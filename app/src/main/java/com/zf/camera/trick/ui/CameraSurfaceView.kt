@@ -68,8 +68,21 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
         }
     }
 
+    /**
+     * 切换摄像头
+     */
+    fun switchCamera() {
+        // 先改变摄像头方向
+        mCameraId = mCameraId xor 1
+        mDisplayOrientation = -1;
+        closeCamera()
+        openCamera()
+    }
+
     private fun setCameraDisplayOrientation(context: Context?, cameraId: Int, camera: Camera) {
-        if (context == null) return
+        if (context == null) {
+            return
+        }
         val info = CameraInfo()
         Camera.getCameraInfo(cameraId, info)
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager

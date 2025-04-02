@@ -6,10 +6,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import com.zf.camera.trick.base.BaseActivity
+import com.zf.camera.trick.ui.CameraSurfaceView
 import pub.devrel.easypermissions.EasyPermissions
 
 
 class CameraActivity: BaseActivity(), EasyPermissions.RationaleCallbacks, EasyPermissions.PermissionCallbacks {
+
+    private val TAG = "CameraActivity"
 
     companion object {
         fun startActivity(activity: Activity) {
@@ -21,11 +24,21 @@ class CameraActivity: BaseActivity(), EasyPermissions.RationaleCallbacks, EasyPe
 
     override var isDarkFont = false
 
+    private var cameraSurfaceView: CameraSurfaceView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
 
+        initWidget()
         startCamera()
+    }
+
+    private fun initWidget() {
+        cameraSurfaceView = findViewById(R.id.cameraView)
+        findViewById<androidx.appcompat.widget.AppCompatImageView>(R.id.switch_camera_button).setOnClickListener {
+            cameraSurfaceView?.switchCamera()
+        }
     }
 
     private fun startCamera() {
