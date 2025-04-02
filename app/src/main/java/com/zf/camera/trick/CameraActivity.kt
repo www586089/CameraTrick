@@ -5,11 +5,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
+import com.zf.camera.trick.base.BaseActivity
 import pub.devrel.easypermissions.EasyPermissions
 
 
-class CameraActivity: ComponentActivity(), EasyPermissions.RationaleCallbacks, EasyPermissions.PermissionCallbacks {
+class CameraActivity: BaseActivity(), EasyPermissions.RationaleCallbacks, EasyPermissions.PermissionCallbacks {
 
     companion object {
         fun startActivity(activity: Activity) {

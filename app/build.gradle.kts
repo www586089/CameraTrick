@@ -67,7 +67,10 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // For developers using AndroidX in their applications
+    // 权限请求库
     implementation("pub.devrel:easypermissions:3.0.0")
 
+    //状态啦库
+    implementation ("com.geyifeng.immersionbar:immersionbar:3.2.2")
+    implementation ("com.geyifeng.immersionbar:immersionbar-components:3.2.2")
 }
