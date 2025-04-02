@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/camera"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:background="#67c8ff"
+        android:paddingVertical="6dp"
+        android:text="启动相机" />
+</LinearLayout>
