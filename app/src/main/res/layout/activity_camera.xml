@@ -8,13 +8,13 @@
     android:orientation="vertical"
     tools:context=".CameraActivity">
 
-    <SurfaceView
+    <com.zf.camera.trick.ui.CameraSurfaceView
         android:id="@+id/cameraView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
