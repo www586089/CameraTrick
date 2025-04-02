@@ -18,6 +18,16 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        ndk {
+//            abiFilters.add("armeabi")
+            abiFilters.add("arm64-v8a")
+            abiFilters.add("armeabi-v7a")
+//            abiFilters.add("x86")
+        }
+    }
+
+    sourceSets["main"].jniLibs {
+        srcDir("./libs")
     }
 
     buildTypes {
@@ -75,4 +85,5 @@ dependencies {
     implementation ("com.geyifeng.immersionbar:immersionbar-components:3.2.2")
 
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
 }

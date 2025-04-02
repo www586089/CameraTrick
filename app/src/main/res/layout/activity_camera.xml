@@ -17,8 +17,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/captureBtn"
+    <com.zf.camera.trick.ui.CaptureButton
+        android:id="@+id/camera_take_button"
         android:layout_width="88dp"
         android:layout_height="88dp"
         android:layout_marginBottom="120dp"
@@ -36,19 +36,19 @@
         android:padding="14dp"
         android:scaleType="centerInside"
         android:src="@drawable/ic_switch_camera"
-        app:layout_constraintBottom_toBottomOf="@id/captureBtn"
+        app:layout_constraintBottom_toBottomOf="@id/camera_take_button"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/captureBtn"
-        app:layout_constraintTop_toTopOf="@id/captureBtn" />
+        app:layout_constraintRight_toLeftOf="@id/camera_take_button"
+        app:layout_constraintTop_toTopOf="@id/camera_take_button" />
 
     <ImageView
         android:id="@+id/pictureIv"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:scaleType="centerCrop"
-        app:layout_constraintBottom_toBottomOf="@id/captureBtn"
-        app:layout_constraintLeft_toRightOf="@id/captureBtn"
+        app:layout_constraintBottom_toBottomOf="@id/camera_take_button"
+        app:layout_constraintLeft_toRightOf="@id/camera_take_button"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/captureBtn" />
+        app:layout_constraintTop_toTopOf="@id/camera_take_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

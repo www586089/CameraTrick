@@ -9,6 +9,7 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.WindowManager
+import com.zf.camera.trick.callback.PictureBufferCallback
 import java.util.Collections
 import kotlin.math.abs
 
@@ -63,7 +64,7 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
         closeCamera()
     }
 
-    private fun openCamera() {
+    fun openCamera() {
         if (null != mCamera || (-1 == viewWidth || -1 == viewHeight)) {
             return
         }
@@ -72,16 +73,25 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
                 val cameraParams = parameters
 
                 setCameraDisplayOrientation(mContext, mCameraId, this)
+                if (-1 != mOrientation) {//需要设置方向否则拍出来的照片角度不对
+                    cameraParams.setRotation(mOrientation)
+                }
                 setAutoFocus(cameraParams)
                 setPreViewSize(cameraParams)
 
                 setParameters(cameraParams)
-                setPreviewDisplay(mSurfaceHolder)
-                startPreview()
+                startCameraPreview(this)
             }
         } catch (e: Throwable) {
             Log.d(TAG, "openCamera: error:\n" + Log.getStackTraceString(e))
         } finally {
+        }
+    }
+
+    private fun startCameraPreview(camera: Camera?) {
+        camera?.apply {
+            setPreviewDisplay(mSurfaceHolder)
+            startPreview()
         }
     }
 
@@ -163,10 +173,17 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
         }
     }
 
-    fun startPreview() {
-        Log.d(TAG, "startPreview: ")
-        openCamera()
+    fun takePicture(callback: PictureBufferCallback) {
+        mCamera?.apply {
+            takePicture(null, null, object : Camera.PictureCallback {
+                override fun onPictureTaken(data: ByteArray?, camera: Camera?) {
+                    startCameraPreview(mCamera)//拍照后重新开始预览
+                    callback.onPictureToken(data)
+                }
+            })
+        }
     }
+
     /**
      * 切换摄像头
      */
