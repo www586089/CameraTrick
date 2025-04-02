@@ -58,7 +58,9 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
         }
         try {
             mCamera = Camera.open(mCameraId).apply {
+                val parameters = parameters
                 setCameraDisplayOrientation(mContext, mCameraId, this)
+                setAutoFocus(parameters)
                 setPreviewDisplay(mSurfaceHolder)
                 startPreview()
             }
@@ -68,6 +70,13 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
         }
     }
 
+    private fun setAutoFocus(parameters: Camera.Parameters) {
+        parameters.supportedFocusModes?.apply {
+            if (contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                parameters.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO
+            }
+        }
+    }
     /**
      * 切换摄像头
      */
