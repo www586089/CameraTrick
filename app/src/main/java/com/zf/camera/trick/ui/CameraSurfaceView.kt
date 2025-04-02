@@ -9,11 +9,14 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.WindowManager
+import java.util.Collections
+import kotlin.math.abs
 
 class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(context, attrs),
     SurfaceHolder.Callback {
 
     private val TAG = "CameraSurfaceView"
+    private val DEBUG = true
 
     init {
         init(context)
@@ -27,6 +30,8 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
     private var mDisplayOrientation = -1     //预览方向
     private var mOrientation = -1            //拍照方向
 
+    private var viewWidth = -1
+    private var viewHeight = -1
 
     private fun init(context: Context) {
         Log.d(TAG, "init: ")
@@ -36,6 +41,12 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
             setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
             addCallback(this@CameraSurfaceView)
         }
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        viewWidth = measuredWidth
+        viewHeight = measuredHeight
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
@@ -58,9 +69,13 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
         }
         try {
             mCamera = Camera.open(mCameraId).apply {
-                val parameters = parameters
+                val cameraParams = parameters
+
                 setCameraDisplayOrientation(mContext, mCameraId, this)
-                setAutoFocus(parameters)
+                setAutoFocus(cameraParams)
+                setPreViewSize(cameraParams)
+
+                setParameters(cameraParams)
                 setPreviewDisplay(mSurfaceHolder)
                 startPreview()
             }
@@ -68,6 +83,76 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
             Log.d(TAG, "openCamera: error:\n" + Log.getStackTraceString(e))
         } finally {
         }
+    }
+
+    private fun setPreViewSize(parameters: Camera.Parameters) {
+        val previewSize = parameters.supportedPreviewSizes
+        if (DEBUG) {
+            Log.d(TAG, "openCamera: Before sort")
+            logCameraSize(previewSize)
+            val sizeComparator = CameraSizeComparator(false)
+            Log.d(TAG, "openCamera: After sort")
+            Collections.sort(previewSize, sizeComparator)
+            logCameraSize(previewSize)
+        }
+
+        /**
+         * previewSize 里面的width height，与viewHeight, viewWidth是相反的，所以
+         * 这里传递参数的时候也反过来了，这样才能对应起来
+         */
+        getOptimalPreviewSizeAspect(previewSize, viewHeight, viewWidth)?.also {
+            parameters.setPreviewSize(it.width, it.height)
+        }
+    }
+
+    private fun getOptimalPreviewSizeAspect(sizes: List<Camera.Size>?, w: Int, h: Int): Camera.Size? {
+        if (sizes.isNullOrEmpty()) {
+            return null
+        }
+        val viewAreaSize = w * h
+        val minArea = viewAreaSize / 3
+        val targetRatio = w.toDouble() / h.toDouble()
+        var optimalSize: Camera.Size? = null
+        Collections.sort(sizes, CameraSizeComparator(false))
+        var size: Camera.Size
+
+        var minDiff = Double.MAX_VALUE
+
+
+        //1 根据宽高比进行过滤
+        for (sizeTmp in sizes) {
+            val ratio = sizeTmp.width.toDouble() / sizeTmp.height.toDouble()
+            if (abs(ratio - targetRatio) < minDiff) {
+//                if (null != maxSize && (sizeTmp.height > maxSize.height || sizeTmp.width > maxSize.width)) {
+//                    continue
+//                }
+                if (sizeTmp.width * sizeTmp.height < minArea) { //面积太小[导致预览模糊]，不再考虑后面的
+                    break
+                }
+                minDiff = Math.abs(ratio - targetRatio)
+                optimalSize = sizeTmp
+            }
+        }
+        var minDiffSize = Int.MAX_VALUE
+        var diff: Int
+        if (null == optimalSize) { //2 兜底 找到面积最接近的一个[这里选出的尺寸在UI上可能比较丑]
+            for (value in sizes) {
+//                if (null != maxSize && (value.height > maxSize.height || value.width > maxSize.width)) {
+//                    continue
+//                }
+                size = value
+                diff = abs(size.height * size.width - viewAreaSize)
+                if (diff < minDiffSize) {
+                    minDiffSize = diff
+                    optimalSize = size
+                }
+            }
+            if (null == optimalSize) {
+                optimalSize = sizes[0]
+            }
+        }
+        Log.d(TAG, "getOptimalPreviewSizeAspect-> size ${optimalSize.width} x ${optimalSize.height}")
+        return optimalSize
     }
 
     private fun setAutoFocus(parameters: Camera.Parameters) {
@@ -128,4 +213,28 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
             }
         }
     }
+
+    private fun logCameraSize(sizes: List<Camera.Size>) {
+        val sizeInfo = StringBuffer()
+        var i = 0;
+        for (size: Camera.Size in sizes) {
+            sizeInfo.append("i = ${++i}-> ${size.width} x ${size.height} ")
+        }
+        Log.d(TAG, "logCameraSize: $sizeInfo")
+    }
+
+    class CameraSizeComparator(private val isAsc: Boolean) :
+        Comparator<Camera.Size> {
+        override fun compare(lhs: Camera.Size, rhs: Camera.Size): Int {
+            return if (lhs.width * lhs.height == rhs.width * rhs.height) {
+                0
+            } else {
+                if (isAsc) {
+                    return if (lhs.width * lhs.height > rhs.width * rhs.height) 1 else -1
+                }
+                if (lhs.width * lhs.height > rhs.width * rhs.height) -1 else 1
+            }
+        }
+    }
+
 }
