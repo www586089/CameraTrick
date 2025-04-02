@@ -73,4 +73,6 @@ dependencies {
     //状态啦库
     implementation ("com.geyifeng.immersionbar:immersionbar:3.2.2")
     implementation ("com.geyifeng.immersionbar:immersionbar-components:3.2.2")
+
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
 }

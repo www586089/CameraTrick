@@ -1,8 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#66eee3">
+    android:background="@color/black"
+    android:orientation="vertical"
+    tools:context=".CameraActivity">
 
-</LinearLayout>
+    <SurfaceView
+        android:id="@+id/cameraView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/captureBtn"
+        android:layout_width="88dp"
+        android:layout_height="88dp"
+        android:layout_marginBottom="120dp"
+        android:background="@drawable/btn_capture_bg"
+        android:elevation="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <ImageView
+        android:id="@+id/switchCameraBtn"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/img_switch_bg"
+        android:padding="14dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_switch_camera"
+        app:layout_constraintBottom_toBottomOf="@id/captureBtn"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/captureBtn"
+        app:layout_constraintTop_toTopOf="@id/captureBtn" />
+
+    <ImageView
+        android:id="@+id/pictureIv"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@id/captureBtn"
+        app:layout_constraintLeft_toRightOf="@id/captureBtn"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/captureBtn" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
