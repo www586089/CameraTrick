@@ -64,7 +64,7 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
     }
 
     private fun openCamera() {
-        if (null != mCamera) {
+        if (null != mCamera || (-1 == viewWidth || -1 == viewHeight)) {
             return
         }
         try {
@@ -162,10 +162,16 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
             }
         }
     }
+
+    fun startPreview() {
+        Log.d(TAG, "startPreview: ")
+        openCamera()
+    }
     /**
      * 切换摄像头
      */
     fun switchCamera() {
+        Log.d(TAG, "switchCamera: ")
         // 先改变摄像头方向
         mCameraId = mCameraId xor 1
         mDisplayOrientation = -1;

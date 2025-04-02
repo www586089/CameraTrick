@@ -50,7 +50,7 @@ class CameraActivity: BaseActivity(), EasyPermissions.RationaleCallbacks, EasyPe
     }
 
     private fun startPreview() {
-
+        cameraSurfaceView?.startPreview()
     }
 
     override fun onRationaleAccepted(requestCode: Int) {
