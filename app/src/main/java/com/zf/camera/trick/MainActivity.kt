@@ -16,6 +16,9 @@ class MainActivity : BaseActivity() {
         findViewById<AppCompatTextView>(R.id.camera).setOnClickListener {
             CameraActivity.startActivity(this)
         }
+        findViewById<AppCompatTextView>(R.id.camera_gl_surface).setOnClickListener {
+            CameraGLSurfaceViewActivity.startActivity(this)
+        }
     }
 
     override fun onDestroy() {
