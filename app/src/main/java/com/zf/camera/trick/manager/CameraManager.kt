@@ -97,7 +97,13 @@ open class CameraManager(val mContext: Context) : ICameraManager, ICameraCallbac
         this.viewHeight = height
     }
 
-    override fun startPreview(surfaceTexture: SurfaceTexture) {}
+    override fun startPreview(surfaceTexture: SurfaceTexture) {
+        mCamera?.apply {
+            setPreviewTexture(surfaceTexture)
+            startPreview()
+        }
+    }
+
     override fun startPreview(holder: SurfaceHolder) {
         mCamera?.apply {
             try {
