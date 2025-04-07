@@ -9,6 +9,7 @@ import com.zf.camera.trick.callback.PictureBufferCallback
 import com.zf.camera.trick.manager.CameraManager
 import com.zf.camera.trick.manager.ICameraCallback
 import com.zf.camera.trick.manager.ICameraManager
+import com.zf.camera.trick.utils.TrickLog
 
 class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(context, attrs),
     SurfaceHolder.Callback, ICameraCallback {
@@ -19,14 +20,11 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
         init(context)
     }
 
-    lateinit var mSurfaceHolder: SurfaceHolder
-    private var mContext: Context? = null
-
+    private lateinit var mSurfaceHolder: SurfaceHolder
     private lateinit var mCameraManager: ICameraManager
 
     private fun init(context: Context) {
         Log.d(TAG, "init: ")
-        mContext = context
         mCameraManager = CameraManager(context).apply {
             mCameraCallback = this@CameraSurfaceView
         }
@@ -83,6 +81,7 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
     }
 
     override fun onOpenError(coe: Int, msg: String) {
+        TrickLog.e(TAG, "onOpenError-> code = $coe, msg = $msg")
     }
 
 }
