@@ -24,4 +24,15 @@
         android:paddingHorizontal="4dp"
         android:paddingVertical="6dp"
         android:text="OpenGLES 相机预览" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/picture_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:background="#67c8ff"
+        android:paddingHorizontal="4dp"
+        android:paddingVertical="6dp"
+        android:text="图片显示" />
+
 </LinearLayout>

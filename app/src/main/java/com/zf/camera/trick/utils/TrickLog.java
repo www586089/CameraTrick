@@ -2,6 +2,8 @@ package com.zf.camera.trick.utils;
 
 import android.util.Log;
 
+import java.util.Locale;
+
 public class TrickLog {
 
     private static final String TAG_CONTENT_PRINT = "%s:%s.%s:%d";
@@ -22,14 +24,14 @@ public class TrickLog {
 
     // 获取LOG
     private static String getContent(StackTraceElement trace) {
-        return String.format(TAG_CONTENT_PRINT, sApplicationTag,
+        return String.format(Locale.ENGLISH, TAG_CONTENT_PRINT, sApplicationTag,
                 trace.getClassName(), trace.getMethodName(),
                 trace.getLineNumber());
     }
 
     // 获取LOG
     private static String getContents(StackTraceElement trace) {
-        return String.format("%s:%s:%d", sApplicationTag,
+        return String.format(Locale.ENGLISH, "%s:%s:%d", sApplicationTag,
                 trace.getMethodName(), trace.getLineNumber());
     }
 
