@@ -3,6 +3,9 @@ package com.zf.camera.trick.record
 import android.media.MediaCodec
 import android.media.MediaFormat
 import android.media.MediaMuxer
+import android.os.Build
+import android.os.Handler
+import android.os.HandlerThread
 import android.util.Log
 import com.zf.camera.trick.utils.TrickLog
 
@@ -15,6 +18,7 @@ class VideoEncoder {
     private lateinit var mMuxer: MediaMuxer
     private lateinit var mMediaCodec: MediaCodec
     private lateinit var mFrameData: ByteArray
+    private lateinit var mHandler: Handler
     private var isEndOfStream = false
 
     private val mFrameDeque = ArrayDeque<ByteArray>()
@@ -35,12 +39,21 @@ class VideoEncoder {
         this.height = height
         this.isEndOfStream = false
         this.isEncoderStarted = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val handlerThread = HandlerThread("VideoEncoder").apply { start() }
+            this.mHandler = Handler(handlerThread.looper)
+        }
+
         startMediaCodec(width, height)
     }
 
 
     fun stopMuxer() {
         TrickLog.d(TAG, "stopMuxer: ")
+        /**
+         * 置标识位，在正在编码器检测到结束后（EOS标识）再
+         * 停止编码器
+         */
         isEndOfStream = true
     }
 
@@ -76,7 +89,7 @@ class VideoEncoder {
             setInteger(MediaFormat.KEY_BIT_RATE, 2_000_000)//2Mbps
         }
         mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE).apply {
-            setCallback(object : MediaCodec.Callback() {
+            val callback = object : MediaCodec.Callback() {
                 override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
                     this@VideoEncoder.onInputBufferAvailable(codec, index)
                 }
@@ -92,7 +105,12 @@ class VideoEncoder {
                 override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
                     this@VideoEncoder.onOutputFormatChanged(format)
                 }
-            })
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                setCallback(callback, mHandler)
+            } else {
+                setCallback(callback)
+            }
 
             configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
             start()
@@ -110,19 +128,23 @@ class VideoEncoder {
         TrickLog.d(TAG, "onOutputFormatChanged: $mTrackIndex")
     }
     private fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
-        TrickLog.d(TAG, "index = ${index}, isEndOfStream = ${isEndOfStream}")
+//        TrickLog.d(TAG, "onInputBufferAvailable： index = ${index}, isEndOfStream = $isEndOfStream")
 
         val endOfStreamFlag = MediaCodec.BUFFER_FLAG_END_OF_STREAM
         if (mFrameDeque.size > 0) {
             val inputBuffer = codec.getInputBuffer(index) ?: return
             //fill inputBuffer
             mFrameDeque.removeFirstOrNull()?.apply {
+
+                //Transform to codec format begin
                 System.arraycopy(this, 0, mFrameData, 0, width * height)
 
                 for (i in (width * height) until this.size step 2) {
                     mFrameData[i + 1] = this[i]
                     mFrameData[i] = this[i + 1]
                 }
+                //Transform to codec format end
+
                 inputBuffer.put(mFrameData)
                 var flag = 0
                 if (isEndOfStream) {
@@ -144,11 +166,13 @@ class VideoEncoder {
 
 
     private fun onOutputBufferAvailable(index: Int, codec: MediaCodec, info: MediaCodec.BufferInfo) {
-        TrickLog.d(TAG, "onOutputBufferAvailable: $index")
+//        TrickLog.d(TAG, "onOutputBufferAvailable: $index")
         val outputBuffer = codec.getOutputBuffer(index)
         info.presentationTimeUs = getPTU()
 
-        if (0 != (info.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG)) {
+        val isCodecConfig = 0 != (info.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG)
+        val isEndOfStream = 0 != (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+        if (isCodecConfig) {
             info.size = 0
         }
         outputBuffer?.apply {
@@ -158,10 +182,19 @@ class VideoEncoder {
         }
 
         codec.releaseOutputBuffer(index, false)
-        if (0 != (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM)) {
-            TrickLog.d(TAG, "onOutputBufferAvailable: detect EOS")
-            stopMediaCodec()
-            doStopMuxer()
+        if (isEndOfStream) {
+            release()
+        }
+    }
+
+    private fun release() {
+        TrickLog.d(TAG, "release: detect EOS")
+        stopMediaCodec()
+        doStopMuxer()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            TrickLog.d(TAG, "release: quit looper")
+            mHandler.looper.quitSafely()
+            mHandler.removeCallbacksAndMessages(null)
         }
     }
 
