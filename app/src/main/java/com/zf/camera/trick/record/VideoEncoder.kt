@@ -3,134 +3,67 @@ package com.zf.camera.trick.record
 import android.media.MediaCodec
 import android.media.MediaFormat
 import android.media.MediaMuxer
-import android.os.Handler
-import android.os.HandlerThread
+import android.util.Log
 import com.zf.camera.trick.utils.TrickLog
 
-class VideoEncoder: Runnable {
+class VideoEncoder {
 
     companion object {
         const val TAG = "A-VideoEncoder"
         const val MIME_TYPE = "video/avc"
     }
-    private var mOutputFormat: MediaFormat? = null
-    private var mMediaCodec: MediaCodec? = null
+    private lateinit var mMuxer: MediaMuxer
+    private lateinit var mMediaCodec: MediaCodec
+    private lateinit var mFrameData: ByteArray
     private var isEndOfStream = false
 
     private val mFrameDeque = ArrayDeque<ByteArray>()
     private var mIndexDeque = ArrayDeque<Int>()
-    private var mMuxer: MediaMuxer? = null
     private var mTrackIndex = -1;
-    private var mFrameData: ByteArray? = null
     private var width = 0
     private var height = 0
+
     @Volatile
-    private var isExit = true
-    private var isMuxerStarted = false
-    private var handler: Handler? = null
+    private var isEncoderStarted = false
 
     fun startMuxer(videoPath: String, width: Int, height: Int) {
         TrickLog.d(TAG, "startMuxer: $videoPath")
-        mMuxer = MediaMuxer(videoPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
-        mFrameData = ByteArray(width * height * 3 / 2)
+        this.mMuxer = MediaMuxer(videoPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+        //相机传输过来的是yuv数据，为当前预览分辨率宽高*1.5
+        this.mFrameData = ByteArray(width * height * 3 / 2)
         this.width = width
         this.height = height
-        this.isExit = false
-        val handlerThread = HandlerThread("VideoEncode")
-        handlerThread.start()
+        this.isEndOfStream = false
+        this.isEncoderStarted = true
         startMediaCodec(width, height)
     }
 
-    override fun run() {
-        while (!isExit) {
-            if (!isMuxerStarted) {
-                startMediaCodec(width, height)
-            } else {
-//                feedData()
-            }
-        }
-    }
-
-    private fun feedData() {
-        mMediaCodec?.apply {
-            val index = dequeueInputBuffer(0)
-            if (index > 0) {
-                val inputBuffer = getInputBuffer(index) ?: return
-                if (mFrameDeque.size > 0) {
-                    mFrameDeque.removeFirstOrNull()?.apply {
-                        //TrickLog.d(TAG, "inputBuffer.size = ${inputBuffer.capacity()}, frame.size = ${this.capacity()}")
-                        System.arraycopy(this, 0, mFrameData!!, 0, width * height)
-
-                        for (i in (width * height) until this.size step 2) {
-                            mFrameData!![i + 1] = this[i]
-                            mFrameData!![i] = this[i + 1]
-                        }
-                        inputBuffer.put(mFrameData!!)
-                        var flag = 0
-                        if (isEndOfStream) {
-                            TrickLog.d(TAG, "put EOS")
-                            flag = MediaCodec.BUFFER_FLAG_END_OF_STREAM
-                        }
-                        queueInputBuffer(index, 0, inputBuffer.limit(), System.nanoTime() / 1000, 0)
-                    }
-                }
-
-            }
-        }
-    }
 
     fun stopMuxer() {
         TrickLog.d(TAG, "stopMuxer: ")
-        isExit = true
         isEndOfStream = true
     }
 
     private fun doStopMuxer() {
         TrickLog.d(TAG, "doStopMuxer: ")
-        mMuxer?.apply {
+        mMuxer.apply {
             stop()
             release()
         }
+        isEndOfStream = false
+        mFrameDeque.clear()
+        mIndexDeque.clear()
     }
 
     private fun stopMediaCodec() {
         TrickLog.d(TAG, "stopMediaCodec: ")
-        mMediaCodec?.apply {
+        mMediaCodec.apply {
             stop()
             release()
         }
     }
 
-    fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
-        TrickLog.d(TAG, "onInputBufferAvailable: $index")
-
-        if (mFrameDeque.size > 0) {
-            val inputBuffer = codec.getInputBuffer(index) ?: return
-            val size = 0
-            //fill inputBuffer
-            mFrameDeque.removeFirstOrNull()?.apply {
-                //TrickLog.d(TAG, "inputBuffer.size = ${inputBuffer.capacity()}, frame.size = ${this.capacity()}")
-                System.arraycopy(this, 0, mFrameData!!, 0, width * height)
-
-                for (i in (width * height) until this.size step 2) {
-                    mFrameData!![i + 1] = this[i]
-                    mFrameData!![i] = this[i + 1]
-                }
-                inputBuffer.put(mFrameData!!)
-                var flag = 0
-                if (isEndOfStream) {
-                    TrickLog.d(TAG, "put EOS")
-                    flag = MediaCodec.BUFFER_FLAG_END_OF_STREAM
-                }
-                codec.queueInputBuffer(index, 0, inputBuffer.limit(), System.nanoTime() / 1000, 0)
-            }
-        } else {
-            mIndexDeque.addLast(index)
-        }
-    }
-
-
-    fun startMediaCodec(width: Int, height: Int) {
+    private fun startMediaCodec(width: Int, height: Int) {
         val mediaFormat = MediaFormat().apply {
             setString(MediaFormat.KEY_MIME, MIME_TYPE)
             setInteger(MediaFormat.KEY_WIDTH, width)
@@ -149,39 +82,15 @@ class VideoEncoder: Runnable {
                 }
 
                 override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, info: MediaCodec.BufferInfo) {
-                    TrickLog.d(TAG, "onOutputBufferAvailable: $index")
-                    val outputBuffer = codec.getOutputBuffer(index)
-                    val outputFormat = codec.getOutputFormat(index)
-                    info.presentationTimeUs = System.nanoTime() / 1000L
-
-                    if (0 != (info.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG)) {
-                        info.size = 0
-                    }
-                    outputBuffer?.apply {
-                        outputBuffer.position(info.offset)
-                        outputBuffer.limit(info.offset + info.size)
-                        mMuxer!!.writeSampleData(mTrackIndex, outputBuffer, info)
-                    }
-
-                    codec.releaseOutputBuffer(index, false)
-                    if (isEndOfStream) {
-                        TrickLog.d(TAG, "onOutputBufferAvailable: end of stream")
-                        stopMediaCodec()
-                        doStopMuxer()
-                    }
+                    this@VideoEncoder.onOutputBufferAvailable(index, codec, info)
                 }
 
                 override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
-
+                    this@VideoEncoder.onError(codec, e)
                 }
 
                 override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
-                    mOutputFormat = format
-                    mTrackIndex = mMuxer!!.addTrack(format)
-
-                    mMuxer!!.start()
-                    isMuxerStarted = true
-                    TrickLog.d(TAG, "onOutputFormatChanged: $mTrackIndex")
+                    this@VideoEncoder.onOutputFormatChanged(format)
                 }
             })
 
@@ -190,11 +99,81 @@ class VideoEncoder: Runnable {
         }
     }
 
+    private fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
+        TrickLog.d(TAG, "onError:${Log.getStackTraceString(e)}")
+    }
+
+    private fun onOutputFormatChanged(format: MediaFormat) {
+        mTrackIndex = mMuxer.addTrack(format)
+
+        mMuxer.start()
+        TrickLog.d(TAG, "onOutputFormatChanged: $mTrackIndex")
+    }
+    private fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
+        TrickLog.d(TAG, "index = ${index}, isEndOfStream = ${isEndOfStream}")
+
+        val endOfStreamFlag = MediaCodec.BUFFER_FLAG_END_OF_STREAM
+        if (mFrameDeque.size > 0) {
+            val inputBuffer = codec.getInputBuffer(index) ?: return
+            //fill inputBuffer
+            mFrameDeque.removeFirstOrNull()?.apply {
+                System.arraycopy(this, 0, mFrameData, 0, width * height)
+
+                for (i in (width * height) until this.size step 2) {
+                    mFrameData[i + 1] = this[i]
+                    mFrameData[i] = this[i + 1]
+                }
+                inputBuffer.put(mFrameData)
+                var flag = 0
+                if (isEndOfStream) {
+                    TrickLog.d(TAG, "put EOS of Stream")
+                    flag = endOfStreamFlag
+                    isEncoderStarted = false
+                }
+                codec.queueInputBuffer(index, 0, inputBuffer.limit(), getPTU(), flag)
+            }
+        } else {
+            if (isEndOfStream) {
+                TrickLog.d(TAG, "put EOS no Stream")
+                codec.queueInputBuffer(index, 0, 0, getPTU(), endOfStreamFlag)
+            } else {
+                mIndexDeque.addLast(index)
+            }
+        }
+    }
+
+
+    private fun onOutputBufferAvailable(index: Int, codec: MediaCodec, info: MediaCodec.BufferInfo) {
+        TrickLog.d(TAG, "onOutputBufferAvailable: $index")
+        val outputBuffer = codec.getOutputBuffer(index)
+        info.presentationTimeUs = getPTU()
+
+        if (0 != (info.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG)) {
+            info.size = 0
+        }
+        outputBuffer?.apply {
+            outputBuffer.position(info.offset)
+            outputBuffer.limit(info.offset + info.size)
+            mMuxer.writeSampleData(mTrackIndex, outputBuffer, info)
+        }
+
+        codec.releaseOutputBuffer(index, false)
+        if (0 != (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM)) {
+            TrickLog.d(TAG, "onOutputBufferAvailable: detect EOS")
+            stopMediaCodec()
+            doStopMuxer()
+        }
+    }
+
+    private fun getPTU(): Long {
+        return System.nanoTime() / 1000
+    }
+
     fun encode(data: ByteArray) {
-//        TrickLog.d(TAG, "encode: isExit = $isExit")
-        if (isExit) {
+        if (!isEncoderStarted) {
             return
         }
+
         val copyData = ByteArray(data.size)
         System.arraycopy(data, 0, copyData, 0, data.size)
         mFrameDeque.addLast(copyData)
@@ -203,7 +182,7 @@ class VideoEncoder: Runnable {
 
     private fun checkIndexBuffer() {
         if (mIndexDeque.size > 0) {
-            onInputBufferAvailable(mMediaCodec!!, mIndexDeque.removeFirst())
+            onInputBufferAvailable(mMediaCodec, mIndexDeque.removeFirst())
         }
     }
 }

@@ -88,7 +88,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
         mCameraManager.openCamera()
         mCameraManager.addCallback(object : Camera.PreviewCallback {
             override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
-                TrickLog.d(TAG, "onPreviewFrame: isRecording = $isRecording")
+//                TrickLog.d(TAG, "onPreviewFrame: isRecording = $isRecording")
                 if (!isRecording) {
                     return
                 }
