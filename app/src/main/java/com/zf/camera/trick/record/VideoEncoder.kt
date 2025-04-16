@@ -30,8 +30,11 @@ class VideoEncoder {
     @Volatile
     private var isEncoderStarted = false
 
-    fun startMuxer(videoPath: String, width: Int, height: Int) {
+    private var mListener: VideoRecordListener? = null
+
+    fun startMuxer(videoPath: String, width: Int, height: Int, listener: VideoRecordListener) {
         TrickLog.d(TAG, "startMuxer: $videoPath")
+        this.mListener = listener
         this.mMuxer = MediaMuxer(videoPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
         //相机传输过来的是yuv数据，为当前预览分辨率宽高*1.5
         this.mFrameData = ByteArray(width * height * 3 / 2)
@@ -125,8 +128,10 @@ class VideoEncoder {
         mTrackIndex = mMuxer.addTrack(format)
 
         mMuxer.start()
+        mListener?.apply { onRecordStart() }
         TrickLog.d(TAG, "onOutputFormatChanged: $mTrackIndex")
     }
+
     private fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
 //        TrickLog.d(TAG, "onInputBufferAvailable： index = ${index}, isEndOfStream = $isEndOfStream")
 
@@ -184,6 +189,7 @@ class VideoEncoder {
         codec.releaseOutputBuffer(index, false)
         if (isEndOfStream) {
             release()
+            mListener?.apply { onRecordStop() }
         }
     }
 

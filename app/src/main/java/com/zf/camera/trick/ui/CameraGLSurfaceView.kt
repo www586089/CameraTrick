@@ -16,6 +16,7 @@ import com.zf.camera.trick.manager.CameraManager
 import com.zf.camera.trick.manager.ICameraCallback
 import com.zf.camera.trick.manager.ICameraManager
 import com.zf.camera.trick.record.VideoEncoder
+import com.zf.camera.trick.record.VideoRecordListener
 import com.zf.camera.trick.utils.TrickLog
 import java.io.File
 import java.lang.ref.WeakReference
@@ -107,7 +108,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
         mCameraManager.takePicture(callback)
     }
 
-    fun startRecord() {
+    fun startRecord(listener: VideoRecordListener) {
         isRecording = true
 
         val parentPath = App.get().externalCacheDir!!.absolutePath + "/video/"
@@ -123,7 +124,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
             videoFile.delete()
         }
         videoFile.createNewFile()
-        videoEncoder.startMuxer(videoFile.absolutePath, previewWidth, previewHeight)
+        videoEncoder.startMuxer(videoFile.absolutePath, previewWidth, previewHeight, listener)
     }
 
     fun stopRecord() {
