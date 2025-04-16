@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Size
-import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
@@ -100,7 +99,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
                     override fun onRecordStart() {
                         Handler(Looper.getMainLooper()).post {
                             TrickLog.d("A-Activity", "onRecordStart")
-                            mTimeInfo.visibility = View.VISIBLE
+                            mTimeInfo.alpha = 1.0f
                             startTime = System.currentTimeMillis()
                             mTimeInfo.text = TIME_START_INFO
                             mTimeInfo.postDelayed(timeTask, TimeUnit.SECONDS.toMillis(1))
@@ -109,7 +108,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
 
                     override fun onRecordStop() {
                         mTimeInfo.post {
-                            mTimeInfo.visibility = View.INVISIBLE
+                            mTimeInfo.alpha = 0f
                             Toast.makeText(this@CameraGLSurfaceViewActivity, "录制完成", Toast.LENGTH_SHORT).show()
                             mTimeInfo.text = TIME_START_INFO
                             mTimeInfo.removeCallbacks(timeTask)

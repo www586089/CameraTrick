@@ -28,10 +28,10 @@
         android:paddingVertical="4dp"
         android:textColor="@color/purple_200"
         android:textSize="18sp"
-        android:visibility="gone"
+        android:alpha="0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
+        tools:alpha="1" />
 
     <com.zf.camera.trick.ui.CaptureButton
         android:id="@+id/camera_take_button"

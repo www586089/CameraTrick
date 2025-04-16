@@ -87,20 +87,6 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 
     fun openCamera() {
         mCameraManager.openCamera()
-        mCameraManager.addCallback(object : Camera.PreviewCallback {
-            override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
-//                TrickLog.d(TAG, "onPreviewFrame: isRecording = $isRecording")
-                if (!isRecording) {
-                    return
-                }
-                if (null == data) {
-                    TrickLog.e(TAG, "onPreviewFrame: data is null")
-                }
-                data?.apply {
-                    videoEncoder.encode(data)
-                }
-            }
-        })
     }
 
 
@@ -124,6 +110,21 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
             videoFile.delete()
         }
         videoFile.createNewFile()
+        mCameraManager.addCallback(object : Camera.PreviewCallback {
+            override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
+                TrickLog.d(TAG, "onPreviewFrame: isRecording = $isRecording")
+                if (!isRecording) {
+                    return
+                }
+                if (null == data) {
+                    TrickLog.e(TAG, "onPreviewFrame: data is null")
+                }
+                data?.apply {
+                    videoEncoder.encode(data)
+                }
+            }
+        })
+
         videoEncoder.startMuxer(videoFile.absolutePath, previewWidth, previewHeight, listener)
     }
 

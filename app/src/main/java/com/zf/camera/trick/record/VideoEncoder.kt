@@ -209,6 +209,7 @@ class VideoEncoder {
     }
 
     fun encode(data: ByteArray) {
+//        TrickLog.d(TAG, "encode: $isEncoderStarted")
         if (!isEncoderStarted) {
             return
         }
