@@ -2,6 +2,7 @@ package com.zf.camera.trick.ui
 
 import android.content.Context
 import android.graphics.SurfaceTexture
+import android.hardware.Camera
 import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.Message
@@ -14,7 +15,9 @@ import com.zf.camera.trick.filter.CameraFilter
 import com.zf.camera.trick.manager.CameraManager
 import com.zf.camera.trick.manager.ICameraCallback
 import com.zf.camera.trick.manager.ICameraManager
+import com.zf.camera.trick.record.VideoEncoder
 import com.zf.camera.trick.utils.TrickLog
+import java.io.File
 import java.lang.ref.WeakReference
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -23,7 +26,7 @@ import javax.microedition.khronos.opengles.GL10
 class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView(context, attrs), SurfaceTexture.OnFrameAvailableListener,
     ICameraCallback {
 
-    private val TAG = "CameraGLSurfaceView"
+    private val TAG = "A-CameraGLSurfaceView"
 
     init {
         init(context)
@@ -34,10 +37,16 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 
     private var mSurfaceTexture: SurfaceTexture? = null
     private var mCameraHandler: CameraHandler? = null
+    @Volatile
+    private var isRecording = false
+    private lateinit var videoEncoder: VideoEncoder
+    private var previewWidth = 0
+    private var previewHeight = 0
 
     private fun init(context: Context) {
         Log.d(TAG, "init: ")
 
+        videoEncoder = VideoEncoder()
         mCameraManager = CameraManager(context).apply {
             mCameraCallback = this@CameraGLSurfaceView
         }
@@ -62,6 +71,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 
     override fun onPause() {
         super.onPause()
+        TrickLog.d(TAG, "onPause")
         closeCamera()
         queueEvent {
             render.release()
@@ -76,11 +86,49 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 
     fun openCamera() {
         mCameraManager.openCamera()
+        mCameraManager.addCallback(object : Camera.PreviewCallback {
+            override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
+                TrickLog.d(TAG, "onPreviewFrame: isRecording = $isRecording")
+                if (!isRecording) {
+                    return
+                }
+                if (null == data) {
+                    TrickLog.e(TAG, "onPreviewFrame: data is null")
+                }
+                data?.apply {
+                    videoEncoder.encode(data)
+                }
+            }
+        })
     }
 
 
     fun takePicture(callback: PictureBufferCallback) {
         mCameraManager.takePicture(callback)
+    }
+
+    fun startRecord() {
+        isRecording = true
+
+        val parentPath = App.get().externalCacheDir!!.absolutePath + "/video/"
+        TrickLog.d("startRecord: $parentPath")
+        val file = File(parentPath)
+        if (!file.exists()) {
+            file.mkdirs()
+        }
+        val videoFile = File(parentPath, "test.mp4")
+        if (videoFile.isDirectory) {
+            videoFile.delete()
+        } else if (videoFile.exists()) {
+            videoFile.delete()
+        }
+        videoFile.createNewFile()
+        videoEncoder.startMuxer(videoFile.absolutePath, previewWidth, previewHeight)
+    }
+
+    fun stopRecord() {
+        isRecording = false
+        videoEncoder.stopMuxer()
     }
 
     /**
@@ -198,6 +246,11 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 
     override fun onOpenError(code: Int, msg: String) {
         TrickLog.e(TAG, "onOpenError-> code = $code, msg = $msg")
+    }
+
+    override fun onSetPreviewSize(width: Int, height: Int) {
+        this.previewWidth = width
+        this.previewHeight = height
     }
 
 

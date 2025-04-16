@@ -2,13 +2,11 @@ package com.zf.camera.trick.utils;
 
 import android.util.Log;
 
-import java.util.Locale;
-
 public class TrickLog {
 
     private static final String TAG_CONTENT_PRINT = "%s:%s.%s:%d";
     private static boolean sIsLogEnabled = true;// 是否打开LOG
-    private static String sApplicationTag = "Logs";// LOG默认TAG
+    private static String sApplicationTag = "TrickCamera";// LOG默认TAG
 
     private static StackTraceElement getCurrentStackTraceElement() {
         return Thread.currentThread().getStackTrace()[4];
@@ -24,15 +22,17 @@ public class TrickLog {
 
     // 获取LOG
     private static String getContent(StackTraceElement trace) {
-        return String.format(Locale.ENGLISH, TAG_CONTENT_PRINT, sApplicationTag,
-                trace.getClassName(), trace.getMethodName(),
-                trace.getLineNumber());
+//        return String.format(Locale.ENGLISH, TAG_CONTENT_PRINT, sApplicationTag,
+//                trace.getClassName(), trace.getMethodName(),
+//                trace.getLineNumber());
+        return "";
     }
 
     // 获取LOG
     private static String getContents(StackTraceElement trace) {
-        return String.format(Locale.ENGLISH, "%s:%s:%d", sApplicationTag,
-                trace.getMethodName(), trace.getLineNumber());
+//        return String.format(Locale.ENGLISH, "%s:%s:%d", sApplicationTag,
+//                trace.getMethodName(), trace.getLineNumber());
+        return "";
     }
 
     // 打印默认TAG的LOG

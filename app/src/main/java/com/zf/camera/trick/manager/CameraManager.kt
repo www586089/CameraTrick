@@ -1,8 +1,10 @@
 package com.zf.camera.trick.manager
 
 import android.content.Context
+import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.Camera
+import android.hardware.Camera.PreviewCallback
 import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
@@ -30,6 +32,15 @@ open class CameraManager(val mContext: Context) : ICameraManager, ICameraCallbac
 
     var mCameraCallback: ICameraCallback? = null
 
+    override fun addCallback(cb: PreviewCallback) {
+        mCamera?.apply { 
+            setPreviewCallback (cb)
+        }
+    }
+
+    override fun removeCallback(cb: PreviewCallback) {
+        mCamera?.apply { setPreviewCallback(null) }
+    }
 
     override fun openCamera() {
         if (-1 == viewWidth || -1 == viewHeight) {
@@ -45,6 +56,7 @@ open class CameraManager(val mContext: Context) : ICameraManager, ICameraCallbac
                 }
                 setAutoFocus(cameraParams)
                 setPreViewSize(cameraParams)
+                cameraParams.previewFormat = ImageFormat.NV21
 
                 setParameters(cameraParams)
             }
@@ -59,6 +71,7 @@ open class CameraManager(val mContext: Context) : ICameraManager, ICameraCallbac
     override fun closeCamera() {
         mCamera?.also {
             try {
+                it.setPreviewCallback(null)
                 it.stopPreview()
                 it.release()
             } catch (e: Throwable) {
@@ -124,6 +137,10 @@ open class CameraManager(val mContext: Context) : ICameraManager, ICameraCallbac
         mCameraCallback?.apply { onOpenError(coe, msg) }
     }
 
+    override fun onSetPreviewSize(width: Int, height: Int) {
+        mCameraCallback?.apply { onSetPreviewSize(width, height) }
+    }
+
     private fun setCameraDisplayOrientation(context: Context?, cameraId: Int, camera: Camera) {
         if (context == null) {
             return
@@ -170,6 +187,7 @@ open class CameraManager(val mContext: Context) : ICameraManager, ICameraCallbac
          */
         getOptimalPreviewSizeAspect(previewSize, viewHeight, viewWidth)?.also {
             parameters.setPreviewSize(it.width, it.height)
+            onSetPreviewSize(it.width, it.height)
         }
     }
 

@@ -1,10 +1,14 @@
 package com.zf.camera.trick.manager
 
 import android.graphics.SurfaceTexture
+import android.hardware.Camera
 import android.view.SurfaceHolder
 import com.zf.camera.trick.callback.PictureBufferCallback
 
 interface ICameraManager {
+
+    fun addCallback(cb: Camera.PreviewCallback)
+    fun removeCallback(cb: Camera.PreviewCallback)
     /**
      * 打开相机
      */

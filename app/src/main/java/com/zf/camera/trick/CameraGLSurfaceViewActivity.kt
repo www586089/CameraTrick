@@ -74,9 +74,11 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
             }
 
             override fun onStartRecord() {
+                cameraSurfaceView?.startRecord()
             }
 
             override fun onStopRecord() {
+                cameraSurfaceView?.stopRecord()
             }
         })
     }

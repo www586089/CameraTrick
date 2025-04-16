@@ -84,4 +84,8 @@ class CameraSurfaceView(context: Context, attrs: AttributeSet) : SurfaceView(con
         TrickLog.e(TAG, "onOpenError-> code = $coe, msg = $msg")
     }
 
+    override fun onSetPreviewSize(width: Int, height: Int) {
+
+    }
+
 }
