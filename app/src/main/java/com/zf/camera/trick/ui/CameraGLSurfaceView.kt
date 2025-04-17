@@ -17,6 +17,7 @@ import com.zf.camera.trick.manager.ICameraCallback
 import com.zf.camera.trick.manager.ICameraManager
 import com.zf.camera.trick.record.VideoEncoder
 import com.zf.camera.trick.record.VideoRecordListener
+import com.zf.camera.trick.record.VideoSurfaceEncoder
 import com.zf.camera.trick.utils.TrickLog
 import java.io.File
 import java.lang.ref.WeakReference
@@ -29,6 +30,14 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 
     private val TAG = "A-CameraGLSurfaceView"
 
+    companion object {
+        /**
+         * false: 使用相机预览回调录制
+         * true: 使用surface渲染录制[可基于OpenGL ES进行绘制输出，加入各种特性，录制出特效视频]
+         */
+        private const val ENCODE_WITH_SURFACE = true
+    }
+
     init {
         init(context)
     }
@@ -40,14 +49,21 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
     private var mCameraHandler: CameraHandler? = null
     @Volatile
     private var isRecording = false
+    private var hasUpdateShareContext = false
     private lateinit var videoEncoder: VideoEncoder
+    private lateinit var mSurfaceEncoder: VideoSurfaceEncoder
     private var previewWidth = 0
     private var previewHeight = 0
 
     private fun init(context: Context) {
         Log.d(TAG, "init: ")
 
-        videoEncoder = VideoEncoder()
+        if (ENCODE_WITH_SURFACE) {
+            mSurfaceEncoder = VideoSurfaceEncoder()
+        } else {
+            videoEncoder = VideoEncoder()
+        }
+
         mCameraManager = CameraManager(context).apply {
             mCameraCallback = this@CameraGLSurfaceView
         }
@@ -119,18 +135,29 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
                 if (null == data) {
                     TrickLog.e(TAG, "onPreviewFrame: data is null")
                 }
-                data?.apply {
-                    videoEncoder.encode(data)
+                if (!ENCODE_WITH_SURFACE) {
+                    data?.apply {
+                        videoEncoder.encode(data)
+                    }
                 }
             }
         })
 
-        videoEncoder.startMuxer(videoFile.absolutePath, previewWidth, previewHeight, listener)
+        if (ENCODE_WITH_SURFACE) {
+            mSurfaceEncoder.startRecord(videoFile.absolutePath, previewHeight, previewWidth, listener)
+        } else {
+            videoEncoder.startRecord(videoFile.absolutePath, previewWidth, previewHeight, listener)
+        }
     }
 
     fun stopRecord() {
         isRecording = false
-        videoEncoder.stopMuxer()
+        hasUpdateShareContext = false
+        if (ENCODE_WITH_SURFACE) {
+            mSurfaceEncoder.stopRecord()
+        } else {
+            videoEncoder.stopRecord()
+        }
     }
 
     /**
@@ -236,6 +263,19 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
                 getTransformMatrix(mDisplayProjectionMatrix)
                 // 将SurfaceTexture绘制到GLSurfaceView上
                 mCameraFilter.draw(mDisplayProjectionMatrix)
+                if (ENCODE_WITH_SURFACE) {
+                    handleSurfaceFrameRecord(this)
+                }
+            }
+        }
+
+        private fun handleSurfaceFrameRecord(st: SurfaceTexture) {
+            if (mView.isRecording) {
+                if (!mView.hasUpdateShareContext) {
+                    mView.hasUpdateShareContext = true
+                    mView.mSurfaceEncoder.onUpdatedSharedContext()
+                }
+                mView.mSurfaceEncoder.willComingAFrame(mCameraFilter.textureId, st)
             }
         }
     }

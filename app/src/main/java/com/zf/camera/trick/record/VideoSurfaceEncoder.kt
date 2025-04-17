@@ -1,18 +1,28 @@
 package com.zf.camera.trick.record
 
+import android.graphics.SurfaceTexture
 import android.media.MediaCodec
+import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.MediaMuxer
+import android.opengl.EGL14
+import android.opengl.EGLContext
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Looper
+import android.os.Message
 import android.util.Log
+import com.zf.camera.trick.App
+import com.zf.camera.trick.filter.CameraFilter
+import com.zf.camera.trick.gl.egl.EglCore
+import com.zf.camera.trick.gl.egl.WindowSurface
 import com.zf.camera.trick.utils.TrickLog
 
-class VideoEncoder {
+class VideoSurfaceEncoder : Runnable {
 
     companion object {
-        const val TAG = "A-VideoEncoder"
+        const val TAG = "A-VideoSurfaceEncoder"
         const val MIME_TYPE = "video/avc"
     }
     private lateinit var mMuxer: MediaMuxer
@@ -20,6 +30,16 @@ class VideoEncoder {
     private lateinit var mFrameData: ByteArray
     private lateinit var mHandler: Handler
     private var isEndOfStream = false
+
+    private lateinit var mShareContext: EGLContext
+    private lateinit var mInputWindowSurface: WindowSurface
+    private lateinit var mEglCore: EglCore
+    private lateinit var mCameraFilter: CameraFilter
+    private lateinit var mEncodeHandler: EncodeHandler
+    private var mTextureId = 0
+    private val mReadyFence = Object()
+    private var mReady = false
+    private var mRunning = false
 
     private val mFrameDeque = ArrayDeque<ByteArray>()
     private var mIndexDeque = ArrayDeque<Int>()
@@ -47,17 +67,55 @@ class VideoEncoder {
             this.mHandler = Handler(handlerThread.looper)
         }
 
-        startMediaCodec(width, height)
+        mShareContext = getEGLShareContext()
+        synchronized(mReadyFence) {
+            if (mRunning) {
+                TrickLog.w(TAG, "Encoder thread already running")
+                return
+            }
+            mRunning = true
+            Thread(this, "VideoSurfaceEncoder").start()
+            while (!mReady) {
+                try {
+                    mReadyFence.wait()
+                } catch (ie: InterruptedException) {
+                    // ignore
+                }
+            }
+        }
+
+        mEncodeHandler.sendEmptyMessage(mEncodeHandler.MSG_START_RECORD)
     }
 
+    override fun run() {
+        Looper.prepare()
+        synchronized(mReadyFence) {
+            mEncodeHandler = EncodeHandler(Looper.myLooper()!!)
+            mReady = true
+            mReadyFence.notify()
+        }
+        Looper.loop()
+
+        TrickLog.d(TAG, "encoder thread--->end")
+    }
 
     fun stopRecord() {
+        mEncodeHandler.sendEmptyMessage(mEncodeHandler.MSG_STOP_RECORD)
+    }
+
+    private fun stopMuxer() {
         TrickLog.d(TAG, "stopMuxer: ")
         /**
          * 置标识位，在正在编码器检测到结束后（EOS标识）再
          * 停止编码器
          */
         isEndOfStream = true
+        signalEndOfStream()
+    }
+
+    private fun signalEndOfStream() {
+        TrickLog.d(TAG, "signalEndOfStream: ")
+        mMediaCodec.signalEndOfInputStream()
     }
 
     private fun doStopMuxer() {
@@ -79,13 +137,13 @@ class VideoEncoder {
         }
     }
 
-    private fun startMediaCodec(width: Int, height: Int) {
+    private fun startMediaCodec() {
         val mediaFormat = MediaFormat().apply {
             setString(MediaFormat.KEY_MIME, MIME_TYPE)
             setInteger(MediaFormat.KEY_WIDTH, width)
             setInteger(MediaFormat.KEY_HEIGHT, height)
 
-            setInteger(MediaFormat.KEY_COLOR_FORMAT, 21)
+            setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
             setInteger(MediaFormat.KEY_FRAME_RATE, 25)
 
             setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10)
@@ -94,19 +152,19 @@ class VideoEncoder {
         mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE).apply {
             val callback = object : MediaCodec.Callback() {
                 override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
-                    this@VideoEncoder.onInputBufferAvailable(codec, index)
+                    this@VideoSurfaceEncoder.onInputBufferAvailable(codec, index)
                 }
 
                 override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, info: MediaCodec.BufferInfo) {
-                    this@VideoEncoder.onOutputBufferAvailable(index, codec, info)
+                    this@VideoSurfaceEncoder.onOutputBufferAvailable(index, codec, info)
                 }
 
                 override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
-                    this@VideoEncoder.onError(codec, e)
+                    this@VideoSurfaceEncoder.onError(codec, e)
                 }
 
                 override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
-                    this@VideoEncoder.onOutputFormatChanged(format)
+                    this@VideoSurfaceEncoder.onOutputFormatChanged(format)
                 }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -116,6 +174,14 @@ class VideoEncoder {
             }
 
             configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+
+            mEglCore = EglCore(mShareContext, EglCore.FLAG_RECORDABLE)
+            mInputWindowSurface = WindowSurface(mEglCore, createInputSurface(), true)
+            mInputWindowSurface.makeCurrent()
+            mCameraFilter = CameraFilter(App.get().resources)
+            mCameraFilter.surfaceCreated()
+            mCameraFilter.surfaceChanged(width, height)
+
             start()
         }
     }
@@ -133,7 +199,7 @@ class VideoEncoder {
     }
 
     private fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
-//        TrickLog.d(TAG, "onInputBufferAvailable： index = ${index}, isEndOfStream = $isEndOfStream")
+        TrickLog.d(TAG, "onInputBufferAvailable： index = ${index}, isEndOfStream = $isEndOfStream")
 
         val endOfStreamFlag = MediaCodec.BUFFER_FLAG_END_OF_STREAM
         if (mFrameDeque.size > 0) {
@@ -171,7 +237,7 @@ class VideoEncoder {
 
 
     private fun onOutputBufferAvailable(index: Int, codec: MediaCodec, info: MediaCodec.BufferInfo) {
-//        TrickLog.d(TAG, "onOutputBufferAvailable: $index")
+        TrickLog.d(TAG, "onOutputBufferAvailable: $index")
         val outputBuffer = codec.getOutputBuffer(index)
         info.presentationTimeUs = getPTU()
 
@@ -202,6 +268,12 @@ class VideoEncoder {
             mHandler.looper.quitSafely()
             mHandler.removeCallbacksAndMessages(null)
         }
+        mEncodeHandler.removeCallbacksAndMessages(null)
+        mEncodeHandler.looper.quitSafely()
+        mRunning = false
+        mReady = false
+
+        releaseEGLContext()
     }
 
     private fun getPTU(): Long {
@@ -220,9 +292,88 @@ class VideoEncoder {
         checkIndexBuffer()
     }
 
+    fun willComingAFrame(textureId: Int, st: SurfaceTexture) {
+        if (!::mCameraFilter.isInitialized || isEndOfStream) {
+            return
+        }
+        mTextureId = textureId
+        Message.obtain().apply {
+            what = mEncodeHandler.MSG_DRAW_FRAME
+            arg1 = textureId
+            obj = st
+            mEncodeHandler.sendMessage(this)
+        }
+    }
+
+    private fun drawFrame(st: SurfaceTexture) {
+        val transform = FloatArray(16)
+        st.getTransformMatrix(transform)
+        mCameraFilter.textureId = mTextureId
+        mCameraFilter.draw(transform)
+        mInputWindowSurface.setPresentationTime(getPTU() * 1000L)
+        mInputWindowSurface.swapBuffers()
+    }
+
+    fun onUpdatedSharedContext() {
+        mEncodeHandler.sendMessage(Message.obtain().apply {
+            what = mEncodeHandler.MSG_UPDATE_SHARE_CONTEXT
+            obj = getEGLShareContext()
+        })
+    }
+
+    private fun getEGLShareContext(): EGLContext {
+        return EGL14.eglGetCurrentContext()
+    }
+
+    private fun releaseEGLContext() {
+        // Release the EGLSurface and EGLContext.
+        mInputWindowSurface.releaseEglSurface()
+        mCameraFilter.release()
+        mEglCore.release()
+    }
+
+
+    private fun handleUpdateSharedContext(newSharedContext: EGLContext) {
+        TrickLog.d(TAG, "handleUpdatedSharedContext $newSharedContext")
+        releaseEGLContext()
+
+        // Create a new EGLContext and recreate the window surface.
+        mEglCore = EglCore(newSharedContext, EglCore.FLAG_RECORDABLE)
+        mInputWindowSurface.recreate(mEglCore)
+        mInputWindowSurface.makeCurrent()
+
+        // Create new programs and such for the new context.
+        mCameraFilter.surfaceCreated()
+        mCameraFilter.surfaceChanged(width, height)
+    }
+
     private fun checkIndexBuffer() {
         if (mIndexDeque.size > 0) {
             onInputBufferAvailable(mMediaCodec, mIndexDeque.removeFirst())
+        }
+    }
+
+    inner class EncodeHandler(looper: Looper): Handler(looper) {
+        val MSG_START_RECORD = 0
+        val MSG_STOP_RECORD = 1
+        val MSG_DRAW_FRAME = 2
+        val MSG_UPDATE_SHARE_CONTEXT = 3
+
+        override fun handleMessage(msg: Message) {
+            when (msg.what) {
+                MSG_START_RECORD -> {
+                    startMediaCodec()
+                }
+                MSG_STOP_RECORD -> {
+                    stopMuxer()
+                }
+                MSG_DRAW_FRAME -> {
+                    drawFrame(msg.obj as SurfaceTexture)
+                }
+                MSG_UPDATE_SHARE_CONTEXT -> {
+                    handleUpdateSharedContext(msg.obj as EGLContext)
+                }
+            }
         }
     }
 }

@@ -312,8 +312,18 @@ public class CameraFilter {
         return 0;
     }
 
+    public void setTextureId(int textureId) {
+        this.textureId = textureId;
+    }
+
     public int getTextureId() {
         return textureId;
+    }
+
+    public void release() {
+        GLES20.glDeleteProgram(mProgram);
+        mProgram = -1;
+//        destroyFrameBuffers();
     }
 }
 
