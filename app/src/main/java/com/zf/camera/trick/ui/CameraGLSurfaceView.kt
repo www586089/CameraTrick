@@ -15,7 +15,10 @@ import com.zf.camera.trick.filter.CameraFilter
 import com.zf.camera.trick.manager.CameraManager
 import com.zf.camera.trick.manager.ICameraCallback
 import com.zf.camera.trick.manager.ICameraManager
-import com.zf.camera.trick.record.VideoEncoder
+import com.zf.camera.trick.record.ICameraVideoRecorder
+import com.zf.camera.trick.record.IMediaRecorder
+import com.zf.camera.trick.record.ISurfaceVideoRecorder
+import com.zf.camera.trick.record.VideoCameraEncoder
 import com.zf.camera.trick.record.VideoRecordListener
 import com.zf.camera.trick.record.VideoSurfaceEncoder
 import com.zf.camera.trick.utils.TrickLog
@@ -35,7 +38,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
          * false: 使用相机预览回调录制
          * true: 使用surface渲染录制[可基于OpenGL ES进行绘制输出，加入各种特性，录制出特效视频]
          */
-        private const val ENCODE_WITH_SURFACE = true
+        private const val ENCODE_WITH_SURFACE = false
     }
 
     init {
@@ -44,24 +47,24 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 
     private lateinit var mCameraManager: ICameraManager
     private lateinit var render: MyRenderer
+    private lateinit var mCameraHandler: CameraHandler
+    private lateinit var mVideoRecorder: IMediaRecorder
 
     private var mSurfaceTexture: SurfaceTexture? = null
-    private var mCameraHandler: CameraHandler? = null
+
     @Volatile
     private var isRecording = false
     private var hasUpdateShareContext = false
-    private lateinit var videoEncoder: VideoEncoder
-    private lateinit var mSurfaceEncoder: VideoSurfaceEncoder
     private var previewWidth = 0
     private var previewHeight = 0
 
     private fun init(context: Context) {
         Log.d(TAG, "init: ")
 
-        if (ENCODE_WITH_SURFACE) {
-            mSurfaceEncoder = VideoSurfaceEncoder()
+        mVideoRecorder = if (ENCODE_WITH_SURFACE) {
+            VideoSurfaceEncoder()
         } else {
-            videoEncoder = VideoEncoder()
+            VideoCameraEncoder()
         }
 
         mCameraManager = CameraManager(context).apply {
@@ -135,29 +138,21 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
                 if (null == data) {
                     TrickLog.e(TAG, "onPreviewFrame: data is null")
                 }
-                if (!ENCODE_WITH_SURFACE) {
-                    data?.apply {
-                        videoEncoder.encode(data)
+                data?.run {
+                    if (!ENCODE_WITH_SURFACE && mVideoRecorder is ICameraVideoRecorder) {
+                        (mVideoRecorder as ICameraVideoRecorder).encode(this)
                     }
                 }
             }
         })
 
-        if (ENCODE_WITH_SURFACE) {
-            mSurfaceEncoder.startRecord(videoFile.absolutePath, previewHeight, previewWidth, listener)
-        } else {
-            videoEncoder.startRecord(videoFile.absolutePath, previewWidth, previewHeight, listener)
-        }
+        mVideoRecorder.startRecord(videoFile.absolutePath, previewWidth, previewHeight, listener)
     }
 
     fun stopRecord() {
         isRecording = false
         hasUpdateShareContext = false
-        if (ENCODE_WITH_SURFACE) {
-            mSurfaceEncoder.stopRecord()
-        } else {
-            videoEncoder.stopRecord()
-        }
+        mVideoRecorder.stopRecord()
     }
 
     /**
@@ -247,7 +242,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
             mCameraFilter.surfaceCreated()
             mTextureId = mCameraFilter.textureId
             mSurfaceTexture = SurfaceTexture(mTextureId)
-            mView.mCameraHandler?.post { mView.handleSetSurfaceTexture(mSurfaceTexture!!) }
+            mView.mCameraHandler.post { mView.handleSetSurfaceTexture(mSurfaceTexture!!) }
         }
 
         override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
@@ -270,12 +265,16 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
         }
 
         private fun handleSurfaceFrameRecord(st: SurfaceTexture) {
-            if (mView.isRecording) {
+            if (!mView.isRecording) {
+                return
+            }
+            if (mView.mVideoRecorder is ISurfaceVideoRecorder ) {
+                val surfaceRecorder = mView.mVideoRecorder as ISurfaceVideoRecorder
                 if (!mView.hasUpdateShareContext) {
                     mView.hasUpdateShareContext = true
-                    mView.mSurfaceEncoder.onUpdatedSharedContext()
+                    surfaceRecorder.onUpdatedSharedContext()
                 }
-                mView.mSurfaceEncoder.willComingAFrame(mCameraFilter.textureId, st)
+                surfaceRecorder.willComingAFrame(mCameraFilter.textureId, st)
             }
         }
     }

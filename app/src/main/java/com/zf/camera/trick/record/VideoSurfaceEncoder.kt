@@ -19,7 +19,7 @@ import com.zf.camera.trick.gl.egl.EglCore
 import com.zf.camera.trick.gl.egl.WindowSurface
 import com.zf.camera.trick.utils.TrickLog
 
-class VideoSurfaceEncoder : Runnable {
+class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
 
     companion object {
         const val TAG = "A-VideoSurfaceEncoder"
@@ -29,7 +29,6 @@ class VideoSurfaceEncoder : Runnable {
     private lateinit var mMediaCodec: MediaCodec
     private lateinit var mFrameData: ByteArray
     private lateinit var mHandler: Handler
-    private var isEndOfStream = false
 
     private lateinit var mShareContext: EGLContext
     private lateinit var mInputWindowSurface: WindowSurface
@@ -40,6 +39,7 @@ class VideoSurfaceEncoder : Runnable {
     private val mReadyFence = Object()
     private var mReady = false
     private var mRunning = false
+    private var isEndOfStream = false
 
     private val mFrameDeque = ArrayDeque<ByteArray>()
     private var mIndexDeque = ArrayDeque<Int>()
@@ -52,14 +52,19 @@ class VideoSurfaceEncoder : Runnable {
 
     private var mListener: VideoRecordListener? = null
 
-    fun startRecord(videoPath: String, width: Int, height: Int, listener: VideoRecordListener) {
+    override fun startRecord(videoPath: String, width: Int, height: Int, listener: VideoRecordListener) {
         TrickLog.d(TAG, "startMuxer: $videoPath")
         this.mListener = listener
         this.mMuxer = MediaMuxer(videoPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
         //相机传输过来的是yuv数据，为当前预览分辨率宽高*1.5
         this.mFrameData = ByteArray(width * height * 3 / 2)
-        this.width = width
-        this.height = height
+        /**
+         * 交换宽高
+         */
+        val tmp = width
+        this.width = height
+        this.height = tmp
+
         this.isEndOfStream = false
         this.isEncoderStarted = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -99,7 +104,7 @@ class VideoSurfaceEncoder : Runnable {
         TrickLog.d(TAG, "encoder thread--->end")
     }
 
-    fun stopRecord() {
+    override fun stopRecord() {
         mEncodeHandler.sendEmptyMessage(mEncodeHandler.MSG_STOP_RECORD)
     }
 
@@ -151,6 +156,11 @@ class VideoSurfaceEncoder : Runnable {
         }
         mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE).apply {
             val callback = object : MediaCodec.Callback() {
+                /**
+                 * 在使用MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface的情况下，这里不会有回调。在
+                 * swapBuffers之后会自动提交数据到MediaCodec，之后MediaCodec会自动回调onOutputBufferAvailable，
+                 * 所以这里不需处理了
+                 */
                 override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
                     this@VideoSurfaceEncoder.onInputBufferAvailable(codec, index)
                 }
@@ -292,7 +302,7 @@ class VideoSurfaceEncoder : Runnable {
         checkIndexBuffer()
     }
 
-    fun willComingAFrame(textureId: Int, st: SurfaceTexture) {
+    override fun willComingAFrame(textureId: Int, st: SurfaceTexture) {
         if (!::mCameraFilter.isInitialized || isEndOfStream) {
             return
         }
@@ -314,7 +324,7 @@ class VideoSurfaceEncoder : Runnable {
         mInputWindowSurface.swapBuffers()
     }
 
-    fun onUpdatedSharedContext() {
+    override fun onUpdatedSharedContext() {
         mEncodeHandler.sendMessage(Message.obtain().apply {
             what = mEncodeHandler.MSG_UPDATE_SHARE_CONTEXT
             obj = getEGLShareContext()

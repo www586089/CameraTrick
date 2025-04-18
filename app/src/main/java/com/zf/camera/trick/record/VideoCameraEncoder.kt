@@ -9,7 +9,7 @@ import android.os.HandlerThread
 import android.util.Log
 import com.zf.camera.trick.utils.TrickLog
 
-class VideoEncoder {
+class VideoCameraEncoder: IMediaRecorder, ICameraVideoRecorder {
 
     companion object {
         const val TAG = "A-VideoEncoder"
@@ -32,7 +32,7 @@ class VideoEncoder {
 
     private var mListener: VideoRecordListener? = null
 
-    fun startRecord(videoPath: String, width: Int, height: Int, listener: VideoRecordListener) {
+    override fun startRecord(videoPath: String, width: Int, height: Int, listener: VideoRecordListener) {
         TrickLog.d(TAG, "startMuxer: $videoPath")
         this.mListener = listener
         this.mMuxer = MediaMuxer(videoPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
@@ -51,7 +51,7 @@ class VideoEncoder {
     }
 
 
-    fun stopRecord() {
+    override fun stopRecord() {
         TrickLog.d(TAG, "stopMuxer: ")
         /**
          * 置标识位，在正在编码器检测到结束后（EOS标识）再
@@ -94,19 +94,19 @@ class VideoEncoder {
         mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE).apply {
             val callback = object : MediaCodec.Callback() {
                 override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
-                    this@VideoEncoder.onInputBufferAvailable(codec, index)
+                    this@VideoCameraEncoder.onInputBufferAvailable(codec, index)
                 }
 
                 override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, info: MediaCodec.BufferInfo) {
-                    this@VideoEncoder.onOutputBufferAvailable(index, codec, info)
+                    this@VideoCameraEncoder.onOutputBufferAvailable(index, codec, info)
                 }
 
                 override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
-                    this@VideoEncoder.onError(codec, e)
+                    this@VideoCameraEncoder.onError(codec, e)
                 }
 
                 override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
-                    this@VideoEncoder.onOutputFormatChanged(format)
+                    this@VideoCameraEncoder.onOutputFormatChanged(format)
                 }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -208,7 +208,7 @@ class VideoEncoder {
         return System.nanoTime() / 1000
     }
 
-    fun encode(data: ByteArray) {
+    override fun encode(data: ByteArray) {
 //        TrickLog.d(TAG, "encode: $isEncoderStarted")
         if (!isEncoderStarted) {
             return
