@@ -4,7 +4,7 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 
-import com.zf.camera.trick.filter.Image;
+import com.zf.camera.trick.filter.sample.EBOTriangle;
 import com.zf.camera.trick.utils.TrickLog;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -29,17 +29,17 @@ public class ImageFilterSurfaceView extends GLSurfaceView {
     private void init(Context context) {
         mContext = context;
         mMyRenderer = new MyRenderer(context);
-        setEGLContextClientVersion(2);
+        setEGLContextClientVersion(3);
         setRenderer(mMyRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
     static class MyRenderer implements Renderer {
 
-        private final Image mTriangle;
+        private final EBOTriangle mTriangle;
 
         public MyRenderer(Context context) {
-            mTriangle = new Image(context.getResources());
+            mTriangle = new EBOTriangle();
         }
 
         @Override
