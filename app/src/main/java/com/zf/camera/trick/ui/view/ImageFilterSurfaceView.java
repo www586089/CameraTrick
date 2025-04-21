@@ -3,8 +3,10 @@ package com.zf.camera.trick.ui.view;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.view.SurfaceHolder;
 
-import com.zf.camera.trick.filter.sample.EBOTriangle;
+import com.zf.camera.trick.filter.sample.IShape;
+import com.zf.camera.trick.filter.sample.NormalTriangle;
 import com.zf.camera.trick.utils.TrickLog;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -12,6 +14,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class ImageFilterSurfaceView extends GLSurfaceView {
 
+    private static final String TAG = "A-Test";
 
     private Context mContext;
     private MyRenderer mMyRenderer;
@@ -34,28 +37,53 @@ public class ImageFilterSurfaceView extends GLSurfaceView {
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        super.surfaceCreated(holder);
+        TrickLog.d(TAG, "surfaceCreated");
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        super.surfaceDestroyed(holder);
+        TrickLog.d(TAG, "surfaceDestroyed");
+        queueEvent(()-> mMyRenderer.onSurfaceDestroyed());
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        super.surfaceChanged(holder, format, w, h);
+        TrickLog.d(TAG, "surfaceChanged");
+    }
+
     static class MyRenderer implements Renderer {
 
-        private final EBOTriangle mTriangle;
+        private final IShape mTriangle;
 
         public MyRenderer(Context context) {
-            mTriangle = new EBOTriangle();
+            mTriangle = new NormalTriangle(context);
         }
 
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            mTriangle.surfaceCreated();
+            TrickLog.d(TAG, "onSurfaceCreated");
+            mTriangle.onSurfaceCreated();
         }
 
         @Override
         public void onSurfaceChanged(GL10 gl, int width, int height) {
-            TrickLog.d("A", "onSurfaceChanged, width = " + width + ", height = " + height);
-            mTriangle.surfaceChanged(width, height);
+            TrickLog.d(TAG, "onSurfaceChanged, width = " + width + ", height = " + height);
+            mTriangle.onSurfaceChanged(width, height);
+        }
+
+        public void onSurfaceDestroyed() {
+            TrickLog.d(TAG, "onSurfaceDestroyed");
+            mTriangle.onSurfaceDestroyed();
         }
 
         @Override
         public void onDrawFrame(GL10 gl) {
-            mTriangle.draw();
+            mTriangle.drawFrame();
         }
     }
 }

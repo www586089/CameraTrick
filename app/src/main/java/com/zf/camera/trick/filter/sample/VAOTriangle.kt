@@ -1,5 +1,6 @@
 package com.zf.camera.trick.filter.sample
 
+import android.content.Context
 import android.opengl.GLES30
 import com.zf.camera.trick.gl.GLESUtils.createProgram
 import java.nio.Buffer
@@ -10,7 +11,7 @@ import java.nio.ByteOrder
 /**
  * 使用VAO绘制 （OpenGL ES3.0才支持）
  */
-class VAOTriangle() {
+class VAOTriangle(val ctx: Context): IShape {
 
     private var vertices = floatArrayOf(
         -0.5f, -0.5f, 0.0f,
@@ -46,7 +47,7 @@ class VAOTriangle() {
     }
 
 
-    fun surfaceCreated() {
+    override fun onSurfaceCreated() {
         vertexBuffer = ByteBuffer.allocateDirect(vertices.size * 4)
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer()
@@ -91,11 +92,11 @@ class VAOTriangle() {
         GLES30.glBindVertexArray(0)
     }
 
-    fun surfaceChanged(width: Int, height: Int) {
+    override fun onSurfaceChanged(width: Int, height: Int) {
         GLES30.glViewport(0, 0, width, height)
     }
 
-    fun draw() {
+    override fun drawFrame() {
 
         // 重新绘制背景色为黑色
         GLES30.glClearColor(0.2f, 0.5f, 0.0f, 1.0f)
@@ -112,7 +113,7 @@ class VAOTriangle() {
         GLES30.glUseProgram(0)
     }
 
-    fun release() {
+    override fun onSurfaceDestroyed() {
         //释放VBO
         if (0 != mVBO) {
             GLES30.glDeleteBuffers(1, intArrayOf(mVBO), 0)
