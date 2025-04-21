@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 
 import com.zf.camera.trick.filter.sample.IShape;
-import com.zf.camera.trick.filter.sample.NormalTriangle;
+import com.zf.camera.trick.filter.sample.VAOTriangle;
 import com.zf.camera.trick.utils.TrickLog;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -34,7 +34,7 @@ public class ImageFilterSurfaceView extends GLSurfaceView {
         mMyRenderer = new MyRenderer(context);
         setEGLContextClientVersion(3);
         setRenderer(mMyRenderer);
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ImageFilterSurfaceView extends GLSurfaceView {
         private final IShape mTriangle;
 
         public MyRenderer(Context context) {
-            mTriangle = new NormalTriangle(context);
+            mTriangle = new VAOTriangle(context);
         }
 
         @Override

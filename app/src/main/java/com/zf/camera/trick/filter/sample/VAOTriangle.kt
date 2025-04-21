@@ -14,15 +14,20 @@ import java.nio.ByteOrder
 class VAOTriangle(val ctx: Context): IShape {
 
     private var vertices = floatArrayOf(
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
+        //vertex             //colors
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, //bottom-left
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, //bottom-right
+         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f  //top-center
     )
 
     // 顶点着色器代码
     private val vertexShaderCode = """
         attribute vec3 aPosition;
+        attribute vec3 aColor;
+        varying vec3 vColor;
+        
         void main() {
+            vColor = aColor;
             gl_Position = vec4(aPosition, 1.0);
         }
         """
@@ -30,14 +35,17 @@ class VAOTriangle(val ctx: Context): IShape {
     // 片段着色器代码
     private val fragmentShaderCode = """
         precision mediump float;
+        varying vec3 vColor;
+        
         void main() {
-            gl_FragColor = vec4(1.0, 0.5, 0.2, 1.0);
+            gl_FragColor = vec4(vColor, 1.0);
         }
         """
 
     private var mProgram = -1
 
     private var aPositionHandle = -1
+    private var aColorHandle = -1
     private var mVAO = -1
     private var mVBO = -1
     private lateinit var vertexBuffer: Buffer
@@ -58,6 +66,7 @@ class VAOTriangle(val ctx: Context): IShape {
         mProgram = createProgram(vertexShaderCode, fragmentShaderCode)
 
         aPositionHandle = GLES30.glGetAttribLocation(mProgram, "aPosition")
+        aColorHandle = GLES30.glGetAttribLocation(mProgram, "aColor")
 
 
         //创建VAO
@@ -83,8 +92,10 @@ class VAOTriangle(val ctx: Context): IShape {
         GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, vertices.size * 4, vertexBuffer, GLES30.GL_STATIC_DRAW)
 
         // 3. then set our vertex attributes pointers
-        GLES30.glVertexAttribPointer(aPositionHandle, 3, GLES30.GL_FLOAT, false, 3 * 4, 0)
+        GLES30.glVertexAttribPointer(aPositionHandle, 3, GLES30.GL_FLOAT, false, (3 + 3) * 4, 0)
         GLES30.glEnableVertexAttribArray(aPositionHandle)
+        GLES30.glVertexAttribPointer(aColorHandle, 3, GLES30.GL_FLOAT, false, (3 + 3) * 4, 3 * 4)
+        GLES30.glEnableVertexAttribArray(aColorHandle)
 
 
         // 4. You can unbind the VAO now

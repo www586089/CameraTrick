@@ -3,15 +3,20 @@ package com.zf.camera.trick.filter.sample
 import android.content.Context
 import android.opengl.GLES20
 import com.zf.camera.trick.gl.GLESUtils.createProgram
+import com.zf.camera.trick.utils.TrickLog
 import java.nio.Buffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.math.sin
 
 /**
  * 正常操作
  */
 class NormalTriangle(val ctx: Context): IShape {
 
+    companion object {
+        const val TAG = "NormalTriangle"
+    }
     private var vertices = floatArrayOf(
         -0.5f, -0.5f, 0.0f,
          0.5f, -0.5f, 0.0f,
@@ -21,6 +26,7 @@ class NormalTriangle(val ctx: Context): IShape {
     // 顶点着色器代码
     private val vertexShaderCode = """
         attribute vec3 aPosition;
+        
         void main() {
             gl_Position = vec4(aPosition, 1.0);
         }
@@ -29,15 +35,21 @@ class NormalTriangle(val ctx: Context): IShape {
     // 片段着色器代码
     private val fragmentShaderCode = """
         precision mediump float;
+        
+        uniform vec4 vertexColor;
+        
         void main() {
-            gl_FragColor = vec4(1.0, 0.5, 0.2, 1.0);
+            gl_FragColor = vertexColor;
         }
         """
 
     private var mProgram = -1
 
     private var aPositionHandle = -1
+    private var uVertexColorHandle = -1
     private lateinit var vertexBuffer: Buffer
+
+    private var curMSC = System.currentTimeMillis()
 
     init {
 
@@ -50,10 +62,15 @@ class NormalTriangle(val ctx: Context): IShape {
             .asFloatBuffer()
             .put(vertices)
             .position(0)
+        val nrAttributes = IntArray(1)
+        //least 16 4-component vertex attributes available
+        GLES20.glGetIntegerv(GLES20.GL_MAX_VERTEX_ATTRIBS, nrAttributes, 0)
+        TrickLog.d(TAG, "onSurfaceCreated-> Maximum nr of vertex attributes supported: ${nrAttributes[0]}")
 
         mProgram = createProgram(vertexShaderCode, fragmentShaderCode)
 
         aPositionHandle = GLES20.glGetAttribLocation(mProgram, "aPosition")
+        uVertexColorHandle = GLES20.glGetUniformLocation(mProgram, "vertexColor")
     }
 
     override fun onSurfaceChanged(width: Int, height: Int) {
@@ -71,6 +88,11 @@ class NormalTriangle(val ctx: Context): IShape {
 
         // 绘制三角形
         GLES20.glUseProgram(mProgram)
+        val redColor = 0.1f + sin((System.currentTimeMillis() - curMSC) / 1000.0f) / 2.0f
+        val greenColor = 0.3f + sin((System.currentTimeMillis() - curMSC) / 1000.0f) / 2.0f
+        val blueColor = 0.5f + sin((System.currentTimeMillis() - curMSC) / 1000.0f) / 2.0f
+        TrickLog.d(TAG, "drawFrame-> blueColor: $blueColor")
+        GLES20.glUniform4f(uVertexColorHandle, redColor, greenColor, blueColor, 1.0f)
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3)
 
         GLES20.glDisableVertexAttribArray(aPositionHandle)
