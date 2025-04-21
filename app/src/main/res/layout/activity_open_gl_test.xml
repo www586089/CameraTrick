@@ -6,6 +6,7 @@
     tools:context=".GLTestActivity">
 
     <com.zf.camera.trick.ui.view.ImageFilterSurfaceView
+        android:id="@+id/glSurfaceView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

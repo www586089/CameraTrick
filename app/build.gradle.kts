@@ -7,6 +7,10 @@ android {
     namespace = "com.zf.camera.trick"
     compileSdk = 34
 
+    viewBinding {
+        enable = true
+    }
+
     defaultConfig {
         applicationId = "com.zf.camera.trick"
         minSdk = 21

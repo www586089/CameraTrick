@@ -4,6 +4,7 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
+import android.view.View;
 
 import com.zf.camera.trick.filter.sample.IShape;
 import com.zf.camera.trick.filter.sample.VAOTriangle;
@@ -56,34 +57,45 @@ public class ImageFilterSurfaceView extends GLSurfaceView {
         TrickLog.d(TAG, "surfaceChanged");
     }
 
+    public void updateShape(IShape shape) {
+        queueEvent(()-> {mMyRenderer.updateShape(this, shape);});
+    }
+
+
     static class MyRenderer implements Renderer {
 
-        private final IShape mTriangle;
+        private IShape shape;
 
         public MyRenderer(Context context) {
-            mTriangle = new VAOTriangle(context);
+            shape = new VAOTriangle(context);
+        }
+
+        private void updateShape(View surfaceView, IShape shape) {
+            this.shape = shape;
+            shape.onSurfaceCreated();
+            shape.onSurfaceChanged(surfaceView.getWidth(), surfaceView.getHeight());
         }
 
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             TrickLog.d(TAG, "onSurfaceCreated");
-            mTriangle.onSurfaceCreated();
+            shape.onSurfaceCreated();
         }
 
         @Override
         public void onSurfaceChanged(GL10 gl, int width, int height) {
             TrickLog.d(TAG, "onSurfaceChanged, width = " + width + ", height = " + height);
-            mTriangle.onSurfaceChanged(width, height);
+            shape.onSurfaceChanged(width, height);
         }
 
         public void onSurfaceDestroyed() {
             TrickLog.d(TAG, "onSurfaceDestroyed");
-            mTriangle.onSurfaceDestroyed();
+            shape.onSurfaceDestroyed();
         }
 
         @Override
         public void onDrawFrame(GL10 gl) {
-            mTriangle.drawFrame();
+            shape.drawFrame();
         }
     }
 }

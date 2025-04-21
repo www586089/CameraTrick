@@ -20,7 +20,8 @@ open class BaseActivity : ComponentActivity() {
             .init()
         super.onCreate(savedInstanceState)
         actionBar?.apply {
-            setDisplayShowTitleEnabled(false)
+            setDisplayShowTitleEnabled(true)
+            title = ""
             setDisplayHomeAsUpEnabled(showBackIcon)
         }
     }
