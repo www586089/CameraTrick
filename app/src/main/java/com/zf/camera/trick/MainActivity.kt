@@ -10,6 +10,12 @@ import com.zf.camera.trick.base.BaseActivity
 import com.zf.camera.trick.ui.theme.MainActivityTheme
 
 class MainActivity : BaseActivity() {
+
+    override var showBackIcon: Boolean
+        get() = false
+        set(value) {}
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
