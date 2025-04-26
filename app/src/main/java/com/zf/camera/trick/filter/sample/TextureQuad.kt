@@ -1,7 +1,10 @@
 package com.zf.camera.trick.filter.sample
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.opengl.GLES30
+import android.opengl.GLUtils
+import com.zf.camera.trick.R
 import com.zf.camera.trick.gl.GLESUtils.createProgram
 import java.nio.Buffer
 import java.nio.ByteBuffer
@@ -15,10 +18,10 @@ class TextureQuad(val ctx: Context): IShape {
 
     private var vertices = floatArrayOf(
         //positions         //colors            // texture coords
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   1.0f, 0.0f,   // top right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,   1.0f, 1.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,   0.0f, 1.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f,   0.0f, 0.0f    // top left
     )
 
     private var indices = intArrayOf(
@@ -32,8 +35,12 @@ class TextureQuad(val ctx: Context): IShape {
         attribute vec3 aColor;
         varying vec3 vColor;
         
+        attribute vec2 aTextCoord;
+        varying vec2 vTextCoord;
+        
         void main() {
             vColor = aColor;
+            vTextCoord = aTextCoord;
             gl_Position = vec4(aPosition, 1.0);
         }
         """
@@ -42,9 +49,14 @@ class TextureQuad(val ctx: Context): IShape {
     private val fragmentShaderCode = """
         precision mediump float;
         varying vec3 vColor;
+        varying vec2 vTextCoord;
+        uniform sampler2D sampler1;
+        uniform sampler2D sampler2;
         
         void main() {
-            gl_FragColor = vec4(vColor, 1.0);
+            vec4 color1 = texture2D(sampler1, vTextCoord);
+            vec4 color2 = texture2D(sampler2, vTextCoord);
+            gl_FragColor = mix(color1, color2, 0.2);
         }
         """
 
@@ -52,6 +64,13 @@ class TextureQuad(val ctx: Context): IShape {
 
     private var aPositionHandle = -1
     private var aColorHandle = -1
+    private var aTextCoordHandle = -1
+    private var mSampler1Handle = -1
+    private var mSampler2Handle = -1
+
+    private var mTextureId = -1
+    private var mTextureId2 = -1
+
     private var mVAO = -1
     private var mVBO = -1
     private var mEBO = -1
@@ -62,6 +81,32 @@ class TextureQuad(val ctx: Context): IShape {
 
     }
 
+    private fun createTexture(bitmapId: Int): Int {
+        val texture = IntArray(1)
+        val bitmap = BitmapFactory.decodeResource(ctx.resources, bitmapId)
+        if (bitmap != null && !bitmap.isRecycled) {
+            //生成纹理
+            GLES30.glGenTextures(1, texture, 0)
+            //生成纹理
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, texture[0])
+            //设置缩小过滤为使用纹理中坐标最接近的一个像素的颜色作为需要绘制的像素颜色
+            GLES30.glTexParameterf(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST.toFloat())
+            //设置放大过滤为使用纹理中坐标最接近的若干个颜色，通过加权平均算法得到需要绘制的像素颜色
+            GLES30.glTexParameterf(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR.toFloat())
+            //设置环绕方向S，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
+            GLES30.glTexParameterf(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE.toFloat())
+            //设置环绕方向T，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
+            GLES30.glTexParameterf(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE.toFloat())
+            //根据以上指定的参数，生成一个2D纹理
+            GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
+            // 取消绑定纹理
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
+            bitmap.recycle()
+
+            return texture[0]
+        }
+        return 0
+    }
 
     override fun onSurfaceCreated() {
         vertexBuffer = ByteBuffer.allocateDirect(vertices.size * 4)
@@ -79,7 +124,13 @@ class TextureQuad(val ctx: Context): IShape {
         mProgram = createProgram(vertexShaderCode, fragmentShaderCode)
 
         aPositionHandle = GLES30.glGetAttribLocation(mProgram, "aPosition")
-        aColorHandle = GLES30.glGetAttribLocation(mProgram, "aColor");
+        aColorHandle = GLES30.glGetAttribLocation(mProgram, "aColor")
+        aTextCoordHandle = GLES30.glGetAttribLocation(mProgram, "aTextCoord")
+        mSampler1Handle = GLES30.glGetUniformLocation(mProgram, "sampler1")
+        mSampler2Handle = GLES30.glGetUniformLocation(mProgram, "sampler2")
+
+        mTextureId = createTexture(R.drawable.container)
+        mTextureId2 = createTexture(R.drawable.awesomeface)
 
 
         //创建VAO
@@ -122,6 +173,9 @@ class TextureQuad(val ctx: Context): IShape {
         //4.2 bind color
         GLES30.glVertexAttribPointer(aColorHandle, 3, GLES30.GL_FLOAT, false, 8 * 4, 3 * 4)
         GLES30.glEnableVertexAttribArray(aColorHandle)
+        //4.3 bind Texture Coords
+        GLES30.glVertexAttribPointer(aTextCoordHandle, 3, GLES30.GL_FLOAT, false, 8 * 4, 6 * 4)
+        GLES30.glEnableVertexAttribArray(aTextCoordHandle)
 
 
         // 5. You can unbind the VAO now
@@ -140,6 +194,18 @@ class TextureQuad(val ctx: Context): IShape {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
 
         GLES30.glUseProgram(mProgram)
+        //1绑定纹理
+        //1.1 使用mTextureId绑定0号纹理
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTextureId)
+        //1.2 使用mTextureId2绑定1号纹理
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTextureId2)
+        //1.3 mSampler1Handle使用0号纹理采样
+        GLES30.glUniform1i(mSampler1Handle, 0)
+        //1.4 mSampler2Handle使用1号纹理采样
+        GLES30.glUniform1i(mSampler2Handle, 1)
+
         // 绑定VAO
         GLES30.glBindVertexArray(mVAO)
         // 绘制三角形
@@ -147,6 +213,7 @@ class TextureQuad(val ctx: Context): IShape {
 
         // 解绑VAO
         GLES30.glBindVertexArray(0)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
         GLES30.glUseProgram(0)
     }
 
