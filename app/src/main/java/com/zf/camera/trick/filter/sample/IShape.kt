@@ -16,6 +16,7 @@ const val SHAPE_TYPE_TRIANGLE_NORMAL = SHAPE_TYPE_NONE + 1
 const val SHAPE_TYPE_TRIANGLE_VBO = SHAPE_TYPE_NONE + 2
 const val SHAPE_TYPE_TRIANGLE_VAO = SHAPE_TYPE_NONE + 3
 const val SHAPE_TYPE_TRIANGLE_EBO = SHAPE_TYPE_NONE + 4
+const val SHAPE_TYPE_QUAD_TEXTURE = SHAPE_TYPE_NONE + 5        //使用纹理绘制四边形
 
 
 fun getShapeAction(ctx: Context, actions: MutableMap<Int, IAction>) {
@@ -56,6 +57,16 @@ fun getShapeAction(ctx: Context, actions: MutableMap<Int, IAction>) {
             return "EBO"
         }
     }
+
+    actions[SHAPE_TYPE_QUAD_TEXTURE] = object : IAction {
+        override fun getAction(): IShape {
+            return TextureQuad(ctx)
+        }
+
+        override fun getName(): String {
+            return "纹理的使用"
+        }
+    }
 }
 
 
@@ -68,6 +79,7 @@ fun onCreateOptionsMenu(menu: Menu) {
     baseOpenGL.add(baseGroupId, SHAPE_TYPE_TRIANGLE_VBO, SHAPE_TYPE_TRIANGLE_VBO, "VB0")
     baseOpenGL.add(baseGroupId, SHAPE_TYPE_TRIANGLE_VAO, SHAPE_TYPE_TRIANGLE_VAO, "VAO")
     baseOpenGL.add(baseGroupId, SHAPE_TYPE_TRIANGLE_EBO, SHAPE_TYPE_TRIANGLE_EBO, "EBO")
+    baseOpenGL.add(baseGroupId, SHAPE_TYPE_QUAD_TEXTURE, SHAPE_TYPE_QUAD_TEXTURE, "纹理的使用")
     baseOpenGL.setGroupCheckable(baseGroupId, true, true)
 
     val testGroupId = 100
