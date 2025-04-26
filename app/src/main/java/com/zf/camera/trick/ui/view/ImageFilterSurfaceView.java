@@ -71,6 +71,9 @@ public class ImageFilterSurfaceView extends GLSurfaceView {
         }
 
         private void updateShape(View surfaceView, IShape shape) {
+            if (null != this.shape) {
+                this.shape.onSurfaceDestroyed();
+            }
             this.shape = shape;
             shape.onSurfaceCreated();
             shape.onSurfaceChanged(surfaceView.getWidth(), surfaceView.getHeight());

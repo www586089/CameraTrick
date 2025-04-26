@@ -6,4 +6,11 @@ interface IAction {
     // 获取动作
     fun getAction(): IShape
     fun getName(): String
+
+    fun getGroupId(): Int
+}
+
+interface  IGroup {
+    fun getGroupId(): Int
+    fun getGroupName(): String
 }

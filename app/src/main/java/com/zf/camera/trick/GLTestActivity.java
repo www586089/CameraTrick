@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 
 import com.zf.camera.trick.base.BaseActivity;
 import com.zf.camera.trick.base.IAction;
+import com.zf.camera.trick.base.IGroup;
 import com.zf.camera.trick.databinding.ActivityOpenGlTestBinding;
 import com.zf.camera.trick.filter.sample.IShapeKt;
 
@@ -35,6 +36,7 @@ public class GLTestActivity extends BaseActivity {
     }
 
     private final Map<Integer, IAction> actions = new HashMap<>();
+    private final Map<Integer, IGroup> groups = new HashMap<>();
     private int mCurrentType = SHAPE_TYPE_NONE;
     //默认选中的选项
     private static final int DEFAULT_TYPE = SHAPE_TYPE_TRIANGLE_VAO;
@@ -56,7 +58,7 @@ public class GLTestActivity extends BaseActivity {
     }
 
     private void init() {
-        IShapeKt.getShapeAction(this, actions);
+        IShapeKt.getShapeAction(this, actions, groups);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class GLTestActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        IShapeKt.onCreateOptionsMenu(menu);
+        IShapeKt.onCreateOptionsMenu(menu, actions, groups);
         super.onCreateOptionsMenu(menu);
         return true;
     }
