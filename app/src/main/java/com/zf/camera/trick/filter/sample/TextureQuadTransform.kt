@@ -9,6 +9,8 @@ import com.zf.camera.trick.gl.GLESUtils.createProgram
 import java.nio.Buffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 /**
@@ -35,13 +37,15 @@ class TextureQuadTransform(val ctx: Context): IShape {
         attribute vec3 aColor;
         varying vec3 vColor;
         
+        uniform mat4 uTransform;
+        
         attribute vec2 aTextCoord;
         varying vec2 vTextCoord;
         
         void main() {
             vColor = aColor;
             vTextCoord = aTextCoord;
-            gl_Position = vec4(aPosition, 1.0);
+            gl_Position = uTransform * vec4(aPosition, 1.0);
         }
         """
 
@@ -63,6 +67,7 @@ class TextureQuadTransform(val ctx: Context): IShape {
 
     private var mProgram = -1
 
+    private var uTransformHandle = -1
     private var aPositionHandle = -1
     private var aColorHandle = -1
     private var aTextCoordHandle = -1
@@ -77,6 +82,12 @@ class TextureQuadTransform(val ctx: Context): IShape {
     private var mEBO = -1
     private lateinit var vertexBuffer: Buffer
     private lateinit var indexBuffer: Buffer
+
+    private lateinit var mTranslateMat: FloatArray
+    private lateinit var mRotateMat: FloatArray
+    private lateinit var mScaleMat: FloatArray
+    private lateinit var mTransformMat: FloatArray
+    private var timeSec = 0.0
 
     init {
 
@@ -110,6 +121,59 @@ class TextureQuadTransform(val ctx: Context): IShape {
     }
 
     override fun onSurfaceCreated() {
+        //沿x轴平移
+//        mTranslateMat = floatArrayOf(
+//            1.0f, 0.0f, 0.0f, 0.5f,
+//            0.0f, 1.0f, 0.0f, 0.0f,
+//            0.0f, 0.0f, 1.0f, 0.0f,
+//            0.0f, 0.0f, 0.0f, 1.0f
+//        )
+        /**
+         * 因为是列向量所以需要把上面的矩阵转置
+         */
+        mTranslateMat = floatArrayOf(
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.5f, 0.0f, 0.0f, 1.0f
+        )
+        val angle = Math.toRadians(90.0)
+        val cos = cos(angle).toFloat()
+        val sin = sin(angle).toFloat()
+        //绕z轴旋转angle度
+//        mRotateMat = floatArrayOf(
+//            cos,  -sin,  0.0f, 0.5f,
+//            sin,  cos,   0.0f, 0.0f,
+//            0.0f, 0.0f,  1.0f, 0.0f,
+//            0.0f, 0.0f,  0.0f, 1.0f
+//        )
+        /**
+         * 因为是列向量所以需要把上面的矩阵转置
+         */
+        mRotateMat = floatArrayOf(
+            cos,  sin,  0.0f, 0.0f,
+            -sin, cos,  0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        )
+
+//        mRotateMat = floatArrayOf(
+//            0.5f, 0.0f, 0.0f, 0.0f,
+//            0.0f, 0.5f, 0.0f, 0.0f,
+//            0.0f, 0.0f, 1.0f, 0.0f,
+//            0.0f, 0.0f, 0.0f, 1.0f
+//        )
+
+        /**
+         * 因为是列向量所以需要把上面的矩阵转置
+         */
+        mScaleMat = floatArrayOf(
+            0.5f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.5f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        )
+
         vertexBuffer = ByteBuffer.allocateDirect(vertices.size * 4)
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer()
@@ -124,6 +188,7 @@ class TextureQuadTransform(val ctx: Context): IShape {
 
         mProgram = createProgram(vertexShaderCode, fragmentShaderCode)
 
+        uTransformHandle = GLES30.glGetUniformLocation(mProgram, "uTransform")
         aPositionHandle = GLES30.glGetAttribLocation(mProgram, "aPosition")
         aColorHandle = GLES30.glGetAttribLocation(mProgram, "aColor")
         aTextCoordHandle = GLES30.glGetAttribLocation(mProgram, "aTextCoord")
@@ -182,6 +247,9 @@ class TextureQuadTransform(val ctx: Context): IShape {
         // 5. You can unbind the VAO now
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0)
         GLES30.glBindVertexArray(0)
+
+        GLES30.glUseProgram(mProgram)
+        GLES30.glUniformMatrix4fv(uTransformHandle, 1, false, mScaleMat, 0)
     }
 
     override fun onSurfaceChanged(width: Int, height: Int) {
@@ -195,6 +263,26 @@ class TextureQuadTransform(val ctx: Context): IShape {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
 
         GLES30.glUseProgram(mProgram)
+        val angle = Math.toRadians(timeSec++)
+        val cos = cos(angle).toFloat()
+        val sin = sin(angle).toFloat()
+        //绕z轴旋转angle度
+//        mRotateMat = floatArrayOf(
+//            cos,  -sin,  0.0f, 0.5f,
+//            sin,  cos,   0.0f, 0.0f,
+//            0.0f, 0.0f,  1.0f, 0.0f,
+//            0.0f, 0.0f,  0.0f, 1.0f
+//        )
+        /**
+         * 因为是列向量所以需要把上面的矩阵转置
+         */
+        mRotateMat = floatArrayOf(
+            cos,  sin,  0.0f, 0.0f,
+            -sin, cos,  0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        )
+        GLES30.glUniformMatrix4fv(uTransformHandle, 1, false, mRotateMat, 0)
         //1绑定纹理
         //1.1 使用mTextureId绑定0号纹理
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
