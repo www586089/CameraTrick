@@ -21,7 +21,8 @@ const val SHAPE_TYPE_TRIANGLE_NORMAL = SHAPE_TYPE_NONE + 1
 const val SHAPE_TYPE_TRIANGLE_VBO = SHAPE_TYPE_NONE + 2
 const val SHAPE_TYPE_TRIANGLE_VAO = SHAPE_TYPE_NONE + 3
 const val SHAPE_TYPE_TRIANGLE_EBO = SHAPE_TYPE_NONE + 4
-const val SHAPE_TYPE_QUAD_TEXTURE = SHAPE_TYPE_NONE + 5        //使用纹理绘制四边形
+const val SHAPE_TYPE_QUAD_TEXTURE = SHAPE_TYPE_NONE + 5             //使用纹理绘制四边形
+const val SHAPE_TYPE_QUAD_TRANSFORM = SHAPE_TYPE_NONE + 6           //使用纹理绘制四边形
 
 const val SHAPE_TEST1 = GP_TEST + 1
 const val SHAPE_TEST2 = GP_TEST + 2
@@ -119,6 +120,20 @@ fun getShapeAction(ctx: Context, actions: MutableMap<Int, IAction>, groups: Muta
         }
     }
 
+    actions[SHAPE_TYPE_QUAD_TRANSFORM] = object : IAction {
+        override fun getAction(): IShape {
+            return TextureQuadTransform(ctx)
+        }
+
+        override fun getName(): String {
+            return "坐标变换"
+        }
+
+        override fun getGroupId(): Int {
+            return GP_BASE_OPEN_GL
+        }
+    }
+
     actions[SHAPE_TEST1] = object : IAction {
         override fun getAction(): IShape {
             return TextureQuad(ctx)
@@ -149,23 +164,6 @@ fun getShapeAction(ctx: Context, actions: MutableMap<Int, IAction>, groups: Muta
 
 
 fun onCreateOptionsMenu(menu: Menu, actions: MutableMap<Int, IAction>, groups: MutableMap<Int, IGroup>) {
-
-//    //添加一个子菜单
-//    val baseGroupId = SHAPE_TYPE_NONE
-//    val baseOpenGL = menu.addSubMenu(baseGroupId, baseGroupId, baseGroupId, "OpenGL ES基础")
-//    baseOpenGL.add(baseGroupId, SHAPE_TYPE_TRIANGLE_NORMAL, SHAPE_TYPE_TRIANGLE_NORMAL, "基本绘制")
-//    baseOpenGL.add(baseGroupId, SHAPE_TYPE_TRIANGLE_VBO, SHAPE_TYPE_TRIANGLE_VBO, "VB0")
-//    baseOpenGL.add(baseGroupId, SHAPE_TYPE_TRIANGLE_VAO, SHAPE_TYPE_TRIANGLE_VAO, "VAO")
-//    baseOpenGL.add(baseGroupId, SHAPE_TYPE_TRIANGLE_EBO, SHAPE_TYPE_TRIANGLE_EBO, "EBO")
-//    baseOpenGL.add(baseGroupId, SHAPE_TYPE_QUAD_TEXTURE, SHAPE_TYPE_QUAD_TEXTURE, "纹理的使用")
-//    baseOpenGL.setGroupCheckable(baseGroupId, true, true)
-//
-//    val testGroupId = 100
-//    val subMenuTest = menu.addSubMenu(testGroupId, 1, 1, "测试菜单")
-//    subMenuTest.add(testGroupId, 100, 100, "测试1")
-//    subMenuTest.add(testGroupId, 101, 101, "测试2")
-//    subMenuTest.setGroupCheckable(testGroupId, true, true)
-
     groups.forEach { menuGroup ->
         val groupId = menuGroup.key
         val groupName = menuGroup.value.getGroupName()
