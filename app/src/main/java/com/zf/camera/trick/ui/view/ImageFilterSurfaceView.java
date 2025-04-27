@@ -65,16 +65,21 @@ public class ImageFilterSurfaceView extends GLSurfaceView {
     static class MyRenderer implements Renderer {
 
         private IShape shape;
+        private boolean isInit = false;
 
         public MyRenderer(Context context) {
             shape = new VAOTriangle(context);
         }
 
         private void updateShape(View surfaceView, IShape shape) {
-            if (null != this.shape) {
+            if (isInit && null != this.shape) {
                 this.shape.onSurfaceDestroyed();
             }
             this.shape = shape;
+            if (!isInit) {
+                return;
+            }
+
             shape.onSurfaceCreated();
             shape.onSurfaceChanged(surfaceView.getWidth(), surfaceView.getHeight());
         }
@@ -83,6 +88,7 @@ public class ImageFilterSurfaceView extends GLSurfaceView {
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             TrickLog.d(TAG, "onSurfaceCreated");
             shape.onSurfaceCreated();
+            isInit = true;
         }
 
         @Override
