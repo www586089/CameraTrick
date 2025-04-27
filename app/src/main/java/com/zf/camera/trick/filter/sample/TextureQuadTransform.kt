@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.opengl.GLES30
 import android.opengl.GLUtils
+import android.opengl.Matrix
 import com.zf.camera.trick.R
 import com.zf.camera.trick.gl.GLESUtils.createProgram
 import java.nio.Buffer
@@ -87,6 +88,8 @@ class TextureQuadTransform(val ctx: Context): IShape {
     private lateinit var mRotateMat: FloatArray
     private lateinit var mScaleMat: FloatArray
     private lateinit var mTransformMat: FloatArray
+    private lateinit var mTempMat: FloatArray
+    private lateinit var mOrthMat: FloatArray
     private var timeSec = 0.0
 
     init {
@@ -121,6 +124,9 @@ class TextureQuadTransform(val ctx: Context): IShape {
     }
 
     override fun onSurfaceCreated() {
+        mTempMat = FloatArray(16)
+        mTransformMat = FloatArray(16)
+        mOrthMat = FloatArray(16)
         //沿x轴平移
 //        mTranslateMat = floatArrayOf(
 //            1.0f, 0.0f, 0.0f, 0.5f,
@@ -135,7 +141,7 @@ class TextureQuadTransform(val ctx: Context): IShape {
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
-            0.5f, 0.0f, 0.0f, 1.0f
+            0.0f, 0.5f, 0.0f, 1.0f
         )
         val angle = Math.toRadians(90.0)
         val cos = cos(angle).toFloat()
@@ -254,6 +260,16 @@ class TextureQuadTransform(val ctx: Context): IShape {
 
     override fun onSurfaceChanged(width: Int, height: Int) {
         GLES30.glViewport(0, 0, width, height)
+        Matrix.setIdentityM(mOrthMat, 0)
+
+        var ratio = 0f
+        if (height > width) {
+            ratio = height.toFloat() / width.toFloat()
+            Matrix.orthoM(mOrthMat, 0, -1.0f, 1.0f, -ratio, ratio, 0.0f, 10.0f)
+        } else {
+            ratio = width.toFloat() / height.toFloat()
+            Matrix.orthoM(mOrthMat, 0, -ratio, ratio, -1.0f, 1.0f, 0.0f, 10.0f)
+        }
     }
 
     override fun drawFrame() {
@@ -282,7 +298,11 @@ class TextureQuadTransform(val ctx: Context): IShape {
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
         )
-        GLES30.glUniformMatrix4fv(uTransformHandle, 1, false, mRotateMat, 0)
+        //translate -> rotate -> orthoM 这里会绕z轴旋转
+        Matrix.multiplyMM(mTempMat, 0, mRotateMat, 0, mTranslateMat, 0)
+        Matrix.multiplyMM(mTempMat, 0, mOrthMat, 0, mTempMat, 0)
+        System.arraycopy(mTempMat, 0, mTransformMat, 0, mTempMat.size)
+        GLES30.glUniformMatrix4fv(uTransformHandle, 1, false, mTransformMat, 0)
         //1绑定纹理
         //1.1 使用mTextureId绑定0号纹理
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
