@@ -56,7 +56,8 @@ class TextureQuad(val ctx: Context): IShape {
         void main() {
             vec4 color1 = texture2D(sampler1, vTextCoord);
             vec4 color2 = texture2D(sampler2, vTextCoord);
-            gl_FragColor = mix(color1, color2, 0.2);
+            vec4 mixTextureColor = mix(color1, color2, 0.4);
+            gl_FragColor = mix(mixTextureColor, vec4(vColor, 1.0), 0.2);
         }
         """
 
