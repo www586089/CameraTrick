@@ -8,12 +8,16 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.util.Size
 import android.view.Menu
 import android.view.MenuItem
+import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
+import com.gyf.immersionbar.ImmersionBar
 import com.zf.camera.trick.base.BaseActivity
 import com.zf.camera.trick.callback.PictureBufferCallback
 import com.zf.camera.trick.filter.camera.CameraFilterBase
@@ -89,6 +93,27 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
 
     override fun onDestroy() {
         super.onDestroy()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            Log.d(TAG, "onWindowFocusChanged: acHeight = ${actionBar?.height}, statusHeight = ${ImmersionBar.getStatusBarHeight(this)}")
+            var lp: ViewGroup.LayoutParams = mTimeInfo.layoutParams
+            if (lp == null) {
+                lp = MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            }
+            val statusBarHeight = if (null != actionBar) actionBar?.height!! else 0
+            val topMargin = ImmersionBar.getStatusBarHeight(this) + statusBarHeight
+            val layoutParams = lp as MarginLayoutParams
+            layoutParams.setMargins(
+                layoutParams.leftMargin,
+                topMargin,
+                layoutParams.rightMargin,
+                layoutParams.bottomMargin
+            )
+            mTimeInfo.layoutParams = layoutParams
+        }
     }
 
     private fun initWidget() {
