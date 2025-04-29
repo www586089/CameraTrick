@@ -14,15 +14,24 @@ interface IShape {
 
 const val SHAPE_TYPE_NONE = 0
 
-const val GP_BASE_OPEN_GL = SHAPE_TYPE_NONE //OpenGL ES 基础
-const val GP_TEST = SHAPE_TYPE_NONE + 100   //测试菜单
+const val GP_BASE_OPEN_GL = SHAPE_TYPE_NONE             //OpenGL ES 基础
+const val GP_GPU_IMAGE_FILTER = SHAPE_TYPE_NONE + 100   //GPU 图像滤镜
+const val GP_TEST = SHAPE_TYPE_NONE + 1000              //测试菜单
 
+//OpenGL ES 基础 begin
 const val SHAPE_TYPE_TRIANGLE_NORMAL = SHAPE_TYPE_NONE + 1
 const val SHAPE_TYPE_TRIANGLE_VBO = SHAPE_TYPE_NONE + 2
 const val SHAPE_TYPE_TRIANGLE_VAO = SHAPE_TYPE_NONE + 3
 const val SHAPE_TYPE_TRIANGLE_EBO = SHAPE_TYPE_NONE + 4
 const val SHAPE_TYPE_QUAD_TEXTURE = SHAPE_TYPE_NONE + 5             //使用纹理绘制四边形
 const val SHAPE_TYPE_QUAD_TRANSFORM = SHAPE_TYPE_NONE + 6           //使用纹理绘制四边形
+// -->end
+
+
+//GpuImage 开源项目图像滤镜 begin
+const val GPU_IMAGE_FILTER_INVERT = GP_GPU_IMAGE_FILTER + 1         //图像反转
+
+//-->end
 
 const val SHAPE_TEST1 = GP_TEST + 1
 const val SHAPE_TEST2 = GP_TEST + 2
@@ -41,6 +50,18 @@ fun getShapeAction(ctx: Context, actions: MutableMap<Int, IAction>, groups: Muta
         }
     })
 
+    groups[GP_GPU_IMAGE_FILTER] = object : IGroup {
+        override fun getGroupId(): Int {
+            return GP_GPU_IMAGE_FILTER
+        }
+
+        override fun getGroupName(): String {
+            return "GPUImage 图像滤镜"
+        }
+    }
+
+
+
     groups.put(GP_TEST, object : IGroup {
         override fun getGroupId(): Int {
             return GP_TEST
@@ -52,7 +73,7 @@ fun getShapeAction(ctx: Context, actions: MutableMap<Int, IAction>, groups: Muta
     })
 
 
-    //OpenGL ES 基础
+    //OpenGL ES 基础 =====================================>begin
     actions[SHAPE_TYPE_TRIANGLE_NORMAL] = object : IAction {
         override fun getAction(): IShape {
             return NormalTriangle(ctx)
@@ -133,6 +154,25 @@ fun getShapeAction(ctx: Context, actions: MutableMap<Int, IAction>, groups: Muta
             return GP_BASE_OPEN_GL
         }
     }
+
+    //OpenGL ES 基础 =====================================>>end
+
+
+    //GpuImage 开源项目图像滤镜 =====================================>begin
+    actions[GPU_IMAGE_FILTER_INVERT] = object : IAction {
+        override fun getAction(): IShape {
+            return GIColorInvertFilter(ctx)
+        }
+
+        override fun getName(): String {
+            return "颜色反转（Invert）"
+        }
+
+        override fun getGroupId(): Int {
+            return GP_GPU_IMAGE_FILTER
+        }
+    }
+    //GpuImage 开源项目图像滤镜 <===================================== end
 
     actions[SHAPE_TEST1] = object : IAction {
         override fun getAction(): IShape {
