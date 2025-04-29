@@ -13,6 +13,7 @@ import com.zf.camera.trick.App
 import com.zf.camera.trick.callback.PictureBufferCallback
 import com.zf.camera.trick.filter.camera.CameraFilerNoChange
 import com.zf.camera.trick.filter.camera.CameraFilterBase
+import com.zf.camera.trick.filter.camera.CameraFilterContrast
 import com.zf.camera.trick.manager.CameraManager
 import com.zf.camera.trick.manager.ICameraCallback
 import com.zf.camera.trick.manager.ICameraManager
@@ -202,6 +203,15 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
         queueEvent { mRender.updateShaderType(shaderType) }
     }
 
+    fun setValue(percentage: Float) {
+        if (isRecording) {
+            if (ENCODE_WITH_SURFACE && mVideoRecorder is ISurfaceVideoRecorder) {
+                (mVideoRecorder as ISurfaceVideoRecorder).setValue(percentage)
+            }
+        }
+        queueEvent { mRender.setValue(percentage) }
+    }
+
     internal class CameraHandler(view: CameraGLSurfaceView) :
         Handler() {
         private val mWeakGLSurfaceView: WeakReference<CameraGLSurfaceView>
@@ -246,6 +256,15 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
             mSurfaceTexture?.release();
         }
 
+        fun setValue(percentage: Float) {
+            if (mCameraFilter is CameraFilterContrast) {
+                (mCameraFilter as CameraFilterContrast).setContrast(range(0f, 2f, percentage))
+            }
+        }
+
+        fun range(start: Float, end: Float, percentage: Float): Float {
+            return start + ((end - start) * percentage) / 100f
+        }
         fun updateShaderType(shaderType: Int) {
             mCameraFilter.onSurfaceDestroyed()
 

@@ -22,13 +22,13 @@
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="72dp"
+        android:alpha="0"
         android:background="@drawable/record_time_info_bg"
         android:gravity="center"
         android:paddingHorizontal="6dp"
         android:paddingVertical="4dp"
         android:textColor="@color/purple_200"
         android:textSize="18sp"
-        android:alpha="0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:alpha="1" />
@@ -43,6 +43,17 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
+
+    <SeekBar
+        android:id="@+id/seek_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:max="100"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/camera_take_button" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/switch_camera_button"

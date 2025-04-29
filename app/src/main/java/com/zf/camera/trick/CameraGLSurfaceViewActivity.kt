@@ -15,6 +15,7 @@ import android.view.MenuItem
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import com.gyf.immersionbar.ImmersionBar
@@ -48,6 +49,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
     private lateinit var cameraSurfaceView: CameraGLSurfaceView
     private lateinit var mPictureIv: ImageView
     private lateinit var mTimeInfo: AppCompatTextView
+    private lateinit var mSeekBar: SeekBar
 
     private var curType = CameraFilterBase.NO_FILTER
 
@@ -65,6 +67,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menu.add(0, CameraFilterBase.NO_FILTER, CameraFilterBase.NO_FILTER, "No Filter")
+        menu.add(0, CameraFilterBase.FILTER_TYPE_CONTRAST, CameraFilterBase.FILTER_TYPE_CONTRAST, "Contrast")
         menu.add(0, CameraFilterBase.FILTER_TYPE_INVERT, CameraFilterBase.FILTER_TYPE_INVERT, "Invert")
         super.onCreateOptionsMenu(menu)
         menu.setGroupCheckable(0, true, true)
@@ -120,6 +123,20 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         cameraSurfaceView = findViewById(R.id.cameraView)
         mPictureIv = findViewById(R.id.pictureIv)
         mTimeInfo = findViewById(R.id.time_info)
+        mSeekBar = findViewById<SeekBar>(R.id.seek_bar).apply {
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    Log.d(TAG, "onProgressChanged: progress = $progress")
+                    cameraSurfaceView.setValue(progress.toFloat())
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                }
+            })
+        }
         findViewById<androidx.appcompat.widget.AppCompatImageView>(R.id.switch_camera_button).setOnClickListener {
             cameraSurfaceView.switchCamera()
         }

@@ -29,7 +29,8 @@ const val SHAPE_TYPE_QUAD_TRANSFORM = SHAPE_TYPE_NONE + 6           //使用纹�
 
 
 //GpuImage 开源项目图像滤镜 begin
-const val GPU_IMAGE_FILTER_INVERT = GP_GPU_IMAGE_FILTER + 1         //图像反转
+const val GPU_IMAGE_FILTER_CONTRAST = GP_GPU_IMAGE_FILTER + 1
+const val GPU_IMAGE_FILTER_INVERT = GP_GPU_IMAGE_FILTER + 2         //图像反转
 
 //-->end
 
@@ -166,6 +167,20 @@ fun getShapeAction(ctx: Context, actions: MutableMap<Int, IAction>, groups: Muta
 
         override fun getName(): String {
             return "颜色反转（Invert）"
+        }
+
+        override fun getGroupId(): Int {
+            return GP_GPU_IMAGE_FILTER
+        }
+    }
+
+    actions[GPU_IMAGE_FILTER_CONTRAST] = object : IAction {
+        override fun getAction(): IShape {
+            return GIColorInvertFilter(ctx)
+        }
+
+        override fun getName(): String {
+            return "Contrast"
         }
 
         override fun getGroupId(): Int {

@@ -15,6 +15,7 @@ import android.os.Message
 import android.util.Log
 import com.zf.camera.trick.App
 import com.zf.camera.trick.filter.camera.CameraFilterBase
+import com.zf.camera.trick.filter.camera.CameraFilterContrast
 import com.zf.camera.trick.gl.egl.EglCore
 import com.zf.camera.trick.gl.egl.WindowSurface
 import com.zf.camera.trick.utils.TrickLog
@@ -305,6 +306,10 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
 
     override fun updateShaderType(shaderType: Int) {
         this.shaderType = shaderType
+    }
+
+    override fun setValue(value: Float) {
+        (mCameraFilter as CameraFilterContrast).setContrast(value)
     }
 
     override fun willComingAFrame(textureId: Int, st: SurfaceTexture) {

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
@@ -27,7 +28,8 @@ public class CameraFilterBase extends AFilter {
     private String TAG = "CameraFilterBase";
 
     public static final int NO_FILTER = 0;
-    public static final int FILTER_TYPE_INVERT = 1;
+    public static final int FILTER_TYPE_CONTRAST = NO_FILTER + 1;
+    public static final int FILTER_TYPE_INVERT = NO_FILTER + 2;
 
 
     public static CameraFilterBase getFilter(Resources resources, int type) {
@@ -35,8 +37,12 @@ public class CameraFilterBase extends AFilter {
             case NO_FILTER:
                 return new CameraFilerNoChange(resources);
 
+            case FILTER_TYPE_CONTRAST:
+                return new CameraFilterContrast(resources);
+
                 case FILTER_TYPE_INVERT:
                 return new CameraFilterInvert(resources);
+
         }
 
         return new CameraFilerNoChange(resources);
@@ -346,6 +352,14 @@ public class CameraFilterBase extends AFilter {
         GLES20.glDeleteProgram(mProgram);
         mProgram = -1;
 //        destroyFrameBuffers();
+    }
+
+    public int getUniformLocation(String uName) {
+        return GLES30.glGetUniformLocation(mProgram, uName);
+    }
+
+    public void setUniformLocation(int location, float value) {
+        GLES30.glUniform1f(location, value);
     }
 }
 
