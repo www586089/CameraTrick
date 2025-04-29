@@ -23,4 +23,5 @@ interface ICameraVideoRecorder : IMediaRecorder {
 interface ISurfaceVideoRecorder : IMediaRecorder {
     fun onUpdatedSharedContext()
     fun willComingAFrame(textureId: Int, st: SurfaceTexture)
+    fun updateShaderType(shaderType: Int)
 }

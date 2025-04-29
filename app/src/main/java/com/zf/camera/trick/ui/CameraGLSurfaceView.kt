@@ -11,7 +11,8 @@ import android.util.Log
 import android.view.SurfaceHolder
 import com.zf.camera.trick.App
 import com.zf.camera.trick.callback.PictureBufferCallback
-import com.zf.camera.trick.filter.CameraFilter
+import com.zf.camera.trick.filter.camera.CameraFilerNoChange
+import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.manager.CameraManager
 import com.zf.camera.trick.manager.ICameraCallback
 import com.zf.camera.trick.manager.ICameraManager
@@ -38,7 +39,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
          * false: 使用相机预览回调录制
          * true: 使用surface渲染录制[可基于OpenGL ES进行绘制输出，加入各种特性，录制出特效视频]
          */
-        private const val ENCODE_WITH_SURFACE = false
+        private const val ENCODE_WITH_SURFACE = true
     }
 
     init {
@@ -46,7 +47,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
     }
 
     private lateinit var mCameraManager: ICameraManager
-    private lateinit var render: MyRenderer
+    private lateinit var mRender: MyRenderer
     private lateinit var mCameraHandler: CameraHandler
     private lateinit var mVideoRecorder: IMediaRecorder
 
@@ -57,6 +58,8 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
     private var hasUpdateShareContext = false
     private var previewWidth = 0
     private var previewHeight = 0
+
+    private var mShaderType = -1;
 
     private fun init(context: Context) {
         Log.d(TAG, "init: ")
@@ -70,10 +73,10 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
         mCameraManager = CameraManager(context).apply {
             mCameraCallback = this@CameraGLSurfaceView
         }
-        render = MyRenderer(this)
+        mRender = MyRenderer(this)
         mCameraHandler = CameraHandler(this);
         setEGLContextClientVersion(2)
-        setRenderer(render)
+        setRenderer(mRender)
         renderMode = RENDERMODE_WHEN_DIRTY
     }
 
@@ -94,7 +97,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
         TrickLog.d(TAG, "onPause")
         closeCamera()
         queueEvent {
-            render.release()
+            mRender.release()
         }
         mSurfaceTexture = null
     }
@@ -146,6 +149,9 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
             }
         })
 
+        if (ENCODE_WITH_SURFACE && mVideoRecorder is ISurfaceVideoRecorder) {
+            (mVideoRecorder as ISurfaceVideoRecorder).updateShaderType(this.mShaderType)
+        }
         mVideoRecorder.startRecord(videoFile.absolutePath, previewWidth, previewHeight, listener)
     }
 
@@ -191,6 +197,10 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 //        setAspectRatio()
     }
 
+    fun updateShaderType(shaderType: Int) {
+        this.mShaderType = shaderType
+        queueEvent { mRender.updateShaderType(shaderType) }
+    }
 
     internal class CameraHandler(view: CameraGLSurfaceView) :
         Handler() {
@@ -227,8 +237,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 
 
     internal class MyRenderer(private val mView: CameraGLSurfaceView) : Renderer {
-        private val mCameraFilter: CameraFilter =
-            CameraFilter(App.get().resources)
+        private var mCameraFilter: CameraFilterBase = CameraFilerNoChange(App.get().resources)
         private var mTextureId = 0
         private var mSurfaceTexture: SurfaceTexture? = null
         private val mDisplayProjectionMatrix = FloatArray(16)
@@ -237,9 +246,20 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
             mSurfaceTexture?.release();
         }
 
+        fun updateShaderType(shaderType: Int) {
+            mCameraFilter.onSurfaceDestroyed()
+
+            mCameraFilter = CameraFilterBase.getFilter(App.get().resources, shaderType).apply {
+                onSurfaceCreated()
+                textureId = mTextureId
+
+                onSurfaceChanged(mView.width, mView.height)
+            }
+        }
+
         override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
             Log.d("CameraGLSurfaceView", "Render->onSurfaceCreated: ")
-            mCameraFilter.surfaceCreated()
+            mCameraFilter.onSurfaceCreated()
             mTextureId = mCameraFilter.textureId
             mSurfaceTexture = SurfaceTexture(mTextureId)
             mView.mCameraHandler.post { mView.handleSetSurfaceTexture(mSurfaceTexture!!) }
@@ -247,7 +267,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 
         override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
             Log.d("CameraGLSurfaceView", "Render-> onSurfaceChanged: ")
-            mCameraFilter.surfaceChanged(width, height)
+            mCameraFilter.onSurfaceChanged(width, height)
         }
 
         override fun onDrawFrame(gl: GL10) {
@@ -257,7 +277,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
                 // 获取SurfaceTexture变换矩阵
                 getTransformMatrix(mDisplayProjectionMatrix)
                 // 将SurfaceTexture绘制到GLSurfaceView上
-                mCameraFilter.draw(mDisplayProjectionMatrix)
+                mCameraFilter.drawFrame(mDisplayProjectionMatrix)
                 if (ENCODE_WITH_SURFACE) {
                     handleSurfaceFrameRecord(this)
                 }

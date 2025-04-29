@@ -9,11 +9,14 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Size
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import com.zf.camera.trick.base.BaseActivity
 import com.zf.camera.trick.callback.PictureBufferCallback
+import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.record.VideoRecordListener
 import com.zf.camera.trick.ui.CameraGLSurfaceView
 import com.zf.camera.trick.ui.CaptureButton
@@ -42,6 +45,8 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
     private lateinit var mPictureIv: ImageView
     private lateinit var mTimeInfo: AppCompatTextView
 
+    private var curType = CameraFilterBase.NO_FILTER
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera_gl_surfaceview)
@@ -50,6 +55,27 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         startCamera()
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(curType)?.apply { isChecked = true }
+        return super.onPrepareOptionsMenu(menu)
+    }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menu.add(0, CameraFilterBase.NO_FILTER, CameraFilterBase.NO_FILTER, "No Filter")
+        menu.add(0, CameraFilterBase.FILTER_TYPE_INVERT, CameraFilterBase.FILTER_TYPE_INVERT, "Invert")
+        super.onCreateOptionsMenu(menu)
+        menu.setGroupCheckable(0, true, true)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        TrickLog.d(TAG, "onOptionsItemSelected: ${item.itemId}")
+        with(item) {
+            curType = itemId
+            cameraSurfaceView.updateShaderType(itemId)
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
 
     override fun onResume() {
         super.onResume()

@@ -14,7 +14,7 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 import com.zf.camera.trick.App
-import com.zf.camera.trick.filter.CameraFilter
+import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.gl.egl.EglCore
 import com.zf.camera.trick.gl.egl.WindowSurface
 import com.zf.camera.trick.utils.TrickLog
@@ -33,7 +33,7 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
     private lateinit var mShareContext: EGLContext
     private lateinit var mInputWindowSurface: WindowSurface
     private lateinit var mEglCore: EglCore
-    private lateinit var mCameraFilter: CameraFilter
+    private lateinit var mCameraFilter: CameraFilterBase
     private lateinit var mEncodeHandler: EncodeHandler
     private var mTextureId = 0
     private val mReadyFence = Object()
@@ -46,6 +46,7 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
     private var mTrackIndex = -1;
     private var width = 0
     private var height = 0
+    private var shaderType: Int = CameraFilterBase.NO_FILTER
 
     @Volatile
     private var isEncoderStarted = false
@@ -188,9 +189,9 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
             mEglCore = EglCore(mShareContext, EglCore.FLAG_RECORDABLE)
             mInputWindowSurface = WindowSurface(mEglCore, createInputSurface(), true)
             mInputWindowSurface.makeCurrent()
-            mCameraFilter = CameraFilter(App.get().resources)
-            mCameraFilter.surfaceCreated()
-            mCameraFilter.surfaceChanged(width, height)
+            mCameraFilter = CameraFilterBase.getFilter(App.get().resources, shaderType)
+            mCameraFilter.onSurfaceCreated()
+            mCameraFilter.onSurfaceChanged(width, height)
 
             start()
         }
@@ -302,6 +303,10 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         checkIndexBuffer()
     }
 
+    override fun updateShaderType(shaderType: Int) {
+        this.shaderType = shaderType
+    }
+
     override fun willComingAFrame(textureId: Int, st: SurfaceTexture) {
         if (!::mCameraFilter.isInitialized || isEndOfStream) {
             return
@@ -319,7 +324,7 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         val transform = FloatArray(16)
         st.getTransformMatrix(transform)
         mCameraFilter.textureId = mTextureId
-        mCameraFilter.draw(transform)
+        mCameraFilter.drawFrame(transform)
         mInputWindowSurface.setPresentationTime(getPTU() * 1000L)
         mInputWindowSurface.swapBuffers()
     }
@@ -338,7 +343,7 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
     private fun releaseEGLContext() {
         // Release the EGLSurface and EGLContext.
         mInputWindowSurface.releaseEglSurface()
-        mCameraFilter.release()
+        mCameraFilter.onSurfaceDestroyed()
         mEglCore.release()
     }
 
@@ -353,8 +358,8 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         mInputWindowSurface.makeCurrent()
 
         // Create new programs and such for the new context.
-        mCameraFilter.surfaceCreated()
-        mCameraFilter.surfaceChanged(width, height)
+        mCameraFilter.onSurfaceCreated()
+        mCameraFilter.onSurfaceChanged(width, height)
     }
 
     private fun checkIndexBuffer() {
