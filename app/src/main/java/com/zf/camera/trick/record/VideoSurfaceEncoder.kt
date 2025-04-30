@@ -18,6 +18,7 @@ import com.zf.camera.trick.filter.camera.CONTRAST_MAX
 import com.zf.camera.trick.filter.camera.CONTRAST_MIN
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.filter.camera.CameraFilterContrast
+import com.zf.camera.trick.filter.camera.CameraFilterHue
 import com.zf.camera.trick.filter.camera.CameraFilterPixelation
 import com.zf.camera.trick.filter.camera.PIXELATION_MAX
 import com.zf.camera.trick.filter.camera.PIXELATION_MIN
@@ -324,13 +325,16 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         return start + ((end - start) * percentage) / 100f
     }
 
-    fun setValue(value: Float) {
+    fun setValue(percentage: Float) {
         if (mCameraFilter is CameraFilterContrast) {
-            val contrast = range(CONTRAST_MIN, CONTRAST_MAX, percentage = value)
+            val contrast = range(CONTRAST_MIN, CONTRAST_MAX, percentage = percentage)
             (mCameraFilter as CameraFilterContrast).setContrast(contrast)
         } else if (mCameraFilter is CameraFilterPixelation) {
-            val pixel = range(PIXELATION_MIN, PIXELATION_MAX, value)
+            val pixel = range(PIXELATION_MIN, PIXELATION_MAX, percentage)
             (mCameraFilter as CameraFilterPixelation).setPixel(pixel)
+        } else if (mCameraFilter is CameraFilterHue) {
+            val hueValue = range(0f, 360f, percentage)
+            (mCameraFilter as CameraFilterHue).setHue(hueValue)
         }
     }
 

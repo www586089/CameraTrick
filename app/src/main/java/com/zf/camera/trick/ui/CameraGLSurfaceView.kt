@@ -16,6 +16,7 @@ import com.zf.camera.trick.filter.camera.CONTRAST_MIN
 import com.zf.camera.trick.filter.camera.CameraFilerNoChange
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.filter.camera.CameraFilterContrast
+import com.zf.camera.trick.filter.camera.CameraFilterHue
 import com.zf.camera.trick.filter.camera.CameraFilterPixelation
 import com.zf.camera.trick.filter.camera.PIXELATION_MAX
 import com.zf.camera.trick.filter.camera.PIXELATION_MIN
@@ -215,7 +216,6 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
                 if (mVideoRecorder is ISurfaceVideoRecorder) {
                     (mVideoRecorder as ISurfaceVideoRecorder).updateValue(percentage)
                 }
-
             }
         }
         queueEvent {
@@ -282,6 +282,9 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
             } else if (mCameraFilter is CameraFilterPixelation) {
                 val pixel = mView.range(PIXELATION_MIN, PIXELATION_MAX, percentage)
                 (mCameraFilter as CameraFilterPixelation).setPixel(pixel)
+            } else if (mCameraFilter is CameraFilterHue) {
+                val hueValue = mView.range(0f, 360f, percentage)
+                (mCameraFilter as CameraFilterHue).setHue(hueValue)
             }
         }
 
