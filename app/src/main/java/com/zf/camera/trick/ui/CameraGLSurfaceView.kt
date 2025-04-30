@@ -11,6 +11,8 @@ import android.util.Log
 import android.view.SurfaceHolder
 import com.zf.camera.trick.App
 import com.zf.camera.trick.callback.PictureBufferCallback
+import com.zf.camera.trick.filter.camera.CONTRAST_MAX
+import com.zf.camera.trick.filter.camera.CONTRAST_MIN
 import com.zf.camera.trick.filter.camera.CameraFilerNoChange
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.filter.camera.CameraFilterContrast
@@ -201,15 +203,21 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
     fun updateShaderType(shaderType: Int) {
         this.mShaderType = shaderType
         queueEvent { mRender.updateShaderType(shaderType) }
+
     }
 
     fun setValue(percentage: Float) {
+        val contrast = range(CONTRAST_MIN, CONTRAST_MAX, percentage)
         if (isRecording) {
             if (ENCODE_WITH_SURFACE && mVideoRecorder is ISurfaceVideoRecorder) {
-                (mVideoRecorder as ISurfaceVideoRecorder).setValue(percentage)
+                (mVideoRecorder as ISurfaceVideoRecorder).updateValue(contrast)
             }
         }
-        queueEvent { mRender.setValue(percentage) }
+        queueEvent { mRender.setValue(contrast) }
+    }
+
+    private fun range(start: Float, end: Float, percentage: Float): Float {
+        return start + ((end - start) * percentage) / 100f
     }
 
     internal class CameraHandler(view: CameraGLSurfaceView) :
@@ -256,15 +264,13 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
             mSurfaceTexture?.release();
         }
 
-        fun setValue(percentage: Float) {
+        fun setValue(contrast: Float) {
             if (mCameraFilter is CameraFilterContrast) {
-                (mCameraFilter as CameraFilterContrast).setContrast(range(0f, 2f, percentage))
+                (mCameraFilter as CameraFilterContrast).setContrast(contrast)
             }
         }
 
-        fun range(start: Float, end: Float, percentage: Float): Float {
-            return start + ((end - start) * percentage) / 100f
-        }
+
         fun updateShaderType(shaderType: Int) {
             mCameraFilter.onSurfaceDestroyed()
 

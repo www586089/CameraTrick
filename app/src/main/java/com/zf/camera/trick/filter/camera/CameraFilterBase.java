@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.LinkedList;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -74,6 +75,7 @@ public class CameraFilterBase extends AFilter {
                     "  gl_FragColor = texture2D(vTexture, vTexCoordinate);\n" +
                     "}\n";
 
+    private final LinkedList<Runnable> mRunOnDraw = new LinkedList<>();
 
     /**
      * Shader程序中矩阵属性的句柄
@@ -253,6 +255,7 @@ public class CameraFilterBase extends AFilter {
     public void drawFrame(float[] texMatrix) {
         // 将程序添加到OpenGL ES环境
         GLES20.glUseProgram(mProgram);
+        runPendingOnDrawTasks();
 
         // 重新绘制背景色为黑色
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -358,8 +361,19 @@ public class CameraFilterBase extends AFilter {
         return GLES30.glGetUniformLocation(mProgram, uName);
     }
 
+    protected void runPendingOnDrawTasks() {
+        synchronized (mRunOnDraw) {
+            while (!mRunOnDraw.isEmpty()) {
+                mRunOnDraw.removeFirst().run();
+            }
+        }
+    }
+
+
     public void setUniformLocation(int location, float value) {
-        GLES30.glUniform1f(location, value);
+        synchronized (mRunOnDraw) {
+            mRunOnDraw.add(() -> GLES30.glUniform1f(location, value));
+        }
     }
 }
 

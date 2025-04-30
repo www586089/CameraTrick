@@ -308,8 +308,17 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         this.shaderType = shaderType
     }
 
-    override fun setValue(value: Float) {
-        (mCameraFilter as CameraFilterContrast).setContrast(value)
+    override fun updateValue(value: Float) {
+        mEncodeHandler.sendMessage(Message.obtain().apply {
+            what = mEncodeHandler.MSG_SET_VALUE
+            obj = value
+        })
+    }
+
+    fun setValue(value: Float) {
+        if (mCameraFilter is CameraFilterContrast) {
+            (mCameraFilter as CameraFilterContrast).setContrast(value)
+        }
     }
 
     override fun willComingAFrame(textureId: Int, st: SurfaceTexture) {
@@ -378,6 +387,7 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         val MSG_STOP_RECORD = 1
         val MSG_DRAW_FRAME = 2
         val MSG_UPDATE_SHARE_CONTEXT = 3
+        val MSG_SET_VALUE = 4
 
         override fun handleMessage(msg: Message) {
             when (msg.what) {
@@ -392,6 +402,9 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
                 }
                 MSG_UPDATE_SHARE_CONTEXT -> {
                     handleUpdateSharedContext(msg.obj as EGLContext)
+                }
+                MSG_SET_VALUE -> {
+                    setValue(msg.obj as Float)
                 }
             }
         }

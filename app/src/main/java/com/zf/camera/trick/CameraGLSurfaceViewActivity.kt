@@ -21,6 +21,8 @@ import androidx.appcompat.widget.AppCompatTextView
 import com.gyf.immersionbar.ImmersionBar
 import com.zf.camera.trick.base.BaseActivity
 import com.zf.camera.trick.callback.PictureBufferCallback
+import com.zf.camera.trick.filter.camera.CONTRAST_DEFAULT
+import com.zf.camera.trick.filter.camera.CONTRAST_MAX
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.record.VideoRecordListener
 import com.zf.camera.trick.ui.CameraGLSurfaceView
@@ -79,6 +81,9 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         with(item) {
             curType = itemId
             cameraSurfaceView.updateShaderType(itemId)
+            if (CameraFilterBase.FILTER_TYPE_CONTRAST == itemId) {
+                mSeekBar.progress = ((CONTRAST_DEFAULT / CONTRAST_MAX) * 100).toInt()
+            }
         }
 
         return super.onOptionsItemSelected(item)
@@ -102,20 +107,15 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
             Log.d(TAG, "onWindowFocusChanged: acHeight = ${actionBar?.height}, statusHeight = ${ImmersionBar.getStatusBarHeight(this)}")
-            var lp: ViewGroup.LayoutParams = mTimeInfo.layoutParams
-            if (lp == null) {
-                lp = MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            var LP: ViewGroup.LayoutParams = mTimeInfo.layoutParams
+            if (LP == null) {
+                LP = MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             }
             val statusBarHeight = if (null != actionBar) actionBar?.height!! else 0
             val topMargin = ImmersionBar.getStatusBarHeight(this) + statusBarHeight
-            val layoutParams = lp as MarginLayoutParams
-            layoutParams.setMargins(
-                layoutParams.leftMargin,
-                topMargin,
-                layoutParams.rightMargin,
-                layoutParams.bottomMargin
-            )
-            mTimeInfo.layoutParams = layoutParams
+            val MLP = LP as MarginLayoutParams
+            MLP.setMargins(MLP.leftMargin, topMargin, MLP.rightMargin, MLP.bottomMargin)
+            mTimeInfo.layoutParams = MLP
         }
     }
 

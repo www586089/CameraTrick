@@ -14,13 +14,18 @@ const val FRAGMENT_SHADER_CONTRAST =
         "   vec4 textureColor = texture2D(vTexture, vTexCoordinate);\n" +
         "   gl_FragColor = vec4((textureColor.rgb - vec3(0.5)) * contrast + vec3(0.5), textureColor.w);\n" +
         "}\n"
+
+const val CONTRAST_MIN = 0F
+const val CONTRAST_MAX = 2F
+const val CONTRAST_DEFAULT = 1F
+
 class CameraFilterContrast(res: Resources): CameraFilterBase(res, NO_FILTER_VERTEX_SHADER, FRAGMENT_SHADER_CONTRAST) {
 
         private var uContrastHandle = -1
         override fun onSurfaceCreated() {
                 super.onSurfaceCreated()
                 uContrastHandle = getUniformLocation("contrast")
-                setUniformLocation(uContrastHandle, .5f)
+                setUniformLocation(uContrastHandle, CONTRAST_DEFAULT)
         }
 
         public fun setContrast(contrast: Float) {
