@@ -24,6 +24,8 @@ import com.zf.camera.trick.callback.PictureBufferCallback
 import com.zf.camera.trick.filter.camera.CONTRAST_DEFAULT
 import com.zf.camera.trick.filter.camera.CONTRAST_MAX
 import com.zf.camera.trick.filter.camera.CameraFilterBase
+import com.zf.camera.trick.filter.camera.PIXELATION_DEFAULT
+import com.zf.camera.trick.filter.camera.PIXELATION_MAX
 import com.zf.camera.trick.record.VideoRecordListener
 import com.zf.camera.trick.ui.CameraGLSurfaceView
 import com.zf.camera.trick.ui.CaptureButton
@@ -71,6 +73,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         menu.add(0, CameraFilterBase.NO_FILTER, CameraFilterBase.NO_FILTER, "No Filter")
         menu.add(0, CameraFilterBase.FILTER_TYPE_CONTRAST, CameraFilterBase.FILTER_TYPE_CONTRAST, "Contrast")
         menu.add(0, CameraFilterBase.FILTER_TYPE_INVERT, CameraFilterBase.FILTER_TYPE_INVERT, "Invert")
+        menu.add(0, CameraFilterBase.FILTER_TYPE_PIXELATION, CameraFilterBase.FILTER_TYPE_PIXELATION, "Pixelation")
         super.onCreateOptionsMenu(menu)
         menu.setGroupCheckable(0, true, true)
         return true
@@ -83,6 +86,8 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
             cameraSurfaceView.updateShaderType(itemId)
             if (CameraFilterBase.FILTER_TYPE_CONTRAST == itemId) {
                 mSeekBar.progress = ((CONTRAST_DEFAULT / CONTRAST_MAX) * 100).toInt()
+            } else if (CameraFilterBase.FILTER_TYPE_PIXELATION == itemId) {
+                mSeekBar.progress = ((PIXELATION_DEFAULT / PIXELATION_MAX) * 100).toInt()
             }
         }
 

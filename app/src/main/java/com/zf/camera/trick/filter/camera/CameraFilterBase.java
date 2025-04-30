@@ -31,6 +31,7 @@ public class CameraFilterBase extends AFilter {
     public static final int NO_FILTER = 0;
     public static final int FILTER_TYPE_CONTRAST = NO_FILTER + 1;
     public static final int FILTER_TYPE_INVERT = NO_FILTER + 2;
+    public static final int FILTER_TYPE_PIXELATION = NO_FILTER + 3;
 
 
     public static CameraFilterBase getFilter(Resources resources, int type) {
@@ -43,6 +44,9 @@ public class CameraFilterBase extends AFilter {
 
                 case FILTER_TYPE_INVERT:
                 return new CameraFilterInvert(resources);
+
+                case FILTER_TYPE_PIXELATION:
+                return new CameraFilterPixelation(resources);
 
         }
 

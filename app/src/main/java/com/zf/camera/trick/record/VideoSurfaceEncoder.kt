@@ -14,8 +14,13 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 import com.zf.camera.trick.App
+import com.zf.camera.trick.filter.camera.CONTRAST_MAX
+import com.zf.camera.trick.filter.camera.CONTRAST_MIN
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.filter.camera.CameraFilterContrast
+import com.zf.camera.trick.filter.camera.CameraFilterPixelation
+import com.zf.camera.trick.filter.camera.PIXELATION_MAX
+import com.zf.camera.trick.filter.camera.PIXELATION_MIN
 import com.zf.camera.trick.gl.egl.EglCore
 import com.zf.camera.trick.gl.egl.WindowSurface
 import com.zf.camera.trick.utils.TrickLog
@@ -308,16 +313,24 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         this.shaderType = shaderType
     }
 
-    override fun updateValue(value: Float) {
+    override fun updateValue(percentage: Float) {
         mEncodeHandler.sendMessage(Message.obtain().apply {
             what = mEncodeHandler.MSG_SET_VALUE
-            obj = value
+            obj = percentage
         })
+    }
+
+    private fun range(start: Float, end: Float, percentage: Float): Float {
+        return start + ((end - start) * percentage) / 100f
     }
 
     fun setValue(value: Float) {
         if (mCameraFilter is CameraFilterContrast) {
-            (mCameraFilter as CameraFilterContrast).setContrast(value)
+            val contrast = range(CONTRAST_MIN, CONTRAST_MAX, percentage = value)
+            (mCameraFilter as CameraFilterContrast).setContrast(contrast)
+        } else if (mCameraFilter is CameraFilterPixelation) {
+            val pixel = range(PIXELATION_MIN, PIXELATION_MAX, value)
+            (mCameraFilter as CameraFilterPixelation).setPixel(pixel)
         }
     }
 

@@ -16,6 +16,9 @@ import com.zf.camera.trick.filter.camera.CONTRAST_MIN
 import com.zf.camera.trick.filter.camera.CameraFilerNoChange
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.filter.camera.CameraFilterContrast
+import com.zf.camera.trick.filter.camera.CameraFilterPixelation
+import com.zf.camera.trick.filter.camera.PIXELATION_MAX
+import com.zf.camera.trick.filter.camera.PIXELATION_MIN
 import com.zf.camera.trick.manager.CameraManager
 import com.zf.camera.trick.manager.ICameraCallback
 import com.zf.camera.trick.manager.ICameraManager
@@ -207,13 +210,21 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
     }
 
     fun setValue(percentage: Float) {
-        val contrast = range(CONTRAST_MIN, CONTRAST_MAX, percentage)
         if (isRecording) {
-            if (ENCODE_WITH_SURFACE && mVideoRecorder is ISurfaceVideoRecorder) {
-                (mVideoRecorder as ISurfaceVideoRecorder).updateValue(contrast)
+            if (ENCODE_WITH_SURFACE) {
+                if (mVideoRecorder is ISurfaceVideoRecorder) {
+                    (mVideoRecorder as ISurfaceVideoRecorder).updateValue(percentage)
+                }
+
             }
         }
-        queueEvent { mRender.setValue(contrast) }
+        queueEvent {
+            if (ENCODE_WITH_SURFACE) {
+                if (mVideoRecorder is ISurfaceVideoRecorder) {
+                    mRender.setValue(percentage)
+                }
+            }
+        }
     }
 
     private fun range(start: Float, end: Float, percentage: Float): Float {
@@ -264,9 +275,13 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
             mSurfaceTexture?.release();
         }
 
-        fun setValue(contrast: Float) {
+        fun setValue(percentage: Float) {
             if (mCameraFilter is CameraFilterContrast) {
+                val contrast = mView.range(CONTRAST_MIN, CONTRAST_MAX, percentage)
                 (mCameraFilter as CameraFilterContrast).setContrast(contrast)
+            } else if (mCameraFilter is CameraFilterPixelation) {
+                val pixel = mView.range(PIXELATION_MIN, PIXELATION_MAX, percentage)
+                (mCameraFilter as CameraFilterPixelation).setPixel(pixel)
             }
         }
 
