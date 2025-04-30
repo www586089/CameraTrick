@@ -24,7 +24,9 @@ import com.zf.camera.trick.callback.PictureBufferCallback
 import com.zf.camera.trick.filter.camera.CONTRAST_DEFAULT
 import com.zf.camera.trick.filter.camera.CONTRAST_MAX
 import com.zf.camera.trick.filter.camera.CameraFilterBase
+import com.zf.camera.trick.filter.camera.DEFAULT_GAMMA
 import com.zf.camera.trick.filter.camera.DEFAULT_HUE
+import com.zf.camera.trick.filter.camera.MAX_GAMMA
 import com.zf.camera.trick.filter.camera.MAX_HUE
 import com.zf.camera.trick.filter.camera.PIXELATION_DEFAULT
 import com.zf.camera.trick.filter.camera.PIXELATION_MAX
@@ -77,6 +79,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         menu.add(0, CameraFilterBase.FILTER_TYPE_INVERT, CameraFilterBase.FILTER_TYPE_INVERT, "Invert")
         menu.add(0, CameraFilterBase.FILTER_TYPE_PIXELATION, CameraFilterBase.FILTER_TYPE_PIXELATION, "Pixelation")
         menu.add(0, CameraFilterBase.FILTER_TYPE_HUE, CameraFilterBase.FILTER_TYPE_HUE, "Hue")
+        menu.add(0, CameraFilterBase.FILTER_TYPE_GAMMA, CameraFilterBase.FILTER_TYPE_GAMMA, "Gamma")
         super.onCreateOptionsMenu(menu)
         menu.setGroupCheckable(0, true, true)
         return true
@@ -93,6 +96,8 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
                 mSeekBar.progress = ((PIXELATION_DEFAULT / PIXELATION_MAX) * 100).toInt()
             } else if (CameraFilterBase.FILTER_TYPE_HUE == itemId) {
                 mSeekBar.progress = ((DEFAULT_HUE / MAX_HUE) * 100).toInt()
+            } else if (CameraFilterBase.FILTER_TYPE_GAMMA == itemId) {
+                mSeekBar.progress = ((DEFAULT_GAMMA / MAX_GAMMA) * 100).toInt()
             }
         }
 

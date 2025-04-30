@@ -18,8 +18,11 @@ import com.zf.camera.trick.filter.camera.CONTRAST_MAX
 import com.zf.camera.trick.filter.camera.CONTRAST_MIN
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.filter.camera.CameraFilterContrast
+import com.zf.camera.trick.filter.camera.CameraFilterGamma
 import com.zf.camera.trick.filter.camera.CameraFilterHue
 import com.zf.camera.trick.filter.camera.CameraFilterPixelation
+import com.zf.camera.trick.filter.camera.MAX_GAMMA
+import com.zf.camera.trick.filter.camera.MIN_GAMMA
 import com.zf.camera.trick.filter.camera.PIXELATION_MAX
 import com.zf.camera.trick.filter.camera.PIXELATION_MIN
 import com.zf.camera.trick.gl.egl.EglCore
@@ -335,6 +338,9 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         } else if (mCameraFilter is CameraFilterHue) {
             val hueValue = range(0f, 360f, percentage)
             (mCameraFilter as CameraFilterHue).setHue(hueValue)
+        } else if (mCameraFilter is CameraFilterGamma) {
+            val gamma = range(MIN_GAMMA, MAX_GAMMA, percentage)
+            (mCameraFilter as CameraFilterGamma).setGamma(gamma)
         }
     }
 
