@@ -14,17 +14,7 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 import com.zf.camera.trick.App
-import com.zf.camera.trick.filter.camera.CONTRAST_MAX
-import com.zf.camera.trick.filter.camera.CONTRAST_MIN
 import com.zf.camera.trick.filter.camera.CameraFilterBase
-import com.zf.camera.trick.filter.camera.CameraFilterContrast
-import com.zf.camera.trick.filter.camera.CameraFilterGamma
-import com.zf.camera.trick.filter.camera.CameraFilterHue
-import com.zf.camera.trick.filter.camera.CameraFilterPixelation
-import com.zf.camera.trick.filter.camera.MAX_GAMMA
-import com.zf.camera.trick.filter.camera.MIN_GAMMA
-import com.zf.camera.trick.filter.camera.PIXELATION_MAX
-import com.zf.camera.trick.filter.camera.PIXELATION_MIN
 import com.zf.camera.trick.gl.egl.EglCore
 import com.zf.camera.trick.gl.egl.WindowSurface
 import com.zf.camera.trick.utils.TrickLog
@@ -324,24 +314,8 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         })
     }
 
-    private fun range(start: Float, end: Float, percentage: Float): Float {
-        return start + ((end - start) * percentage) / 100f
-    }
-
     fun setValue(percentage: Float) {
-        if (mCameraFilter is CameraFilterContrast) {
-            val contrast = range(CONTRAST_MIN, CONTRAST_MAX, percentage = percentage)
-            (mCameraFilter as CameraFilterContrast).setContrast(contrast)
-        } else if (mCameraFilter is CameraFilterPixelation) {
-            val pixel = range(PIXELATION_MIN, PIXELATION_MAX, percentage)
-            (mCameraFilter as CameraFilterPixelation).setPixel(pixel)
-        } else if (mCameraFilter is CameraFilterHue) {
-            val hueValue = range(0f, 360f, percentage)
-            (mCameraFilter as CameraFilterHue).setHue(hueValue)
-        } else if (mCameraFilter is CameraFilterGamma) {
-            val gamma = range(MIN_GAMMA, MAX_GAMMA, percentage)
-            (mCameraFilter as CameraFilterGamma).setGamma(gamma)
-        }
+        mCameraFilter.adjust(percentage)
     }
 
     override fun willComingAFrame(textureId: Int, st: SurfaceTexture) {

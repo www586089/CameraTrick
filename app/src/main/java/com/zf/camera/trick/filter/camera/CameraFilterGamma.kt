@@ -30,4 +30,17 @@ class CameraFilterGamma(res: Resources): CameraFilterBase(res, NO_FILTER_VERTEX_
         fun setGamma(gamma: Float) {
                 setUniformLocation(uGammaHandle, gamma)
         }
+
+        override fun createAdjuster(): IAdjuster {
+                return object : IAdjuster {
+                        override fun adjust(percentage: Float) {
+                                val gamma = range(MIN_GAMMA, MAX_GAMMA, percentage)
+                                setGamma(gamma)
+                        }
+
+                        override fun getDefaultProgress(): Float {
+                                return (DEFAULT_GAMMA / MAX_GAMMA) * 100
+                        }
+                }
+        }
 }

@@ -35,6 +35,31 @@ public class CameraFilterBase extends AFilter {
     public static final int FILTER_TYPE_HUE = NO_FILTER + 4;
     public static final int FILTER_TYPE_GAMMA = NO_FILTER + 5;
 
+    protected IAdjuster mAdjuster = null;
+    protected IAdjuster createAdjuster() {
+        return null;
+    }
+
+    public boolean hasAdjuster() {
+        return null != mAdjuster;
+    }
+
+    public float getDefaultProgress() {
+        if (null != mAdjuster) {
+            return mAdjuster.getDefaultProgress();
+        }
+
+        return 0f;
+    }
+    public IAdjuster getAdjuster() {
+        return mAdjuster;
+    }
+
+    public void adjust(float percentage) {
+        if (null != mAdjuster) {
+            mAdjuster.adjust(percentage);
+        }
+    }
 
     public static CameraFilterBase getFilter(Resources resources, int type) {
         switch (type) {
@@ -222,6 +247,7 @@ public class CameraFilterBase extends AFilter {
 
 
     public void onSurfaceCreated() {
+        mAdjuster = createAdjuster();
         // 创建纹理句柄
         textureId = createExternalOES();
 

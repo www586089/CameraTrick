@@ -67,4 +67,17 @@ class CameraFilterHue(res: Resources): CameraFilterBase(res, NO_FILTER_VERTEX_SH
                 setUniformLocation(uHueAdjustHandle, hueAdjust)
         }
 
+        override fun createAdjuster(): IAdjuster {
+                return object : IAdjuster {
+                        override fun adjust(percentage: Float) {
+                                val hueValue = range(0f, 360f, percentage)
+                                setHue(hueValue)
+                        }
+
+                        override fun getDefaultProgress(): Float {
+                                return (DEFAULT_HUE / MAX_HUE) * 100
+                        }
+                }
+        }
+
 }

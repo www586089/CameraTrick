@@ -12,6 +12,7 @@ import android.util.Log
 import android.util.Size
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
@@ -21,15 +22,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import com.gyf.immersionbar.ImmersionBar
 import com.zf.camera.trick.base.BaseActivity
 import com.zf.camera.trick.callback.PictureBufferCallback
-import com.zf.camera.trick.filter.camera.CONTRAST_DEFAULT
-import com.zf.camera.trick.filter.camera.CONTRAST_MAX
 import com.zf.camera.trick.filter.camera.CameraFilterBase
-import com.zf.camera.trick.filter.camera.DEFAULT_GAMMA
-import com.zf.camera.trick.filter.camera.DEFAULT_HUE
-import com.zf.camera.trick.filter.camera.MAX_GAMMA
-import com.zf.camera.trick.filter.camera.MAX_HUE
-import com.zf.camera.trick.filter.camera.PIXELATION_DEFAULT
-import com.zf.camera.trick.filter.camera.PIXELATION_MAX
 import com.zf.camera.trick.record.VideoRecordListener
 import com.zf.camera.trick.ui.CameraGLSurfaceView
 import com.zf.camera.trick.ui.CaptureButton
@@ -89,15 +82,18 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         TrickLog.d(TAG, "onOptionsItemSelected: ${item.itemId}")
         with(item) {
             curType = itemId
-            cameraSurfaceView.updateShaderType(itemId)
-            if (CameraFilterBase.FILTER_TYPE_CONTRAST == itemId) {
-                mSeekBar.progress = ((CONTRAST_DEFAULT / CONTRAST_MAX) * 100).toInt()
-            } else if (CameraFilterBase.FILTER_TYPE_PIXELATION == itemId) {
-                mSeekBar.progress = ((PIXELATION_DEFAULT / PIXELATION_MAX) * 100).toInt()
-            } else if (CameraFilterBase.FILTER_TYPE_HUE == itemId) {
-                mSeekBar.progress = ((DEFAULT_HUE / MAX_HUE) * 100).toInt()
-            } else if (CameraFilterBase.FILTER_TYPE_GAMMA == itemId) {
-                mSeekBar.progress = ((DEFAULT_GAMMA / MAX_GAMMA) * 100).toInt()
+            cameraSurfaceView.updateShaderType(itemId) {
+                runOnUiThread {
+                    if (isFinishing || isDestroyed) {
+                        return@runOnUiThread
+                    }
+                    if (cameraSurfaceView.hasAdjuster()) {
+                        mSeekBar.progress = cameraSurfaceView.getDefaultProgress().toInt()
+                        mSeekBar.visibility = View.VISIBLE
+                    } else {
+                        mSeekBar.visibility = View.GONE
+                    }
+                }
             }
         }
 
@@ -117,10 +113,10 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
     override fun onDestroy() {
         super.onDestroy()
     }
-
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
+
             Log.d(TAG, "onWindowFocusChanged: acHeight = ${actionBar?.height}, statusHeight = ${ImmersionBar.getStatusBarHeight(this)}")
             var LP: ViewGroup.LayoutParams = mTimeInfo.layoutParams
             if (LP == null) {

@@ -31,4 +31,17 @@ class CameraFilterContrast(res: Resources): CameraFilterBase(res, NO_FILTER_VERT
         public fun setContrast(contrast: Float) {
                 setUniformLocation(uContrastHandle, contrast)
         }
+
+        override fun createAdjuster(): IAdjuster {
+                return object : IAdjuster {
+                        override fun adjust(percentage: Float) {
+                                val contrast = range(CONTRAST_MIN, CONTRAST_MAX, percentage = percentage)
+                                setContrast(contrast)
+                        }
+
+                        override fun getDefaultProgress(): Float {
+                                return ((CONTRAST_DEFAULT / CONTRAST_MAX) * 100)
+                        }
+                }
+        }
 }

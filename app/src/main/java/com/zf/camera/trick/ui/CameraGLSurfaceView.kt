@@ -11,20 +11,8 @@ import android.util.Log
 import android.view.SurfaceHolder
 import com.zf.camera.trick.App
 import com.zf.camera.trick.callback.PictureBufferCallback
-import com.zf.camera.trick.filter.camera.CONTRAST_MAX
-import com.zf.camera.trick.filter.camera.CONTRAST_MIN
 import com.zf.camera.trick.filter.camera.CameraFilerNoChange
 import com.zf.camera.trick.filter.camera.CameraFilterBase
-import com.zf.camera.trick.filter.camera.CameraFilterContrast
-import com.zf.camera.trick.filter.camera.CameraFilterGamma
-import com.zf.camera.trick.filter.camera.CameraFilterHue
-import com.zf.camera.trick.filter.camera.CameraFilterPixelation
-import com.zf.camera.trick.filter.camera.MAX_GAMMA
-import com.zf.camera.trick.filter.camera.MAX_HUE
-import com.zf.camera.trick.filter.camera.MIN_GAMMA
-import com.zf.camera.trick.filter.camera.MIN_HUE
-import com.zf.camera.trick.filter.camera.PIXELATION_MAX
-import com.zf.camera.trick.filter.camera.PIXELATION_MIN
 import com.zf.camera.trick.manager.CameraManager
 import com.zf.camera.trick.manager.ICameraCallback
 import com.zf.camera.trick.manager.ICameraManager
@@ -209,10 +197,20 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 //        setAspectRatio()
     }
 
-    fun updateShaderType(shaderType: Int) {
+    fun updateShaderType(shaderType: Int, cb: (()-> Unit)?) {
         this.mShaderType = shaderType
-        queueEvent { mRender.updateShaderType(shaderType) }
+        queueEvent {
+            mRender.updateShaderType(shaderType)
+            cb?.invoke()
+        }
+    }
 
+    fun hasAdjuster(): Boolean {
+        return mRender.hasAdjuster()
+    }
+
+    fun getDefaultProgress(): Float {
+        return mRender.getDefaultProgress()
     }
 
     fun setValue(percentage: Float) {
@@ -230,10 +228,6 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
                 }
             }
         }
-    }
-
-    private fun range(start: Float, end: Float, percentage: Float): Float {
-        return start + ((end - start) * percentage) / 100f
     }
 
     internal class CameraHandler(view: CameraGLSurfaceView) :
@@ -281,21 +275,17 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
         }
 
         fun setValue(percentage: Float) {
-            if (mCameraFilter is CameraFilterContrast) {
-                val contrast = mView.range(CONTRAST_MIN, CONTRAST_MAX, percentage)
-                (mCameraFilter as CameraFilterContrast).setContrast(contrast)
-            } else if (mCameraFilter is CameraFilterPixelation) {
-                val pixel = mView.range(PIXELATION_MIN, PIXELATION_MAX, percentage)
-                (mCameraFilter as CameraFilterPixelation).setPixel(pixel)
-            } else if (mCameraFilter is CameraFilterHue) {
-                val hueValue = mView.range(MIN_HUE, MAX_HUE, percentage)
-                (mCameraFilter as CameraFilterHue).setHue(hueValue)
-            } else if (mCameraFilter is CameraFilterGamma) {
-                val gamma = mView.range(MIN_GAMMA, MAX_GAMMA, percentage)
-                (mCameraFilter as CameraFilterGamma).setGamma(gamma)
-            }
+            mCameraFilter.adjust(percentage)
         }
 
+
+        fun hasAdjuster(): Boolean {
+            return mCameraFilter.hasAdjuster()
+        }
+
+        fun getDefaultProgress(): Float {
+            return mCameraFilter.getDefaultProgress()
+        }
 
         fun updateShaderType(shaderType: Int) {
             mCameraFilter.onSurfaceDestroyed()

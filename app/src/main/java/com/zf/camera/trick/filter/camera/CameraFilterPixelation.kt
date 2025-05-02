@@ -50,4 +50,17 @@ class CameraFilterPixelation(res: Resources): CameraFilterBase(res,
         public fun setPixel(pixel: Float) {
                 setUniformLocation(uPixelHandle, pixel)
         }
+
+    override fun createAdjuster(): IAdjuster {
+        return object : IAdjuster {
+            override fun adjust(percentage: Float) {
+                val pixel = range(PIXELATION_MIN, PIXELATION_MAX, percentage)
+                setPixel(pixel)
+            }
+
+            override fun getDefaultProgress(): Float {
+                return (PIXELATION_DEFAULT / PIXELATION_MAX) * 100
+            }
+        }
+    }
 }
