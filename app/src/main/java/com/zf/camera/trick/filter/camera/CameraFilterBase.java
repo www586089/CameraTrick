@@ -34,6 +34,8 @@ public class CameraFilterBase extends AFilter {
     public static final int FILTER_TYPE_PIXELATION = NO_FILTER + 3;
     public static final int FILTER_TYPE_HUE = NO_FILTER + 4;
     public static final int FILTER_TYPE_GAMMA = NO_FILTER + 5;
+    public static final int FILTER_TYPE_BRIGHTNESS = NO_FILTER + 6;
+
 
     protected IAdjuster mAdjuster = null;
     protected IAdjuster createAdjuster() {
@@ -81,6 +83,8 @@ public class CameraFilterBase extends AFilter {
                 case FILTER_TYPE_GAMMA:
                 return new CameraFilterGamma(resources);
 
+                case FILTER_TYPE_BRIGHTNESS:
+                return new CameraFilterBrightness(resources);
         }
 
         return new CameraFilerNoChange(resources);
