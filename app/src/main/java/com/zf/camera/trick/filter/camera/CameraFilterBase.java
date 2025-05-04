@@ -220,6 +220,9 @@ public class CameraFilterBase extends AFilter {
     private Bitmap mBitmap;
     private String mVertexShader;
     private String mFragmentShader;
+    public CameraFilterBase(Resources resources) {
+        this(resources, NO_FILTER_VERTEX_SHADER, NO_FILTER_FRAGMENT_SHADER);
+    }
 
     public CameraFilterBase(Resources resources, String vertexShader, String fragmentShader) {
         this.mVertexShader = vertexShader;
