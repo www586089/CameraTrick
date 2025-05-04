@@ -74,6 +74,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         menu.add(0, CameraFilterBase.FILTER_TYPE_HUE, CameraFilterBase.FILTER_TYPE_HUE, "Hue")
         menu.add(0, CameraFilterBase.FILTER_TYPE_GAMMA, CameraFilterBase.FILTER_TYPE_GAMMA, "Gamma")
         menu.add(0, CameraFilterBase.FILTER_TYPE_BRIGHTNESS, CameraFilterBase.FILTER_TYPE_BRIGHTNESS, "Brightness")
+        menu.add(0, CameraFilterBase.FILTER_TYPE_SEPIA_TONE, CameraFilterBase.FILTER_TYPE_SEPIA_TONE, "SepiaTone")
         super.onCreateOptionsMenu(menu)
         menu.setGroupCheckable(0, true, true)
         return true

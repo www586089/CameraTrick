@@ -35,6 +35,7 @@ public class CameraFilterBase extends AFilter {
     public static final int FILTER_TYPE_HUE = NO_FILTER + 4;
     public static final int FILTER_TYPE_GAMMA = NO_FILTER + 5;
     public static final int FILTER_TYPE_BRIGHTNESS = NO_FILTER + 6;
+    public static final int FILTER_TYPE_SEPIA_TONE = NO_FILTER + 7;
 
 
     protected IAdjuster mAdjuster = null;
@@ -85,6 +86,9 @@ public class CameraFilterBase extends AFilter {
 
                 case FILTER_TYPE_BRIGHTNESS:
                 return new CameraFilterBrightness(resources);
+
+                case FILTER_TYPE_SEPIA_TONE:
+                return new CameraFilerSepiaTone(resources);
         }
 
         return new CameraFilerNoChange(resources);
@@ -415,6 +419,12 @@ public class CameraFilterBase extends AFilter {
     public void setUniformLocation(int location, float value) {
         synchronized (mRunOnDraw) {
             mRunOnDraw.add(() -> GLES30.glUniform1f(location, value));
+        }
+    }
+
+    public void setUniformMat4fv(int location, float[] mat) {
+        synchronized (mRunOnDraw) {
+            mRunOnDraw.add(() -> GLES30.glUniformMatrix4fv(location, 1, false, mat, 0));
         }
     }
 }
