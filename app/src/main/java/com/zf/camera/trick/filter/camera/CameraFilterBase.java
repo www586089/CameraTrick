@@ -37,9 +37,11 @@ public class CameraFilterBase extends AFilter {
     public static final int FILTER_TYPE_BRIGHTNESS = NO_FILTER + 6;
     public static final int FILTER_TYPE_SEPIA_TONE = NO_FILTER + 7;
     public static final int FILTER_TYPE_GRAY_SCALE = NO_FILTER + 8;
+    public static final int FILTER_TYPE_SHARPNESS = NO_FILTER + 9;
 
 
     protected IAdjuster mAdjuster = null;
+
     protected IAdjuster createAdjuster() {
         return null;
     }
@@ -55,6 +57,7 @@ public class CameraFilterBase extends AFilter {
 
         return 0f;
     }
+
     public IAdjuster getAdjuster() {
         return mAdjuster;
     }
@@ -70,29 +73,32 @@ public class CameraFilterBase extends AFilter {
             case NO_FILTER:
                 return new CameraFilerNoChange(resources);
 
-                case FILTER_TYPE_CONTRAST:
+            case FILTER_TYPE_CONTRAST:
                 return new CameraFilterContrast(resources);
 
-                case FILTER_TYPE_INVERT:
+            case FILTER_TYPE_INVERT:
                 return new CameraFilterInvert(resources);
 
-                case FILTER_TYPE_PIXELATION:
+            case FILTER_TYPE_PIXELATION:
                 return new CameraFilterPixelation(resources);
 
-                case FILTER_TYPE_HUE:
+            case FILTER_TYPE_HUE:
                 return new CameraFilterHue(resources);
 
-                case FILTER_TYPE_GAMMA:
+            case FILTER_TYPE_GAMMA:
                 return new CameraFilterGamma(resources);
 
-                case FILTER_TYPE_BRIGHTNESS:
+            case FILTER_TYPE_BRIGHTNESS:
                 return new CameraFilterBrightness(resources);
 
-                case FILTER_TYPE_SEPIA_TONE:
+            case FILTER_TYPE_SEPIA_TONE:
                 return new CameraFilerSepiaTone(resources);
 
-                case FILTER_TYPE_GRAY_SCALE:
+            case FILTER_TYPE_GRAY_SCALE:
                 return new CameraFilterGrayScale(resources);
+
+            case FILTER_TYPE_SHARPNESS:
+                return new CameraFilterSharpness(resources);
         }
 
         return new CameraFilerNoChange(resources);
@@ -100,7 +106,7 @@ public class CameraFilterBase extends AFilter {
 
     // 顶点着色器代码
     public static final String NO_FILTER_VERTEX_SHADER =
-                    "uniform mat4 uMVPMatrix;\n" +
+            "uniform mat4 uMVPMatrix;\n" +
                     // 顶点坐标
                     "attribute vec4 aPosition;\n" +
                     "uniform mat4 uTexPMatrix;\n" +
@@ -116,7 +122,7 @@ public class CameraFilterBase extends AFilter {
 
     // 片段着色器代码
     public static final String NO_FILTER_FRAGMENT_SHADER =
-                    "#extension GL_OES_EGL_image_external : require\n" +
+            "#extension GL_OES_EGL_image_external : require\n" +
                     "precision mediump float;\n" +
                     "uniform samplerExternalOES vTexture;\n" +
                     "varying vec2 vTexCoordinate;\n" +
@@ -163,10 +169,10 @@ public class CameraFilterBase extends AFilter {
      * (-1,-1),(1,-1)
      */
     private float vertexCoords[] = {
-            -1.0f,  1.0f,    // 左上
+            -1.0f, 1.0f,    // 左上
             -1.0f, -1.0f,    // 左下
-             1.0f,  1.0f,    // 右上
-             1.0f, -1.0f,    // 右下
+            1.0f, 1.0f,    // 右上
+            1.0f, -1.0f,    // 右下
     };
 
     /**
@@ -224,6 +230,7 @@ public class CameraFilterBase extends AFilter {
     private Bitmap mBitmap;
     private String mVertexShader;
     private String mFragmentShader;
+
     public CameraFilterBase(Resources resources) {
         this(resources, NO_FILTER_VERTEX_SHADER, NO_FILTER_FRAGMENT_SHADER);
     }
@@ -300,8 +307,6 @@ public class CameraFilterBase extends AFilter {
         // 获取原始矩阵，与原始矩阵相乘坐标不变
         Matrix.setIdentityM(mMVPMatrix, 0);
     }
-
-
 
 
     @Override
