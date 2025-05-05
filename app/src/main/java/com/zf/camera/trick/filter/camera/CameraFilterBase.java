@@ -36,6 +36,7 @@ public class CameraFilterBase extends AFilter {
     public static final int FILTER_TYPE_GAMMA = NO_FILTER + 5;
     public static final int FILTER_TYPE_BRIGHTNESS = NO_FILTER + 6;
     public static final int FILTER_TYPE_SEPIA_TONE = NO_FILTER + 7;
+    public static final int FILTER_TYPE_GRAY_SCALE = NO_FILTER + 8;
 
 
     protected IAdjuster mAdjuster = null;
@@ -69,7 +70,7 @@ public class CameraFilterBase extends AFilter {
             case NO_FILTER:
                 return new CameraFilerNoChange(resources);
 
-            case FILTER_TYPE_CONTRAST:
+                case FILTER_TYPE_CONTRAST:
                 return new CameraFilterContrast(resources);
 
                 case FILTER_TYPE_INVERT:
@@ -89,6 +90,9 @@ public class CameraFilterBase extends AFilter {
 
                 case FILTER_TYPE_SEPIA_TONE:
                 return new CameraFilerSepiaTone(resources);
+
+                case FILTER_TYPE_GRAY_SCALE:
+                return new CameraFilterGrayScale(resources);
         }
 
         return new CameraFilerNoChange(resources);
