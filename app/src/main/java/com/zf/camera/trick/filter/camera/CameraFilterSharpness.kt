@@ -3,7 +3,8 @@ package com.zf.camera.trick.filter.camera
 import android.content.res.Resources
 
 
-class CameraFilterSharpness(res: Resources, vertexShader: String, fragmentShader: String): CameraFilterBase(res, vertexShader, fragmentShader) {
+class CameraFilterSharpness(res: Resources, vertexShader: String, fragmentShader: String) :
+    CameraFilterBase(res, vertexShader, fragmentShader) {
 
     companion object {
         private const val DEFAULT_SHARPNESS = 0.0f
@@ -11,7 +12,7 @@ class CameraFilterSharpness(res: Resources, vertexShader: String, fragmentShader
         private const val MIN_SHARPNESS = -4.0f
 
         private const val vertexShader =
-                "uniform mat4 uMVPMatrix;\n" +
+            "uniform mat4 uMVPMatrix;\n" +
                 // 顶点坐标
                 "attribute vec4 aPosition;\n" +
                 "uniform mat4 uTexPMatrix;\n" +
@@ -51,7 +52,7 @@ class CameraFilterSharpness(res: Resources, vertexShader: String, fragmentShader
                 "}"
 
         private const val fragmentShader =
-                "#extension GL_OES_EGL_image_external : require\n" +
+            "#extension GL_OES_EGL_image_external : require\n" +
                 "precision mediump float;\n" +
                 "uniform samplerExternalOES vTexture;\n" +
                 "varying vec2 vTexCoordinate;\n" +
