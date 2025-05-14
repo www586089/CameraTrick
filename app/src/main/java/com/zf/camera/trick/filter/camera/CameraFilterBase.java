@@ -106,29 +106,29 @@ public class CameraFilterBase extends AFilter {
 
     // 顶点着色器代码
     public static final String NO_FILTER_VERTEX_SHADER =
-            "uniform mat4 uMVPMatrix;\n" +
-                    // 顶点坐标
-                    "attribute vec4 aPosition;\n" +
-                    "uniform mat4 uTexPMatrix;\n" +
-                    // 纹理坐标
-                    "attribute vec4 aTexCoordinate;\n" +
+        "uniform mat4 uMVPMatrix;\n" +
+        // 顶点坐标
+        "attribute vec4 aPosition;\n" +
+        "uniform mat4 uTextureMatrix;\n" +
+        // 纹理坐标
+        "attribute vec4 aTexCoordinate;\n" +
 
-                    "varying vec2 vTexCoordinate;\n" +
+        "varying vec2 vTexCoordinate;\n" +
 
-                    "void main() {\n" +
-                    "  gl_Position = uMVPMatrix * aPosition;\n" +
-                    "  vTexCoordinate = (uTexPMatrix * aTexCoordinate).xy;\n" +
-                    "}";
+        "void main() {\n" +
+        "  gl_Position = uMVPMatrix * aPosition;\n" +
+        "  vTexCoordinate = (uTextureMatrix * aTexCoordinate).xy;\n" +
+        "}";
 
     // 片段着色器代码
     public static final String NO_FILTER_FRAGMENT_SHADER =
-            "#extension GL_OES_EGL_image_external : require\n" +
-                    "precision mediump float;\n" +
-                    "uniform samplerExternalOES vTexture;\n" +
-                    "varying vec2 vTexCoordinate;\n" +
-                    "void main() {\n" +
-                    "  gl_FragColor = texture2D(vTexture, vTexCoordinate);\n" +
-                    "}\n";
+        "#extension GL_OES_EGL_image_external : require\n" +
+        "precision mediump float;\n" +
+        "uniform samplerExternalOES uTexture;\n" +
+        "varying vec2 vTexCoordinate;\n" +
+        "void main() {\n" +
+        "  gl_FragColor = texture2D(uTexture, vTexCoordinate);\n" +
+        "}\n";
 
     private final LinkedList<Runnable> mRunOnDraw = new LinkedList<>();
 
@@ -136,9 +136,9 @@ public class CameraFilterBase extends AFilter {
      * Shader程序中矩阵属性的句柄
      */
     private int uMVPMatrixHandle;
-    private int texCoordinateHandle;
-    private int vTextureHandle;
-    private int vTexPMatrixHandle;
+    private int aTexCoordinateHandle;
+    private int uTextureHandle;
+    private int uTextureMatrixHandle;
 
     // vPMatrix是“模型视图投影矩阵”的缩写
     // 最终变化矩阵
@@ -295,9 +295,9 @@ public class CameraFilterBase extends AFilter {
         uMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
 
         // 获取顶点着色器中纹理坐标的句柄
-        texCoordinateHandle = GLES20.glGetAttribLocation(mProgram, "aTexCoordinate");
-        vTexPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uTexPMatrix");
-        vTextureHandle = GLES20.glGetUniformLocation(mProgram, "vTexture");
+        aTexCoordinateHandle = GLES20.glGetAttribLocation(mProgram, "aTexCoordinate");
+        uTextureMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uTextureMatrix");
+        uTextureHandle = GLES20.glGetUniformLocation(mProgram, "uTexture");
     }
 
 
@@ -310,7 +310,7 @@ public class CameraFilterBase extends AFilter {
 
 
     @Override
-    public void drawFrame(float[] texMatrix) {
+    public void drawFrame(float[] textureMatrix) {
         // 将程序添加到OpenGL ES环境
         GLES20.glUseProgram(mProgram);
         runPendingOnDrawTasks();
@@ -332,11 +332,11 @@ public class CameraFilterBase extends AFilter {
                 vertexBuffer        // 指向数据缓冲对象
         );
         // 启用纹理坐标控制句柄
-        GLES20.glEnableVertexAttribArray(texCoordinateHandle);
+        GLES20.glEnableVertexAttribArray(aTexCoordinateHandle);
         // 将纹理坐标变换矩阵传递给顶点着色器
-        GLES20.glUniformMatrix4fv(vTexPMatrixHandle, 1, false, texMatrix, 0);
+        GLES20.glUniformMatrix4fv(uTextureMatrixHandle, 1, false, textureMatrix, 0);
         // 写入坐标数据
-        GLES20.glVertexAttribPointer(texCoordinateHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, textureBuffer);
+        GLES20.glVertexAttribPointer(aTexCoordinateHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, textureBuffer);
 
         // 将缩放矩阵传递给着色器程序
         GLES20.glUniformMatrix4fv(uMVPMatrixHandle, 1, false, mMVPMatrix, 0);
@@ -349,7 +349,7 @@ public class CameraFilterBase extends AFilter {
         // 绑定纹理
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
         // 设置纹理采样器编号，该编号和glActiveTexture中设置的编号相同
-        GLES20.glUniform1i(vTextureHandle, 0);
+        GLES20.glUniform1i(uTextureHandle, 0);
 
         // 绘制
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
@@ -358,7 +358,7 @@ public class CameraFilterBase extends AFilter {
 
         // 禁用顶点阵列
         GLES20.glDisableVertexAttribArray(positionHandle);
-        GLES20.glDisableVertexAttribArray(texCoordinateHandle);
+        GLES20.glDisableVertexAttribArray(aTexCoordinateHandle);
     }
 
     private int createExternalOES() {

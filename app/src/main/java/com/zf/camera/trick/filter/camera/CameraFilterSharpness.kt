@@ -15,7 +15,7 @@ class CameraFilterSharpness(res: Resources, vertexShader: String, fragmentShader
             "uniform mat4 uMVPMatrix;\n" +
                 // 顶点坐标
                 "attribute vec4 aPosition;\n" +
-                "uniform mat4 uTexPMatrix;\n" +
+                "uniform mat4 uTextureMatrix;\n" +
                 // 纹理坐标
                 "attribute vec4 aTexCoordinate;\n" +
 
@@ -36,7 +36,7 @@ class CameraFilterSharpness(res: Resources, vertexShader: String, fragmentShader
 
                 "void main() {\n" +
                 "    gl_Position = uMVPMatrix * aPosition;\n" +
-                "    vTexCoordinate = (uTexPMatrix * aTexCoordinate).xy;\n" +
+                "    vTexCoordinate = (uTextureMatrix * aTexCoordinate).xy;\n" +
 
                 "    \n" +
                 "    mediump vec2 widthStep = vec2(uWidthFactor, 0.0);\n" +
