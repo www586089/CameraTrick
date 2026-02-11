@@ -306,6 +306,9 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
     }
 
     override fun setShaderType(shaderType: Int) {
+        if (!::mCameraFilter.isInitialized) {
+            return
+        }
         mEncodeHandler.sendMessage(Message.obtain().apply {
             what = mEncodeHandler.MSG_UPDATE_FILTER
             obj = shaderType
