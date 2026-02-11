@@ -150,7 +150,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
         })
 
         if (ENCODE_WITH_SURFACE && mVideoRecorder is ISurfaceVideoRecorder) {
-            (mVideoRecorder as ISurfaceVideoRecorder).updateShaderType(this.mShaderType)
+            (mVideoRecorder as ISurfaceVideoRecorder).initShaderType(this.mShaderType)
         }
         mVideoRecorder.startRecord(videoFile.absolutePath, previewWidth, previewHeight, listener)
     }
@@ -295,6 +295,11 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
                 textureId = mTextureId
 
                 onSurfaceChanged(mView.width, mView.height)
+            }
+            //更新录制filter
+            if (mView.mVideoRecorder is ISurfaceVideoRecorder ) {
+                val surfaceRecorder = mView.mVideoRecorder as ISurfaceVideoRecorder
+                surfaceRecorder.setShaderType(shaderType)
             }
         }
 

@@ -189,9 +189,7 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
             mEglCore = EglCore(mShareContext, EglCore.FLAG_RECORDABLE)
             mInputWindowSurface = WindowSurface(mEglCore, createInputSurface(), true)
             mInputWindowSurface.makeCurrent()
-            mCameraFilter = CameraFilterBase.getFilter(App.get().resources, shaderType)
-            mCameraFilter.onSurfaceCreated()
-            mCameraFilter.onSurfaceChanged(width, height)
+            newFilterType()
 
             start()
         }
@@ -303,8 +301,25 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         checkIndexBuffer()
     }
 
-    override fun updateShaderType(shaderType: Int) {
+    override fun initShaderType(shaderType: Int) {
         this.shaderType = shaderType
+    }
+
+    override fun setShaderType(shaderType: Int) {
+        mEncodeHandler.sendMessage(Message.obtain().apply {
+            what = mEncodeHandler.MSG_UPDATE_FILTER
+            obj = shaderType
+        })
+    }
+
+    fun updateFilterType(shaderType: Int) {
+        initShaderType(shaderType)
+        newFilterType()
+    }
+    private fun newFilterType() {
+        mCameraFilter = CameraFilterBase.getFilter(App.get().resources, shaderType)
+        mCameraFilter.onSurfaceCreated()
+        mCameraFilter.onSurfaceChanged(width, height)
     }
 
     override fun updateValue(percentage: Float) {
@@ -385,6 +400,7 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         val MSG_DRAW_FRAME = 2
         val MSG_UPDATE_SHARE_CONTEXT = 3
         val MSG_SET_VALUE = 4
+        val MSG_UPDATE_FILTER = 5
 
         override fun handleMessage(msg: Message) {
             when (msg.what) {
@@ -402,6 +418,9 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
                 }
                 MSG_SET_VALUE -> {
                     setValue(msg.obj as Float)
+                }
+                MSG_UPDATE_FILTER -> {
+                    updateFilterType(msg.obj as Int)
                 }
             }
         }

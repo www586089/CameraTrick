@@ -44,6 +44,7 @@ open class CameraManager(val mContext: Context) : ICameraManager, ICameraCallbac
 
     override fun openCamera() {
         if (-1 == viewWidth || -1 == viewHeight) {
+            Log.e(TAG, "openCamera: viewWidth or viewHeight is -1")
             return
         }
         try {
@@ -93,12 +94,10 @@ open class CameraManager(val mContext: Context) : ICameraManager, ICameraCallbac
 
     override fun takePicture(callback: PictureBufferCallback) {
         mCamera?.apply {
-            takePicture(null, null, object : Camera.PictureCallback {
-                override fun onPictureTaken(data: ByteArray?, camera: Camera?) {
-                    camera?.startPreview()//拍照后重新开始预览
-                    callback.onPictureToken(data)
-                }
-            })
+            takePicture(null, null) { data, camera ->
+                camera?.startPreview()//拍照后重新开始预览
+                callback.onPictureToken(data)
+            }
         }
     }
 
