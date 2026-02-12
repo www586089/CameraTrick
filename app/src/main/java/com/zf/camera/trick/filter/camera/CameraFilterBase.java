@@ -38,6 +38,8 @@ public class CameraFilterBase extends AFilter {
     public static final int FILTER_TYPE_SEPIA_TONE = NO_FILTER + 7;
     public static final int FILTER_TYPE_GRAY_SCALE = NO_FILTER + 8;
     public static final int FILTER_TYPE_SHARPNESS = NO_FILTER + 9;
+    public static final int FILTER_TYPE_SOBEL_EDGE_DETECTION = NO_FILTER + 10;
+    public static final int FILTER_TYPE_THRESHOLD_EDGE_DETECTION = NO_FILTER + 11;
 
 
     protected IAdjuster mAdjuster = null;
@@ -48,6 +50,17 @@ public class CameraFilterBase extends AFilter {
 
     public boolean hasAdjuster() {
         return null != mAdjuster;
+    }
+
+    protected int mWidth;
+    protected int mHeight;
+
+    public int getWidth() {
+        return mWidth;
+    }
+
+    public int getHeight() {
+        return mHeight;
     }
 
     public float getDefaultProgress() {
@@ -99,6 +112,11 @@ public class CameraFilterBase extends AFilter {
 
             case FILTER_TYPE_SHARPNESS:
                 return new CameraFilterSharpness(resources);
+            case FILTER_TYPE_SOBEL_EDGE_DETECTION:
+                return new CameraFilterSobelEdgeDetection(resources);
+
+            case FILTER_TYPE_THRESHOLD_EDGE_DETECTION:
+                return new CameraFilterThresholdEdgeDetectionFilter(resources);
         }
 
         return new CameraFilerNoChange(resources);
@@ -302,6 +320,8 @@ public class CameraFilterBase extends AFilter {
 
 
     public void onSurfaceChanged(int width, int height) {
+        this.mWidth = width;
+        this.mHeight = height;
         GLES20.glViewport(0, 0, width, height);
 
         // 获取原始矩阵，与原始矩阵相乘坐标不变
