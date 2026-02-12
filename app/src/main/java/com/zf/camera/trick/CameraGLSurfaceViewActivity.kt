@@ -22,7 +22,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import com.gyf.immersionbar.ImmersionBar
 import com.zf.camera.trick.base.BaseActivity
 import com.zf.camera.trick.callback.PictureBufferCallback
-import com.zf.camera.trick.filter.camera.CameraFilterBase
+import com.zf.camera.trick.filter.CameraFilterFactory
 import com.zf.camera.trick.record.VideoRecordListener
 import com.zf.camera.trick.ui.CameraGLSurfaceView
 import com.zf.camera.trick.ui.CaptureButton
@@ -52,7 +52,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
     private lateinit var mTimeInfo: AppCompatTextView
     private lateinit var mSeekBar: SeekBar
 
-    private var curType = CameraFilterBase.NO_FILTER
+    private var curType = CameraFilterFactory.NO_FILTER
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,18 +67,18 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         return super.onPrepareOptionsMenu(menu)
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu.add(0, CameraFilterBase.NO_FILTER, CameraFilterBase.NO_FILTER, "No Filter")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_CONTRAST, CameraFilterBase.FILTER_TYPE_CONTRAST, "Contrast")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_INVERT, CameraFilterBase.FILTER_TYPE_INVERT, "Invert")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_PIXELATION, CameraFilterBase.FILTER_TYPE_PIXELATION, "Pixelation")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_HUE, CameraFilterBase.FILTER_TYPE_HUE, "Hue")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_GAMMA, CameraFilterBase.FILTER_TYPE_GAMMA, "Gamma")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_BRIGHTNESS, CameraFilterBase.FILTER_TYPE_BRIGHTNESS, "Brightness")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_SEPIA_TONE, CameraFilterBase.FILTER_TYPE_SEPIA_TONE, "SepiaTone")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_GRAY_SCALE, CameraFilterBase.FILTER_TYPE_GRAY_SCALE, "GrayScale")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_SHARPNESS, CameraFilterBase.FILTER_TYPE_SHARPNESS, "Sharpness")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_SOBEL_EDGE_DETECTION, CameraFilterBase.FILTER_TYPE_SOBEL_EDGE_DETECTION, "Sobel Edge Detection")
-        menu.add(0, CameraFilterBase.FILTER_TYPE_THRESHOLD_EDGE_DETECTION, CameraFilterBase.FILTER_TYPE_THRESHOLD_EDGE_DETECTION, "Threshold Edge Detection")
+        menu.add(0, CameraFilterFactory.NO_FILTER, CameraFilterFactory.NO_FILTER, "No Filter")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_CONTRAST, CameraFilterFactory.FILTER_TYPE_CONTRAST, "Contrast")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_INVERT, CameraFilterFactory.FILTER_TYPE_INVERT, "Invert")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_PIXELATION, CameraFilterFactory.FILTER_TYPE_PIXELATION, "Pixelation")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_HUE, CameraFilterFactory.FILTER_TYPE_HUE, "Hue")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_GAMMA, CameraFilterFactory.FILTER_TYPE_GAMMA, "Gamma")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_BRIGHTNESS, CameraFilterFactory.FILTER_TYPE_BRIGHTNESS, "Brightness")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_SEPIA_TONE, CameraFilterFactory.FILTER_TYPE_SEPIA_TONE, "SepiaTone")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_GRAY_SCALE, CameraFilterFactory.FILTER_TYPE_GRAY_SCALE, "GrayScale")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_SHARPNESS, CameraFilterFactory.FILTER_TYPE_SHARPNESS, "Sharpness")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_SOBEL_EDGE_DETECTION, CameraFilterFactory.FILTER_TYPE_SOBEL_EDGE_DETECTION, "Sobel Edge Detection")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_THRESHOLD_EDGE_DETECTION, CameraFilterFactory.FILTER_TYPE_THRESHOLD_EDGE_DETECTION, "Threshold Edge Detection")
         super.onCreateOptionsMenu(menu)
         menu.setGroupCheckable(0, true, true)
         return true

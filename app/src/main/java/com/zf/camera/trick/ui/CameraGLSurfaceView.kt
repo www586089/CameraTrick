@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.SurfaceHolder
 import com.zf.camera.trick.App
 import com.zf.camera.trick.callback.PictureBufferCallback
+import com.zf.camera.trick.filter.CameraFilterFactory
 import com.zf.camera.trick.filter.camera.CameraFilerNoChange
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.manager.CameraManager
@@ -25,6 +26,9 @@ import com.zf.camera.trick.record.VideoSurfaceEncoder
 import com.zf.camera.trick.utils.TrickLog
 import java.io.File
 import java.lang.ref.WeakReference
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -125,7 +129,8 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
         if (!file.exists()) {
             file.mkdirs()
         }
-        val videoFile = File(parentPath, "test.mp4")
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(Date())
+        val videoFile = File(parentPath, "V$timeStamp.mp4")
         if (videoFile.isDirectory) {
             videoFile.delete()
         } else if (videoFile.exists()) {
@@ -290,7 +295,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
         fun updateShaderType(shaderType: Int) {
             mCameraFilter.onSurfaceDestroyed()
 
-            mCameraFilter = CameraFilterBase.getFilter(App.get().resources, shaderType).apply {
+            mCameraFilter = CameraFilterFactory.instance.getFilter(App.get().resources, shaderType).apply {
                 onSurfaceCreated()
                 textureId = mTextureId
 

@@ -14,6 +14,7 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 import com.zf.camera.trick.App
+import com.zf.camera.trick.filter.CameraFilterFactory
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.gl.egl.EglCore
 import com.zf.camera.trick.gl.egl.WindowSurface
@@ -46,7 +47,7 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
     private var mTrackIndex = -1;
     private var width = 0
     private var height = 0
-    private var shaderType: Int = CameraFilterBase.NO_FILTER
+    private var shaderType: Int = CameraFilterFactory.NO_FILTER
 
     @Volatile
     private var isEncoderStarted = false
@@ -320,7 +321,7 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
         newFilterType()
     }
     private fun newFilterType() {
-        mCameraFilter = CameraFilterBase.getFilter(App.get().resources, shaderType)
+        mCameraFilter = CameraFilterFactory.instance.getFilter(App.get().resources, shaderType)
         mCameraFilter.onSurfaceCreated()
         mCameraFilter.onSurfaceChanged(width, height)
     }

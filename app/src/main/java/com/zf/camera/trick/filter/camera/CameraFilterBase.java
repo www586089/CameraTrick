@@ -28,20 +28,6 @@ public class CameraFilterBase extends AFilter {
 
     private String TAG = "CameraFilterBase";
 
-    public static final int NO_FILTER = 0;
-    public static final int FILTER_TYPE_CONTRAST = NO_FILTER + 1;
-    public static final int FILTER_TYPE_INVERT = NO_FILTER + 2;
-    public static final int FILTER_TYPE_PIXELATION = NO_FILTER + 3;
-    public static final int FILTER_TYPE_HUE = NO_FILTER + 4;
-    public static final int FILTER_TYPE_GAMMA = NO_FILTER + 5;
-    public static final int FILTER_TYPE_BRIGHTNESS = NO_FILTER + 6;
-    public static final int FILTER_TYPE_SEPIA_TONE = NO_FILTER + 7;
-    public static final int FILTER_TYPE_GRAY_SCALE = NO_FILTER + 8;
-    public static final int FILTER_TYPE_SHARPNESS = NO_FILTER + 9;
-    public static final int FILTER_TYPE_SOBEL_EDGE_DETECTION = NO_FILTER + 10;
-    public static final int FILTER_TYPE_THRESHOLD_EDGE_DETECTION = NO_FILTER + 11;
-
-
     protected IAdjuster mAdjuster = null;
 
     protected IAdjuster createAdjuster() {
@@ -81,46 +67,7 @@ public class CameraFilterBase extends AFilter {
         }
     }
 
-    public static CameraFilterBase getFilter(Resources resources, int type) {
-        switch (type) {
-            case NO_FILTER:
-                return new CameraFilerNoChange(resources);
 
-            case FILTER_TYPE_CONTRAST:
-                return new CameraFilterContrast(resources);
-
-            case FILTER_TYPE_INVERT:
-                return new CameraFilterInvert(resources);
-
-            case FILTER_TYPE_PIXELATION:
-                return new CameraFilterPixelation(resources);
-
-            case FILTER_TYPE_HUE:
-                return new CameraFilterHue(resources);
-
-            case FILTER_TYPE_GAMMA:
-                return new CameraFilterGamma(resources);
-
-            case FILTER_TYPE_BRIGHTNESS:
-                return new CameraFilterBrightness(resources);
-
-            case FILTER_TYPE_SEPIA_TONE:
-                return new CameraFilerSepiaTone(resources);
-
-            case FILTER_TYPE_GRAY_SCALE:
-                return new CameraFilterGrayScale(resources);
-
-            case FILTER_TYPE_SHARPNESS:
-                return new CameraFilterSharpness(resources);
-            case FILTER_TYPE_SOBEL_EDGE_DETECTION:
-                return new CameraFilterSobelEdgeDetection(resources);
-
-            case FILTER_TYPE_THRESHOLD_EDGE_DETECTION:
-                return new CameraFilterThresholdEdgeDetectionFilter(resources);
-        }
-
-        return new CameraFilerNoChange(resources);
-    }
 
     // 顶点着色器代码
     public static final String NO_FILTER_VERTEX_SHADER =
