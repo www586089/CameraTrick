@@ -26,18 +26,18 @@ class CameraFilterSobelEdgeDetection(res: Resources) : CameraFilterGroup(res) {
                     "varying vec2 bottomLeftTextureCoordinate;\n" +
                     "varying vec2 bottomRightTextureCoordinate;\n" +
                     "\n" +
-                    "uniform samplerExternalOES vTexture;\n" +
+                    "uniform samplerExternalOES uTexture;\n" +
                     "\n" +
                     "void main()\n" +
                     "{\n" +
-                    "    float bottomLeftIntensity = texture2D(vTexture, bottomLeftTextureCoordinate).r;\n" +
-                    "    float topRightIntensity = texture2D(vTexture, topRightTextureCoordinate).r;\n" +
-                    "    float topLeftIntensity = texture2D(vTexture, topLeftTextureCoordinate).r;\n" +
-                    "    float bottomRightIntensity = texture2D(vTexture, bottomRightTextureCoordinate).r;\n" +
-                    "    float leftIntensity = texture2D(vTexture, leftTextureCoordinate).r;\n" +
-                    "    float rightIntensity = texture2D(vTexture, rightTextureCoordinate).r;\n" +
-                    "    float bottomIntensity = texture2D(vTexture, bottomTextureCoordinate).r;\n" +
-                    "    float topIntensity = texture2D(vTexture, topTextureCoordinate).r;\n" +
+                    "    float bottomLeftIntensity = texture2D(uTexture, bottomLeftTextureCoordinate).r;\n" +
+                    "    float topRightIntensity = texture2D(uTexture, topRightTextureCoordinate).r;\n" +
+                    "    float topLeftIntensity = texture2D(uTexture, topLeftTextureCoordinate).r;\n" +
+                    "    float bottomRightIntensity = texture2D(uTexture, bottomRightTextureCoordinate).r;\n" +
+                    "    float leftIntensity = texture2D(uTexture, leftTextureCoordinate).r;\n" +
+                    "    float rightIntensity = texture2D(uTexture, rightTextureCoordinate).r;\n" +
+                    "    float bottomIntensity = texture2D(uTexture, bottomTextureCoordinate).r;\n" +
+                    "    float topIntensity = texture2D(uTexture, topTextureCoordinate).r;\n" +
                     "    float h = -topLeftIntensity - 2.0 * topIntensity - topRightIntensity + bottomLeftIntensity + 2.0 * bottomIntensity + bottomRightIntensity;\n" +
                     "    float v = -bottomLeftIntensity - 2.0 * leftIntensity - topLeftIntensity + bottomRightIntensity + 2.0 * rightIntensity + topRightIntensity;\n" +
                     "\n" +

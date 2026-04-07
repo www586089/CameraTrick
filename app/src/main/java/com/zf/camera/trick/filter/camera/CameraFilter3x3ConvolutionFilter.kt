@@ -13,7 +13,7 @@ open class CameraFilter3x3ConvolutionFilter(res: Resources) :
 
                 "precision highp float;\n" +
                 "\n" +
-                "uniform samplerExternalOES vTexture;\n" +
+                "uniform samplerExternalOES uTexture;\n" +
                 "\n" +
                 "uniform mediump mat3 convolutionMatrix;\n" +
                 "\n" +
@@ -31,15 +31,15 @@ open class CameraFilter3x3ConvolutionFilter(res: Resources) :
                 "\n" +
                 "void main()\n" +
                 "{\n" +
-                "    mediump vec4 bottomColor = texture2D(vTexture, bottomTextureCoordinate);\n" +
-                "    mediump vec4 bottomLeftColor = texture2D(vTexture, bottomLeftTextureCoordinate);\n" +
-                "    mediump vec4 bottomRightColor = texture2D(vTexture, bottomRightTextureCoordinate);\n" +
-                "    mediump vec4 centerColor = texture2D(vTexture, textureCoordinate);\n" +
-                "    mediump vec4 leftColor = texture2D(vTexture, leftTextureCoordinate);\n" +
-                "    mediump vec4 rightColor = texture2D(vTexture, rightTextureCoordinate);\n" +
-                "    mediump vec4 topColor = texture2D(vTexture, topTextureCoordinate);\n" +
-                "    mediump vec4 topRightColor = texture2D(vTexture, topRightTextureCoordinate);\n" +
-                "    mediump vec4 topLeftColor = texture2D(vTexture, topLeftTextureCoordinate);\n" +
+                "    mediump vec4 bottomColor = texture2D(uTexture, bottomTextureCoordinate);\n" +
+                "    mediump vec4 bottomLeftColor = texture2D(uTexture, bottomLeftTextureCoordinate);\n" +
+                "    mediump vec4 bottomRightColor = texture2D(uTexture, bottomRightTextureCoordinate);\n" +
+                "    mediump vec4 centerColor = texture2D(uTexture, textureCoordinate);\n" +
+                "    mediump vec4 leftColor = texture2D(uTexture, leftTextureCoordinate);\n" +
+                "    mediump vec4 rightColor = texture2D(uTexture, rightTextureCoordinate);\n" +
+                "    mediump vec4 topColor = texture2D(uTexture, topTextureCoordinate);\n" +
+                "    mediump vec4 topRightColor = texture2D(uTexture, topRightTextureCoordinate);\n" +
+                "    mediump vec4 topLeftColor = texture2D(uTexture, topLeftTextureCoordinate);\n" +
                 "\n" +
                 "    mediump vec4 resultColor = topLeftColor * convolutionMatrix[0][0] + topColor * convolutionMatrix[0][1] + topRightColor * convolutionMatrix[0][2];\n" +
                 "    resultColor += leftColor * convolutionMatrix[1][0] + centerColor * convolutionMatrix[1][1] + rightColor * convolutionMatrix[1][2];\n" +
