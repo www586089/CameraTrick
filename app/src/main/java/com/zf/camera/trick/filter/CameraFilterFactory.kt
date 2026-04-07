@@ -7,9 +7,11 @@ import com.zf.camera.trick.filter.camera.CameraFilter3x3ConvolutionFilter
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.filter.camera.CameraFilterBrightness
 import com.zf.camera.trick.filter.camera.CameraFilterContrast
+import com.zf.camera.trick.filter.camera.CameraFilterDirectionalSobelEdgeDetection
 import com.zf.camera.trick.filter.camera.CameraFilterEmbossFilter
 import com.zf.camera.trick.filter.camera.CameraFilterGamma
 import com.zf.camera.trick.filter.camera.CameraFilterGrayScale
+import com.zf.camera.trick.filter.camera.CameraFilterGroup
 import com.zf.camera.trick.filter.camera.CameraFilterHue
 import com.zf.camera.trick.filter.camera.CameraFilterInvert
 import com.zf.camera.trick.filter.camera.CameraFilterPixelation
@@ -38,6 +40,7 @@ class CameraFilterFactory {
         val FILTER_TYPE_THREE_X_THREE_CONVOLUTION = NO_FILTER + 12
         val FILTER_TYPE_EMBOSS = NO_FILTER + 13
         val FILTER_TYPE_POSTERIZE = NO_FILTER + 14
+        val FILTER_TYPE_FILTER_GROUP = NO_FILTER + 15
         val instance = CameraFilterFactory()
             get
     }
@@ -58,6 +61,12 @@ class CameraFilterFactory {
             FILTER_TYPE_THREE_X_THREE_CONVOLUTION -> return CameraFilter3x3ConvolutionFilter(resources!!)
             FILTER_TYPE_EMBOSS -> return CameraFilterEmbossFilter(resources!!)
             FILTER_TYPE_POSTERIZE -> return CameraFilterPosterize(resources!!)
+            FILTER_TYPE_FILTER_GROUP -> return CameraFilterGroup(resources!!, mutableListOf(
+                //todo 组合起来后，切换到其他filter会崩溃，应该是CameraFilterGroup有bug
+                CameraFilterContrast(resources),
+                CameraFilterDirectionalSobelEdgeDetection(resources),
+                CameraFilterGrayScale(resources))
+            )
         }
         return CameraFilerNoChange(resources!!)
     }
