@@ -3,6 +3,7 @@ package com.zf.camera.trick.filter
 import android.content.res.Resources
 import com.zf.camera.trick.filter.camera.CameraFilerNoChange
 import com.zf.camera.trick.filter.camera.CameraFilerSepiaTone
+import com.zf.camera.trick.filter.camera.CameraFilter3x3ConvolutionFilter
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.filter.camera.CameraFilterBrightness
 import com.zf.camera.trick.filter.camera.CameraFilterContrast
@@ -32,6 +33,7 @@ class CameraFilterFactory {
         val FILTER_TYPE_SHARPNESS = NO_FILTER + 9
         val FILTER_TYPE_SOBEL_EDGE_DETECTION = NO_FILTER + 10
         val FILTER_TYPE_THRESHOLD_EDGE_DETECTION = NO_FILTER + 11
+        val FILTER_TYPE_THREE_X_THREE_CONVOLUTION = NO_FILTER + 12
         val instance = CameraFilterFactory()
             get
     }
@@ -48,9 +50,8 @@ class CameraFilterFactory {
             FILTER_TYPE_GRAY_SCALE -> return CameraFilterGrayScale(resources!!)
             FILTER_TYPE_SHARPNESS -> return CameraFilterSharpness(resources!!)
             FILTER_TYPE_SOBEL_EDGE_DETECTION -> return CameraFilterSobelEdgeDetection(resources!!)
-            FILTER_TYPE_THRESHOLD_EDGE_DETECTION -> return CameraFilterThresholdEdgeDetectionFilter(
-                resources!!
-            )
+            FILTER_TYPE_THRESHOLD_EDGE_DETECTION -> return CameraFilterThresholdEdgeDetectionFilter(resources!!)
+            FILTER_TYPE_THREE_X_THREE_CONVOLUTION -> return CameraFilter3x3ConvolutionFilter(resources!!)
         }
         return CameraFilerNoChange(resources!!)
     }

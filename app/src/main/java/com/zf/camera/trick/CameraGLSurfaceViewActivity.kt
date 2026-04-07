@@ -79,6 +79,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         menu.add(0, CameraFilterFactory.FILTER_TYPE_SHARPNESS, CameraFilterFactory.FILTER_TYPE_SHARPNESS, "Sharpness")
         menu.add(0, CameraFilterFactory.FILTER_TYPE_SOBEL_EDGE_DETECTION, CameraFilterFactory.FILTER_TYPE_SOBEL_EDGE_DETECTION, "Sobel Edge Detection")
         menu.add(0, CameraFilterFactory.FILTER_TYPE_THRESHOLD_EDGE_DETECTION, CameraFilterFactory.FILTER_TYPE_THRESHOLD_EDGE_DETECTION, "Threshold Edge Detection")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_THREE_X_THREE_CONVOLUTION, CameraFilterFactory.FILTER_TYPE_THREE_X_THREE_CONVOLUTION, "3x3 Convolution")
         super.onCreateOptionsMenu(menu)
         menu.setGroupCheckable(0, true, true)
         return true
