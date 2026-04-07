@@ -5,7 +5,7 @@ import android.content.res.Resources
 /**
  * Runs a 3x3 convolution kernel against the image
  */
-class CameraFilter3x3ConvolutionFilter(res: Resources) :
+open class CameraFilter3x3ConvolutionFilter(res: Resources) :
     CameraFilter3x3TextureSamplingFilter(res, THREE_X_THREE_TEXTURE_SAMPLING_FRAGMENT_SHADER) {
     companion object {
         const val THREE_X_THREE_TEXTURE_SAMPLING_FRAGMENT_SHADER = "" +

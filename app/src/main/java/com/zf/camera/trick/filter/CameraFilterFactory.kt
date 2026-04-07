@@ -7,6 +7,7 @@ import com.zf.camera.trick.filter.camera.CameraFilter3x3ConvolutionFilter
 import com.zf.camera.trick.filter.camera.CameraFilterBase
 import com.zf.camera.trick.filter.camera.CameraFilterBrightness
 import com.zf.camera.trick.filter.camera.CameraFilterContrast
+import com.zf.camera.trick.filter.camera.CameraFilterEmbossFilter
 import com.zf.camera.trick.filter.camera.CameraFilterGamma
 import com.zf.camera.trick.filter.camera.CameraFilterGrayScale
 import com.zf.camera.trick.filter.camera.CameraFilterHue
@@ -34,6 +35,7 @@ class CameraFilterFactory {
         val FILTER_TYPE_SOBEL_EDGE_DETECTION = NO_FILTER + 10
         val FILTER_TYPE_THRESHOLD_EDGE_DETECTION = NO_FILTER + 11
         val FILTER_TYPE_THREE_X_THREE_CONVOLUTION = NO_FILTER + 12
+        val FILTER_TYPE_EMBOSS = NO_FILTER + 13
         val instance = CameraFilterFactory()
             get
     }
@@ -52,6 +54,7 @@ class CameraFilterFactory {
             FILTER_TYPE_SOBEL_EDGE_DETECTION -> return CameraFilterSobelEdgeDetection(resources!!)
             FILTER_TYPE_THRESHOLD_EDGE_DETECTION -> return CameraFilterThresholdEdgeDetectionFilter(resources!!)
             FILTER_TYPE_THREE_X_THREE_CONVOLUTION -> return CameraFilter3x3ConvolutionFilter(resources!!)
+            FILTER_TYPE_EMBOSS -> return CameraFilterEmbossFilter(resources!!)
         }
         return CameraFilerNoChange(resources!!)
     }
