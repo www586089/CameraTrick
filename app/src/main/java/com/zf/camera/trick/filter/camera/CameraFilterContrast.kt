@@ -15,11 +15,11 @@ class CameraFilterContrast(
         const val fragmentShader =
             "#extension GL_OES_EGL_image_external : require\n" +
                 "precision mediump float;\n" +
-                "uniform samplerExternalOES vTexture;\n" +
+                "uniform samplerExternalOES uTexture;\n" +
                 "uniform lowp float contrast;\n" +
                 "varying vec2 vTexCoordinate;\n" +
                 "void main() {\n" +
-                "   vec4 textureColor = texture2D(vTexture, vTexCoordinate);\n" +
+                "   vec4 textureColor = texture2D(uTexture, vTexCoordinate);\n" +
                 "   gl_FragColor = vec4((textureColor.rgb - vec3(0.5)) * contrast + vec3(0.5), textureColor.w);\n" +
                 "}\n"
 
