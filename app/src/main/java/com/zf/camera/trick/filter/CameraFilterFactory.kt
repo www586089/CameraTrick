@@ -16,6 +16,7 @@ import com.zf.camera.trick.filter.camera.CameraFilterHue
 import com.zf.camera.trick.filter.camera.CameraFilterInvert
 import com.zf.camera.trick.filter.camera.CameraFilterPixelation
 import com.zf.camera.trick.filter.camera.CameraFilterPosterize
+import com.zf.camera.trick.filter.camera.CameraFilterSaturationFilter
 import com.zf.camera.trick.filter.camera.CameraFilterSharpness
 import com.zf.camera.trick.filter.camera.CameraFilterSobelEdgeDetection
 import com.zf.camera.trick.filter.camera.CameraFilterThresholdEdgeDetectionFilter
@@ -41,6 +42,7 @@ class CameraFilterFactory {
         val FILTER_TYPE_EMBOSS = NO_FILTER + 13
         val FILTER_TYPE_POSTERIZE = NO_FILTER + 14
         val FILTER_TYPE_FILTER_GROUP = NO_FILTER + 15
+        val FILTER_TYPE_SATURATION = NO_FILTER + 16
         val instance = CameraFilterFactory()
             get
     }
@@ -67,6 +69,9 @@ class CameraFilterFactory {
                 CameraFilterDirectionalSobelEdgeDetection(resources),
                 CameraFilterGrayScale(resources))
             )
+            FILTER_TYPE_SATURATION -> {
+                return CameraFilterSaturationFilter(resources!!)
+            }
         }
         return CameraFilerNoChange(resources!!)
     }

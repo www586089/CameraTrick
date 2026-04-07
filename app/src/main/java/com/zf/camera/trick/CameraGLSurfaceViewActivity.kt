@@ -83,6 +83,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         menu.add(0, CameraFilterFactory.FILTER_TYPE_EMBOSS, CameraFilterFactory.FILTER_TYPE_EMBOSS, "Emboss")
         menu.add(0, CameraFilterFactory.FILTER_TYPE_POSTERIZE, CameraFilterFactory.FILTER_TYPE_POSTERIZE, "Posterize")
         menu.add(0, CameraFilterFactory.FILTER_TYPE_FILTER_GROUP, CameraFilterFactory.FILTER_TYPE_FILTER_GROUP, "Grouped filters")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_SATURATION, CameraFilterFactory.FILTER_TYPE_SATURATION, "Saturation")
         super.onCreateOptionsMenu(menu)
         menu.setGroupCheckable(0, true, true)
         return true
