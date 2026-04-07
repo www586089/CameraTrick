@@ -81,6 +81,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         menu.add(0, CameraFilterFactory.FILTER_TYPE_THRESHOLD_EDGE_DETECTION, CameraFilterFactory.FILTER_TYPE_THRESHOLD_EDGE_DETECTION, "Threshold Edge Detection")
         menu.add(0, CameraFilterFactory.FILTER_TYPE_THREE_X_THREE_CONVOLUTION, CameraFilterFactory.FILTER_TYPE_THREE_X_THREE_CONVOLUTION, "3x3 Convolution")
         menu.add(0, CameraFilterFactory.FILTER_TYPE_EMBOSS, CameraFilterFactory.FILTER_TYPE_EMBOSS, "Emboss")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_POSTERIZE, CameraFilterFactory.FILTER_TYPE_POSTERIZE, "Posterize")
         super.onCreateOptionsMenu(menu)
         menu.setGroupCheckable(0, true, true)
         return true
