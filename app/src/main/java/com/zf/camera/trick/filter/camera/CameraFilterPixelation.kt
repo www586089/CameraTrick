@@ -10,7 +10,7 @@ class CameraFilterPixelation(res: Resources) : CameraFilterBase(res, NO_FILTER_V
         const val FRAGMENT_SHADER_PIXELATION =
             "#extension GL_OES_EGL_image_external : require\n" +
                 "precision mediump float;\n" +
-                "uniform samplerExternalOES vTexture;\n" +
+                "uniform samplerExternalOES uTexture;\n" +
                 "varying vec2 vTexCoordinate;\n" +
                 "uniform float pixel;\n" +
                 "uniform float widthFactor;\n" +
@@ -21,7 +21,7 @@ class CameraFilterPixelation(res: Resources) : CameraFilterBase(res, NO_FILTER_V
                 "    float dx = pixel * widthFactor;\n" +
                 "    float dy = pixel * heightFactor;\n" +
                 "    vec2 coord = vec2(dx * floor(uv.x / dx), dy * floor(uv.y / dy));\n" +
-                "    vec4 textureColor = texture2D(vTexture, coord);\n" +
+                "    vec4 textureColor = texture2D(uTexture, coord);\n" +
                 "    gl_FragColor = vec4(textureColor.rgb, 1.0);\n" +
                 "}\n"
         const val PIXELATION_MIN = 1.0f

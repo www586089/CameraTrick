@@ -11,7 +11,7 @@ class CameraFilterHue(res: Resources) :
         const val FRAGMENT_SHADER_HUE =
             "#extension GL_OES_EGL_image_external : require\n" +
             "precision mediump float;\n" +
-            "uniform samplerExternalOES vTexture;\n" +
+            "uniform samplerExternalOES uTexture;\n" +
             "varying vec2 vTexCoordinate;\n" +
 
             "uniform mediump float hueAdjust;\n" +
@@ -25,7 +25,7 @@ class CameraFilterHue(res: Resources) :
             "\n" +
             "void main() {\n" +
             "    // Sample the input pixel\n" +
-            "    highp vec4 color = texture2D(vTexture, vTexCoordinate);\n" +
+            "    highp vec4 color = texture2D(uTexture, vTexCoordinate);\n" +
             "\n" +
             "    // Convert to YIQ\n" +
             "    highp float YPrime = dot (color, kRGBToYPrime);\n" +

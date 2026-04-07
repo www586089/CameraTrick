@@ -54,7 +54,7 @@ class CameraFilterSharpness(res: Resources, vertexShader: String, fragmentShader
         private const val fragmentShader =
             "#extension GL_OES_EGL_image_external : require\n" +
                 "precision mediump float;\n" +
-                "uniform samplerExternalOES vTexture;\n" +
+                "uniform samplerExternalOES uTexture;\n" +
                 "varying vec2 vTexCoordinate;\n" +
                 "\n" +
                 "varying highp vec2 vLeftTextureCoordinate;\n" +
@@ -66,13 +66,13 @@ class CameraFilterSharpness(res: Resources, vertexShader: String, fragmentShader
                 "varying highp float vEdgeMultiplier;\n" +
                 "\n" +
                 "void main() {\n" +
-                "    mediump vec3 textureColor = texture2D(vTexture, vTexCoordinate).rgb;\n" +
-                "    mediump vec3 leftTextureColor = texture2D(vTexture, vLeftTextureCoordinate).rgb;\n" +
-                "    mediump vec3 rightTextureColor = texture2D(vTexture, vRightTextureCoordinate).rgb;\n" +
-                "    mediump vec3 topTextureColor = texture2D(vTexture, vTopTextureCoordinate).rgb;\n" +
-                "    mediump vec3 bottomTextureColor = texture2D(vTexture, vBottomTextureCoordinate).rgb;\n" +
+                "    mediump vec3 textureColor = texture2D(uTexture, vTexCoordinate).rgb;\n" +
+                "    mediump vec3 leftTextureColor = texture2D(uTexture, vLeftTextureCoordinate).rgb;\n" +
+                "    mediump vec3 rightTextureColor = texture2D(uTexture, vRightTextureCoordinate).rgb;\n" +
+                "    mediump vec3 topTextureColor = texture2D(uTexture, vTopTextureCoordinate).rgb;\n" +
+                "    mediump vec3 bottomTextureColor = texture2D(uTexture, vBottomTextureCoordinate).rgb;\n" +
                 "\n" +
-                "    gl_FragColor = vec4((textureColor * vCenterMultiplier - (leftTextureColor * vEdgeMultiplier + rightTextureColor * vEdgeMultiplier + topTextureColor * vEdgeMultiplier + bottomTextureColor * vEdgeMultiplier)), texture2D(vTexture, vBottomTextureCoordinate).w);\n" +
+                "    gl_FragColor = vec4((textureColor * vCenterMultiplier - (leftTextureColor * vEdgeMultiplier + rightTextureColor * vEdgeMultiplier + topTextureColor * vEdgeMultiplier + bottomTextureColor * vEdgeMultiplier)), texture2D(uTexture, vBottomTextureCoordinate).w);\n" +
                 "}\n"
     }
 

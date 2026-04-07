@@ -15,12 +15,12 @@ class CameraFilterPosterize(
             "#extension GL_OES_EGL_image_external : require\n" +
                     "varying highp vec2 vTexCoordinate;\n" +
                     "\n" +
-                    "uniform samplerExternalOES vTexture;\n" +
+                    "uniform samplerExternalOES uTexture;\n" +
                     "uniform highp float colorLevels;\n" +
                     "\n" +
                     "void main()\n" +
                     "{\n" +
-                    "   highp vec4 textureColor = texture2D(vTexture, vTexCoordinate);\n" +
+                    "   highp vec4 textureColor = texture2D(uTexture, vTexCoordinate);\n" +
                     "   \n" +
                     "   gl_FragColor = floor((textureColor * colorLevels) + vec4(0.5)) / colorLevels;\n" +
                     "}";

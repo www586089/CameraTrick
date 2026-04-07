@@ -11,11 +11,11 @@ class CameraFilterGamma(res: Resources) :
         const val FRAGMENT_SHADER_GAMMA =
             "#extension GL_OES_EGL_image_external : require\n" +
                 "precision mediump float;\n" +
-                "uniform samplerExternalOES vTexture;\n" +
+                "uniform samplerExternalOES uTexture;\n" +
                 "varying vec2 vTexCoordinate;\n" +
                 "uniform lowp float gamma;\n" +
                 "void main() {\n" +
-                "   vec4 textureColor = texture2D(vTexture, vTexCoordinate);\n" +
+                "   vec4 textureColor = texture2D(uTexture, vTexCoordinate);\n" +
                 "   gl_FragColor = vec4(pow(textureColor.rgb, vec3(gamma)), textureColor.w);\n" +
                 "}\n"
 

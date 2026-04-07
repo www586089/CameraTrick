@@ -10,10 +10,10 @@ class CameraFilterInvert(res: Resources) :
         const val FRAGMENT_SHADER_INVERT =
             "#extension GL_OES_EGL_image_external : require\n" +
                 "precision mediump float;\n" +
-                "uniform samplerExternalOES vTexture;\n" +
+                "uniform samplerExternalOES uTexture;\n" +
                 "varying vec2 vTexCoordinate;\n" +
                 "void main() {\n" +
-                "   vec4 textureColor = texture2D(vTexture, vTexCoordinate);\n" +
+                "   vec4 textureColor = texture2D(uTexture, vTexCoordinate);\n" +
                 "   gl_FragColor = vec4(1.0 - textureColor.rgb, textureColor.w);\n" +
                 "}\n"
     }

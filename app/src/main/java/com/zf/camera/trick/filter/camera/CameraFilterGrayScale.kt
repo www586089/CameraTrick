@@ -12,13 +12,13 @@ open class CameraFilterGrayScale(res: Resources, vertexShader: String, fragmentS
             "#extension GL_OES_EGL_image_external : require\n" +
 
             "precision mediump float;\n" +
-            "uniform samplerExternalOES vTexture;\n" +
+            "uniform samplerExternalOES uTexture;\n" +
             "varying vec2 vTexCoordinate;\n" +
 
             "const highp vec3 W = vec3(0.2125, 0.7154, 0.0721);\n" +
 
             "void main() {\n" +
-            "   vec4 textureColor = texture2D(vTexture, vTexCoordinate);\n" +
+            "   vec4 textureColor = texture2D(uTexture, vTexCoordinate);\n" +
             "   float luminance = dot(textureColor.rgb, W);\n" +
             "   gl_FragColor = vec4(vec3(luminance), textureColor.a);\n" +
             "}\n"
