@@ -25,6 +25,7 @@ import com.zf.camera.trick.filter.camera.CameraFilterSaturationFilter
 import com.zf.camera.trick.filter.camera.CameraFilterSharpness
 import com.zf.camera.trick.filter.camera.CameraFilterSobelEdgeDetection
 import com.zf.camera.trick.filter.camera.CameraFilterThresholdEdgeDetectionFilter
+import com.zf.camera.trick.filter.camera.CameraFilterWhiteBalanceFilter
 
 class CameraFilterFactory {
 
@@ -53,6 +54,7 @@ class CameraFilterFactory {
         val FILTER_TYPE_MONOCHROME = NO_FILTER + 19
         val FILTER_TYPE_OPACITY = NO_FILTER + 20
         val FILTER_TYPE_RGB = NO_FILTER + 21
+        val FILTER_TYPE_WHITE_BALANCE = NO_FILTER + 22
         val instance = CameraFilterFactory()
             get
     }
@@ -85,6 +87,7 @@ class CameraFilterFactory {
             FILTER_TYPE_MONOCHROME -> return CameraFilterMonochromeFilter(resources!!)
             FILTER_TYPE_OPACITY -> return CameraFilterOpacityFilter(resources!!)
             FILTER_TYPE_RGB -> return CameraFilterRGBFilter(resources!!)
+            FILTER_TYPE_WHITE_BALANCE -> return CameraFilterWhiteBalanceFilter(resources!!)
         }
         return CameraFilerNoChange(resources!!)
     }

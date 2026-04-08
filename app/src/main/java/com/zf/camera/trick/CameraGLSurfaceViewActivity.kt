@@ -89,6 +89,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         menu.add(0, CameraFilterFactory.FILTER_TYPE_MONOCHROME, CameraFilterFactory.FILTER_TYPE_MONOCHROME, "Monochrome")
         menu.add(0, CameraFilterFactory.FILTER_TYPE_OPACITY, CameraFilterFactory.FILTER_TYPE_OPACITY, "Opacity")
         menu.add(0, CameraFilterFactory.FILTER_TYPE_RGB, CameraFilterFactory.FILTER_TYPE_RGB, "RGB")
+        menu.add(0, CameraFilterFactory.FILTER_TYPE_WHITE_BALANCE, CameraFilterFactory.FILTER_TYPE_WHITE_BALANCE, "White Balance")
         super.onCreateOptionsMenu(menu)
         menu.setGroupCheckable(0, true, true)
         return true
