@@ -406,6 +406,12 @@ public class CameraFilterBase extends AFilter {
         }
     }
 
+    public void setUniformLocation3fv(int location, float[] value) {
+        synchronized (mRunOnDraw) {
+            mRunOnDraw.add(() -> GLES30.glUniform3fv(location, 1, value, 0));
+        }
+    }
+
     public void setUniformMat4fv(int location, float[] mat) {
         synchronized (mRunOnDraw) {
             mRunOnDraw.add(() -> GLES30.glUniformMatrix4fv(location, 1, false, mat, 0));
