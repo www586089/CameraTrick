@@ -7,8 +7,8 @@ import android.content.res.Resources
  * Adjusts the alpha channel of the incoming image
  * opacity: The value to multiply the incoming alpha channel for each pixel by (0.0 - 1.0, with 1.0 as the default)
  */
-class CameraFilterOpacityFilter(res: Resources) :
-    CameraFilterBase(res, NO_FILTER_VERTEX_SHADER, fShader) {
+class TFilterOpacityFilter(res: Resources) :
+    TFilterBase(res, NO_FILTER_VERTEX_SHADER, fShader) {
 
     companion object {
         // 片段着色器代码

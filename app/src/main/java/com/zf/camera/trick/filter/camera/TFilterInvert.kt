@@ -3,8 +3,8 @@ package com.zf.camera.trick.filter.camera
 import android.content.res.Resources
 
 
-class CameraFilterInvert(res: Resources) :
-    CameraFilterBase(res, NO_FILTER_VERTEX_SHADER, FRAGMENT_SHADER_INVERT) {
+class TFilterInvert(res: Resources) :
+    TFilterBase(res, NO_FILTER_VERTEX_SHADER, FRAGMENT_SHADER_INVERT) {
     companion object {
         // 片段着色器代码
         const val FRAGMENT_SHADER_INVERT =

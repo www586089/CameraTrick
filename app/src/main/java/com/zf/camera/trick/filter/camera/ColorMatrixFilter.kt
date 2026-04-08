@@ -4,7 +4,7 @@ import android.content.res.Resources
 
 
 open class ColorMatrixFilter(res: Resources, vertexShader: String, fragmentShader: String) :
-    CameraFilterBase(res, vertexShader, fragmentShader) {
+    TFilterBase(res, vertexShader, fragmentShader) {
 
     companion object {
         private const val vertexShader = NO_FILTER_VERTEX_SHADER

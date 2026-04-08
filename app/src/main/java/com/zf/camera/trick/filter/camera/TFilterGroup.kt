@@ -11,11 +11,11 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 
-open class CameraFilterGroup(res: Resources) :
-    CameraFilterBase(res) {
+open class TFilterGroup(res: Resources) :
+    TFilterBase(res) {
 
-    private lateinit var filters: MutableList<CameraFilterBase>
-    private lateinit var mergedFilters: MutableList<CameraFilterBase>
+    private lateinit var filters: MutableList<TFilterBase>
+    private lateinit var mergedFilters: MutableList<TFilterBase>
     private var frameBuffers: IntArray = intArrayOf()
     private var frameBufferTextures: IntArray = intArrayOf()
 
@@ -41,7 +41,7 @@ open class CameraFilterGroup(res: Resources) :
                 .asFloatBuffer().apply { put(flipTexture).position(0) }
         }
 
-    constructor(res: Resources, filters: MutableList<CameraFilterBase>?) : this(res) {
+    constructor(res: Resources, filters: MutableList<TFilterBase>?) : this(res) {
         if (null == filters) {
             this.filters = mutableListOf()
         } else {
@@ -51,7 +51,7 @@ open class CameraFilterGroup(res: Resources) :
         updateMergedFilters()
     }
 
-    fun addFilter(aFilter: CameraFilterBase?) {
+    fun addFilter(aFilter: TFilterBase?) {
         if (aFilter == null) {
             return
         }
@@ -67,9 +67,9 @@ open class CameraFilterGroup(res: Resources) :
             return
         }
         mergedFilters = mutableListOf()
-        var filters: List<CameraFilterBase>
+        var filters: List<TFilterBase>
         for (filter in this.filters) {
-            if (filter is CameraFilterGroup) {
+            if (filter is TFilterGroup) {
                 filter.updateMergedFilters()
                 filters = filter.getMergedFilters()
                 if (filters.isEmpty()) continue
@@ -80,11 +80,11 @@ open class CameraFilterGroup(res: Resources) :
         }
     }
 
-    private fun getMergedFilters(): List<CameraFilterBase> {
+    private fun getMergedFilters(): List<TFilterBase> {
         return mergedFilters
     }
 
-    fun getFilters(): List<CameraFilterBase> {
+    fun getFilters(): List<TFilterBase> {
         return filters
     }
 
@@ -166,7 +166,7 @@ open class CameraFilterGroup(res: Resources) :
             val size = mergedFilters.size
             var previousTexture = textureId
             for (i in 0 until size) {
-                val filter: CameraFilterBase = mergedFilters[i]
+                val filter: TFilterBase = mergedFilters[i]
                 val isNotLast = i < size - 1
                 if (isNotLast) {
                     // 绑定 FBO，后续渲染都会到这个 FBO 的颜色附件（纹理）

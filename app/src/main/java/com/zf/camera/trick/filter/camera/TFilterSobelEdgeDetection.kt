@@ -1,11 +1,15 @@
 package com.zf.camera.trick.filter.camera
 
 import android.content.res.Resources
+import com.zf.camera.trick.utils.TrickLog
 
-class CameraFilterSobelThresholdFilter(res: Resources) :
-    CameraFilter3x3TextureSamplingFilter(res, SOBEL_THRESHOLD_EDGE_DETECTION) {
+/**
+ * Applies sobel edge detection on the image.
+ */
+class TFilterSobelEdgeDetection(res: Resources) : TFilterGroup(res) {
+
         companion object {
-            const val SOBEL_THRESHOLD_EDGE_DETECTION = "" +
+            const val SOBEL_EDGE_DETECTION = "" +
                     "#extension GL_OES_EGL_image_external : require\n" +
 
                     "precision mediump float;\n" +
@@ -23,9 +27,6 @@ class CameraFilterSobelThresholdFilter(res: Resources) :
                     "varying vec2 bottomRightTextureCoordinate;\n" +
                     "\n" +
                     "uniform samplerExternalOES uTexture;\n" +
-                    "uniform lowp float threshold;\n" +
-                    "\n" +
-                    "const highp vec3 W = vec3(0.2125, 0.7154, 0.0721);\n" +
                     "\n" +
                     "void main()\n" +
                     "{\n" +
@@ -40,24 +41,36 @@ class CameraFilterSobelThresholdFilter(res: Resources) :
                     "    float h = -topLeftIntensity - 2.0 * topIntensity - topRightIntensity + bottomLeftIntensity + 2.0 * bottomIntensity + bottomRightIntensity;\n" +
                     "    float v = -bottomLeftIntensity - 2.0 * leftIntensity - topLeftIntensity + bottomRightIntensity + 2.0 * rightIntensity + topRightIntensity;\n" +
                     "\n" +
-                    "    float mag = 1.0 - length(vec2(h, v));\n" +
-                    "    mag = step(threshold, mag);\n" +
+                    "    float mag = length(vec2(h, v));\n" +
                     "\n" +
                     "    gl_FragColor = vec4(vec3(mag), 1.0);\n" +
-                    "}\n"
+                    "}"
         }
 
-    private var uniformThresholdLocation = 0
-    private var threshold = 0f
-
-    override fun onSurfaceCreated() {
-        super.onSurfaceCreated()
-        uniformThresholdLocation = getUniformLocation("threshold")
-        setThreshold(0.9f)
+    init {
+        addFilter(TFilterGrayScale(res));
+        addFilter(TFilter3x3TextureSamplingFilter(res, SOBEL_EDGE_DETECTION));
     }
 
-    fun setThreshold(threshold: Float) {
-        this.threshold = threshold
-        setUniformLocation(uniformThresholdLocation, threshold)
+    fun setLineSize(size: Float) {
+        TrickLog.d("setLineSize: $size")
+        (getFilters()[1] as TFilter3x3TextureSamplingFilter).setLineSize(size)
     }
+
+    override fun createAdjuster(): IAdjuster {
+        val min = 0.0f
+        val max = 5.0f
+        val default = TFilter3x3TextureSamplingFilter.DEFAULT
+        return object : IAdjuster {
+            override fun adjust(percentage: Float) {
+                val value = range(min, max, percentage)
+                setLineSize(value)
+            }
+
+            override fun getDefaultProgress(): Float {
+                return ((default - min) / (max - min)) * 100
+            }
+        }
+    }
+
 }

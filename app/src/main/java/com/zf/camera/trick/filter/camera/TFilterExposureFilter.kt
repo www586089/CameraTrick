@@ -2,11 +2,11 @@ package com.zf.camera.trick.filter.camera
 
 import android.content.res.Resources
 
-class CameraFilterExposureFilter(
+class TFilterExposureFilter(
     res: Resources,
     vertexShader: String,
     fragmentShader: String
-) : CameraFilterBase(res, vertexShader, fragmentShader) {
+) : TFilterBase(res, vertexShader, fragmentShader) {
 
     companion object {
         // 片段着色器代码

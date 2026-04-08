@@ -1,31 +1,31 @@
 package com.zf.camera.trick.filter
 
 import android.content.res.Resources
-import com.zf.camera.trick.filter.camera.CameraFilerNoChange
-import com.zf.camera.trick.filter.camera.CameraFilerSepiaTone
-import com.zf.camera.trick.filter.camera.CameraFilter3x3ConvolutionFilter
-import com.zf.camera.trick.filter.camera.CameraFilterBase
-import com.zf.camera.trick.filter.camera.CameraFilterBrightness
-import com.zf.camera.trick.filter.camera.CameraFilterContrast
-import com.zf.camera.trick.filter.camera.CameraFilterDirectionalSobelEdgeDetection
-import com.zf.camera.trick.filter.camera.CameraFilterEmbossFilter
-import com.zf.camera.trick.filter.camera.CameraFilterExposureFilter
-import com.zf.camera.trick.filter.camera.CameraFilterGamma
-import com.zf.camera.trick.filter.camera.CameraFilterGrayScale
-import com.zf.camera.trick.filter.camera.CameraFilterGroup
-import com.zf.camera.trick.filter.camera.CameraFilterHighlightShadowFilter
-import com.zf.camera.trick.filter.camera.CameraFilterHue
-import com.zf.camera.trick.filter.camera.CameraFilterInvert
-import com.zf.camera.trick.filter.camera.CameraFilterMonochromeFilter
-import com.zf.camera.trick.filter.camera.CameraFilterOpacityFilter
-import com.zf.camera.trick.filter.camera.CameraFilterPixelation
-import com.zf.camera.trick.filter.camera.CameraFilterPosterize
-import com.zf.camera.trick.filter.camera.CameraFilterRGBFilter
-import com.zf.camera.trick.filter.camera.CameraFilterSaturationFilter
-import com.zf.camera.trick.filter.camera.CameraFilterSharpness
-import com.zf.camera.trick.filter.camera.CameraFilterSobelEdgeDetection
-import com.zf.camera.trick.filter.camera.CameraFilterThresholdEdgeDetectionFilter
-import com.zf.camera.trick.filter.camera.CameraFilterWhiteBalanceFilter
+import com.zf.camera.trick.filter.camera.TFilerNoChange
+import com.zf.camera.trick.filter.camera.TFilerSepiaTone
+import com.zf.camera.trick.filter.camera.TFilter3x3ConvolutionFilter
+import com.zf.camera.trick.filter.camera.TFilterBase
+import com.zf.camera.trick.filter.camera.TFilterBrightness
+import com.zf.camera.trick.filter.camera.TFilterContrast
+import com.zf.camera.trick.filter.camera.TFilterDirectionalSobelEdgeDetection
+import com.zf.camera.trick.filter.camera.TFilterEmbossFilter
+import com.zf.camera.trick.filter.camera.TFilterExposureFilter
+import com.zf.camera.trick.filter.camera.TFilterGamma
+import com.zf.camera.trick.filter.camera.TFilterGrayScale
+import com.zf.camera.trick.filter.camera.TFilterGroup
+import com.zf.camera.trick.filter.camera.TFilterHighlightShadowFilter
+import com.zf.camera.trick.filter.camera.TFilterHue
+import com.zf.camera.trick.filter.camera.TFilterInvert
+import com.zf.camera.trick.filter.camera.TFilterMonochromeFilter
+import com.zf.camera.trick.filter.camera.TFilterOpacityFilter
+import com.zf.camera.trick.filter.camera.TFilterPixelation
+import com.zf.camera.trick.filter.camera.TFilterPosterize
+import com.zf.camera.trick.filter.camera.TFilterRGBFilter
+import com.zf.camera.trick.filter.camera.TFilterSaturationFilter
+import com.zf.camera.trick.filter.camera.TFilterSharpness
+import com.zf.camera.trick.filter.camera.TFilterSobelEdgeDetection
+import com.zf.camera.trick.filter.camera.TFilterThresholdEdgeDetectionFilter
+import com.zf.camera.trick.filter.camera.TFilterWhiteBalanceFilter
 
 class CameraFilterFactory {
 
@@ -58,37 +58,37 @@ class CameraFilterFactory {
         val instance = CameraFilterFactory()
             get
     }
-    fun getFilter(resources: Resources?, type: Int): CameraFilterBase {
+    fun getFilter(resources: Resources?, type: Int): TFilterBase {
         when (type) {
-            NO_FILTER -> return CameraFilerNoChange(resources!!)
-            FILTER_TYPE_CONTRAST -> return CameraFilterContrast(resources!!)
-            FILTER_TYPE_INVERT -> return CameraFilterInvert(resources!!)
-            FILTER_TYPE_PIXELATION -> return CameraFilterPixelation(resources!!)
-            FILTER_TYPE_HUE -> return CameraFilterHue(resources!!)
-            FILTER_TYPE_GAMMA -> return CameraFilterGamma(resources!!)
-            FILTER_TYPE_BRIGHTNESS -> return CameraFilterBrightness(resources!!)
-            FILTER_TYPE_SEPIA_TONE -> return CameraFilerSepiaTone(resources!!)
-            FILTER_TYPE_GRAY_SCALE -> return CameraFilterGrayScale(resources!!)
-            FILTER_TYPE_SHARPNESS -> return CameraFilterSharpness(resources!!)
-            FILTER_TYPE_SOBEL_EDGE_DETECTION -> return CameraFilterSobelEdgeDetection(resources!!)
-            FILTER_TYPE_THRESHOLD_EDGE_DETECTION -> return CameraFilterThresholdEdgeDetectionFilter(resources!!)
-            FILTER_TYPE_THREE_X_THREE_CONVOLUTION -> return CameraFilter3x3ConvolutionFilter(resources!!)
-            FILTER_TYPE_EMBOSS -> return CameraFilterEmbossFilter(resources!!)
-            FILTER_TYPE_POSTERIZE -> return CameraFilterPosterize(resources!!)
-            FILTER_TYPE_FILTER_GROUP -> return CameraFilterGroup(resources!!, mutableListOf(
+            NO_FILTER -> return TFilerNoChange(resources!!)
+            FILTER_TYPE_CONTRAST -> return TFilterContrast(resources!!)
+            FILTER_TYPE_INVERT -> return TFilterInvert(resources!!)
+            FILTER_TYPE_PIXELATION -> return TFilterPixelation(resources!!)
+            FILTER_TYPE_HUE -> return TFilterHue(resources!!)
+            FILTER_TYPE_GAMMA -> return TFilterGamma(resources!!)
+            FILTER_TYPE_BRIGHTNESS -> return TFilterBrightness(resources!!)
+            FILTER_TYPE_SEPIA_TONE -> return TFilerSepiaTone(resources!!)
+            FILTER_TYPE_GRAY_SCALE -> return TFilterGrayScale(resources!!)
+            FILTER_TYPE_SHARPNESS -> return TFilterSharpness(resources!!)
+            FILTER_TYPE_SOBEL_EDGE_DETECTION -> return TFilterSobelEdgeDetection(resources!!)
+            FILTER_TYPE_THRESHOLD_EDGE_DETECTION -> return TFilterThresholdEdgeDetectionFilter(resources!!)
+            FILTER_TYPE_THREE_X_THREE_CONVOLUTION -> return TFilter3x3ConvolutionFilter(resources!!)
+            FILTER_TYPE_EMBOSS -> return TFilterEmbossFilter(resources!!)
+            FILTER_TYPE_POSTERIZE -> return TFilterPosterize(resources!!)
+            FILTER_TYPE_FILTER_GROUP -> return TFilterGroup(resources!!, mutableListOf(
                 //todo 组合起来后，切换到其他filter会崩溃，应该是CameraFilterGroup有bug
-                CameraFilterContrast(resources),
-                CameraFilterDirectionalSobelEdgeDetection(resources),
-                CameraFilterGrayScale(resources))
+                TFilterContrast(resources),
+                TFilterDirectionalSobelEdgeDetection(resources),
+                TFilterGrayScale(resources))
             )
-            FILTER_TYPE_SATURATION -> return CameraFilterSaturationFilter(resources!!)
-            FILTER_TYPE_EXPOSURE -> return CameraFilterExposureFilter(resources!!)
-            FILTER_TYPE_HIGHLIGHT_SHADOW -> return CameraFilterHighlightShadowFilter(resources!!)
-            FILTER_TYPE_MONOCHROME -> return CameraFilterMonochromeFilter(resources!!)
-            FILTER_TYPE_OPACITY -> return CameraFilterOpacityFilter(resources!!)
-            FILTER_TYPE_RGB -> return CameraFilterRGBFilter(resources!!)
-            FILTER_TYPE_WHITE_BALANCE -> return CameraFilterWhiteBalanceFilter(resources!!)
+            FILTER_TYPE_SATURATION -> return TFilterSaturationFilter(resources!!)
+            FILTER_TYPE_EXPOSURE -> return TFilterExposureFilter(resources!!)
+            FILTER_TYPE_HIGHLIGHT_SHADOW -> return TFilterHighlightShadowFilter(resources!!)
+            FILTER_TYPE_MONOCHROME -> return TFilterMonochromeFilter(resources!!)
+            FILTER_TYPE_OPACITY -> return TFilterOpacityFilter(resources!!)
+            FILTER_TYPE_RGB -> return TFilterRGBFilter(resources!!)
+            FILTER_TYPE_WHITE_BALANCE -> return TFilterWhiteBalanceFilter(resources!!)
         }
-        return CameraFilerNoChange(resources!!)
+        return TFilerNoChange(resources!!)
     }
 }

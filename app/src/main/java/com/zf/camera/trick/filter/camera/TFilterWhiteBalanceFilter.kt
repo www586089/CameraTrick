@@ -8,8 +8,8 @@ import android.content.res.Resources
  * temperature:
  * tint:
  */
-class CameraFilterWhiteBalanceFilter(res: Resources) :
-    CameraFilterBase(res, NO_FILTER_VERTEX_SHADER, fShader) {
+class TFilterWhiteBalanceFilter(res: Resources) :
+    TFilterBase(res, NO_FILTER_VERTEX_SHADER, fShader) {
 
     companion object {
         // 片段着色器代码

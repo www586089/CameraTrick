@@ -3,8 +3,8 @@ package com.zf.camera.trick.filter.camera
 import android.content.res.Resources
 
 
-open class CameraFilterGrayScale(res: Resources, vertexShader: String, fragmentShader: String) :
-    CameraFilterBase(res, vertexShader, fragmentShader) {
+open class TFilterGrayScale(res: Resources, vertexShader: String, fragmentShader: String) :
+    TFilterBase(res, vertexShader, fragmentShader) {
 
     companion object {
         private const val vertexShader = NO_FILTER_VERTEX_SHADER

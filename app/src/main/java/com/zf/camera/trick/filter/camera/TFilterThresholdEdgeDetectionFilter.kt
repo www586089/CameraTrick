@@ -6,22 +6,22 @@ import com.zf.camera.trick.utils.TrickLog
 /**
  * Applies sobel edge detection on the image.
  */
-class CameraFilterThresholdEdgeDetectionFilter(res: Resources): CameraFilterGroup(res) {
+class TFilterThresholdEdgeDetectionFilter(res: Resources): TFilterGroup(res) {
 
     init {
-        addFilter(CameraFilterGrayScale(res))
-        addFilter(CameraFilterSobelThresholdFilter(res))
+        addFilter(TFilterGrayScale(res))
+        addFilter(TFilterSobelThresholdFilter(res))
     }
 
     fun setLineSize(size: Float) {
         TrickLog.d("setLineSize: $size")
-        (getFilters()[1] as CameraFilter3x3TextureSamplingFilter).setLineSize(size)
+        (getFilters()[1] as TFilter3x3TextureSamplingFilter).setLineSize(size)
     }
 
     override fun createAdjuster(): IAdjuster {
         val min = 0.0f
         val max = 5.0f
-        val default = CameraFilter3x3TextureSamplingFilter.DEFAULT
+        val default = TFilter3x3TextureSamplingFilter.DEFAULT
         return object : IAdjuster {
             override fun adjust(percentage: Float) {
                 val value = range(min, max, percentage)

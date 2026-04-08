@@ -23,7 +23,7 @@ import java.util.LinkedList;
 
 import javax.microedition.khronos.opengles.GL10;
 
-public class CameraFilterBase extends AFilter {
+public class TFilterBase extends AFilter {
 
 
     private String TAG = "CameraFilterBase";
@@ -196,11 +196,11 @@ public class CameraFilterBase extends AFilter {
     private String mVertexShader;
     private String mFragmentShader;
 
-    public CameraFilterBase(Resources resources) {
+    public TFilterBase(Resources resources) {
         this(resources, NO_FILTER_VERTEX_SHADER, NO_FILTER_FRAGMENT_SHADER);
     }
 
-    public CameraFilterBase(Resources resources, String vertexShader, String fragmentShader) {
+    public TFilterBase(Resources resources, String vertexShader, String fragmentShader) {
         this.mVertexShader = vertexShader;
         this.mFragmentShader = fragmentShader;
         mBitmap = BitmapFactory.decodeResource(resources, R.drawable.girl1);

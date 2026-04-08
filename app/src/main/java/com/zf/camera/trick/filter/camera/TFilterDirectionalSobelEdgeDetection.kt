@@ -2,8 +2,8 @@ package com.zf.camera.trick.filter.camera
 
 import android.content.res.Resources
 
-class CameraFilterDirectionalSobelEdgeDetection(res: Resources) :
-    CameraFilter3x3TextureSamplingFilter(res, DIRECTIONAL_SOBEL_EDGE_DETECTION_FRAGMENT_SHADER) {
+class TFilterDirectionalSobelEdgeDetection(res: Resources) :
+    TFilter3x3TextureSamplingFilter(res, DIRECTIONAL_SOBEL_EDGE_DETECTION_FRAGMENT_SHADER) {
     companion object {
         const val DIRECTIONAL_SOBEL_EDGE_DETECTION_FRAGMENT_SHADER = "" +
                 "#extension GL_OES_EGL_image_external : require\n" +

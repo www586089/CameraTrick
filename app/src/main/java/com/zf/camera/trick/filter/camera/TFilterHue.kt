@@ -3,8 +3,8 @@ package com.zf.camera.trick.filter.camera
 import android.content.res.Resources
 
 
-class CameraFilterHue(res: Resources) :
-    CameraFilterBase(res, NO_FILTER_VERTEX_SHADER, FRAGMENT_SHADER_HUE) {
+class TFilterHue(res: Resources) :
+    TFilterBase(res, NO_FILTER_VERTEX_SHADER, FRAGMENT_SHADER_HUE) {
 
     companion object {
         // 片段着色器代码

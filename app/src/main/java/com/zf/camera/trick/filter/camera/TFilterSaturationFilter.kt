@@ -2,8 +2,8 @@ package com.zf.camera.trick.filter.camera
 
 import android.content.res.Resources
 
-class CameraFilterSaturationFilter(res: Resources) :
-    CameraFilterBase(res, NO_FILTER_VERTEX_SHADER, fShader) {
+class TFilterSaturationFilter(res: Resources) :
+    TFilterBase(res, NO_FILTER_VERTEX_SHADER, fShader) {
 
     companion object {
         // 片段着色器代码

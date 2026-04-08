@@ -2,7 +2,7 @@ package com.zf.camera.trick.filter.camera
 
 import android.content.res.Resources
 
-class CameraFilerSepiaTone(val res: Resources): ColorMatrixFilter(res) {
+class TFilerSepiaTone(val res: Resources): ColorMatrixFilter(res) {
 
 
     override fun onSurfaceCreated() {

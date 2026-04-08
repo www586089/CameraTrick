@@ -2,7 +2,7 @@ package com.zf.camera.trick.filter.camera
 
 import android.content.res.Resources
 
-class CameraFilterEmbossFilter(res: Resources): CameraFilter3x3ConvolutionFilter(res) {
+class TFilterEmbossFilter(res: Resources): TFilter3x3ConvolutionFilter(res) {
     private var intensity = 0f
     init {
         this.intensity = 1.0f

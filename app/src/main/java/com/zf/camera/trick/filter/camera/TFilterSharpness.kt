@@ -3,8 +3,8 @@ package com.zf.camera.trick.filter.camera
 import android.content.res.Resources
 
 
-class CameraFilterSharpness(res: Resources, vertexShader: String, fragmentShader: String) :
-    CameraFilterBase(res, vertexShader, fragmentShader) {
+class TFilterSharpness(res: Resources, vertexShader: String, fragmentShader: String) :
+    TFilterBase(res, vertexShader, fragmentShader) {
 
     companion object {
         private const val DEFAULT_SHARPNESS = 0.0f

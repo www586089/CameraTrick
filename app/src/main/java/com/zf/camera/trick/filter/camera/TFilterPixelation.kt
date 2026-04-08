@@ -3,7 +3,7 @@ package com.zf.camera.trick.filter.camera
 import android.content.res.Resources
 
 
-class CameraFilterPixelation(res: Resources) : CameraFilterBase(res, NO_FILTER_VERTEX_SHADER, FRAGMENT_SHADER_PIXELATION) {
+class TFilterPixelation(res: Resources) : TFilterBase(res, NO_FILTER_VERTEX_SHADER, FRAGMENT_SHADER_PIXELATION) {
 
     companion object {
         // 片段着色器代码

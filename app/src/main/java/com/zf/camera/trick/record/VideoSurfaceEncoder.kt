@@ -15,7 +15,7 @@ import android.os.Message
 import android.util.Log
 import com.zf.camera.trick.App
 import com.zf.camera.trick.filter.CameraFilterFactory
-import com.zf.camera.trick.filter.camera.CameraFilterBase
+import com.zf.camera.trick.filter.camera.TFilterBase
 import com.zf.camera.trick.gl.egl.EglCore
 import com.zf.camera.trick.gl.egl.WindowSurface
 import com.zf.camera.trick.utils.TrickLog
@@ -34,7 +34,7 @@ class VideoSurfaceEncoder : Runnable, ISurfaceVideoRecorder {
     private lateinit var mShareContext: EGLContext
     private lateinit var mInputWindowSurface: WindowSurface
     private lateinit var mEglCore: EglCore
-    private lateinit var mCameraFilter: CameraFilterBase
+    private lateinit var mCameraFilter: TFilterBase
     private lateinit var mEncodeHandler: EncodeHandler
     private var mTextureId = 0
     private val mReadyFence = Object()

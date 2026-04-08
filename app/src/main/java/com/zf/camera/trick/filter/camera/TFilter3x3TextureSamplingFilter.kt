@@ -3,8 +3,8 @@ package com.zf.camera.trick.filter.camera
 import android.content.res.Resources
 import com.zf.camera.trick.utils.TrickLog
 
-open class CameraFilter3x3TextureSamplingFilter(res: Resources, fragShader: String) :
-    CameraFilterBase(res, THREE_X_THREE_TEXTURE_SAMPLING_VERTEX_SHADER, fragShader) {
+open class TFilter3x3TextureSamplingFilter(res: Resources, fragShader: String) :
+    TFilterBase(res, THREE_X_THREE_TEXTURE_SAMPLING_VERTEX_SHADER, fragShader) {
 
     companion object {
         const val THREE_X_THREE_TEXTURE_SAMPLING_VERTEX_SHADER = "" +

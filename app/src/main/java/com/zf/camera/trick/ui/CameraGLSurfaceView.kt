@@ -12,8 +12,8 @@ import android.view.SurfaceHolder
 import com.zf.camera.trick.App
 import com.zf.camera.trick.callback.PictureBufferCallback
 import com.zf.camera.trick.filter.CameraFilterFactory
-import com.zf.camera.trick.filter.camera.CameraFilerNoChange
-import com.zf.camera.trick.filter.camera.CameraFilterBase
+import com.zf.camera.trick.filter.camera.TFilerNoChange
+import com.zf.camera.trick.filter.camera.TFilterBase
 import com.zf.camera.trick.manager.CameraManager
 import com.zf.camera.trick.manager.ICameraCallback
 import com.zf.camera.trick.manager.ICameraManager
@@ -270,7 +270,7 @@ class CameraGLSurfaceView(context: Context, attrs: AttributeSet) : GLSurfaceView
 
 
     internal class MyRenderer(private val mView: CameraGLSurfaceView) : Renderer {
-        private var mCameraFilter: CameraFilterBase = CameraFilerNoChange(App.get().resources)
+        private var mCameraFilter: TFilterBase = TFilerNoChange(App.get().resources)
         private var mTextureId = 0
         private var mSurfaceTexture: SurfaceTexture? = null
         private val mDisplayProjectionMatrix = FloatArray(16)
