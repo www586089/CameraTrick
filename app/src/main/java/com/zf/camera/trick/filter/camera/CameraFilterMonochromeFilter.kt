@@ -8,8 +8,8 @@ class CameraFilterMonochromeFilter(res: Resources) :
     companion object {
         // 片段着色器代码
         const val fShader = "" +
-                "#extension GL_OES_EGL_image_external : require\n" +
-                " precision lowp float;\n" +
+                "  #extension GL_OES_EGL_image_external : require\n" +
+                "  precision lowp float;\n" +
                 "  \n" +
                 "  varying highp vec2 vTexCoordinate;\n" +
                 "  \n" +

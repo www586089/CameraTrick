@@ -17,6 +17,7 @@ import com.zf.camera.trick.filter.camera.CameraFilterHighlightShadowFilter
 import com.zf.camera.trick.filter.camera.CameraFilterHue
 import com.zf.camera.trick.filter.camera.CameraFilterInvert
 import com.zf.camera.trick.filter.camera.CameraFilterMonochromeFilter
+import com.zf.camera.trick.filter.camera.CameraFilterOpacityFilter
 import com.zf.camera.trick.filter.camera.CameraFilterPixelation
 import com.zf.camera.trick.filter.camera.CameraFilterPosterize
 import com.zf.camera.trick.filter.camera.CameraFilterSaturationFilter
@@ -49,6 +50,7 @@ class CameraFilterFactory {
         val FILTER_TYPE_EXPOSURE = NO_FILTER + 17
         val FILTER_TYPE_HIGHLIGHT_SHADOW = NO_FILTER + 18
         val FILTER_TYPE_MONOCHROME = NO_FILTER + 19
+        val FILTER_TYPE_OPACITY = NO_FILTER + 20
         val instance = CameraFilterFactory()
             get
     }
@@ -79,6 +81,7 @@ class CameraFilterFactory {
             FILTER_TYPE_EXPOSURE -> return CameraFilterExposureFilter(resources!!)
             FILTER_TYPE_HIGHLIGHT_SHADOW -> return CameraFilterHighlightShadowFilter(resources!!)
             FILTER_TYPE_MONOCHROME -> return CameraFilterMonochromeFilter(resources!!)
+            FILTER_TYPE_OPACITY -> return CameraFilterOpacityFilter(resources!!)
         }
         return CameraFilerNoChange(resources!!)
     }
