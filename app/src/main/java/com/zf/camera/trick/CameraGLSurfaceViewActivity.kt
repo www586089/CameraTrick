@@ -21,6 +21,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import com.gyf.immersionbar.ImmersionBar
 import com.zf.camera.trick.base.BaseActivity
+import com.zf.camera.trick.bean.MenuInstance
 import com.zf.camera.trick.callback.PictureBufferCallback
 import com.zf.camera.trick.filter.CameraFilterFactory
 import com.zf.camera.trick.record.VideoRecordListener
@@ -67,29 +68,7 @@ class CameraGLSurfaceViewActivity: BaseActivity(), EasyPermissions.RationaleCall
         return super.onPrepareOptionsMenu(menu)
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu.add(0, CameraFilterFactory.NO_FILTER, CameraFilterFactory.NO_FILTER, "No Filter")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_CONTRAST, CameraFilterFactory.FILTER_TYPE_CONTRAST, "Contrast")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_INVERT, CameraFilterFactory.FILTER_TYPE_INVERT, "Invert")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_PIXELATION, CameraFilterFactory.FILTER_TYPE_PIXELATION, "Pixelation")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_HUE, CameraFilterFactory.FILTER_TYPE_HUE, "Hue")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_GAMMA, CameraFilterFactory.FILTER_TYPE_GAMMA, "Gamma")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_BRIGHTNESS, CameraFilterFactory.FILTER_TYPE_BRIGHTNESS, "Brightness")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_SEPIA_TONE, CameraFilterFactory.FILTER_TYPE_SEPIA_TONE, "SepiaTone")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_GRAY_SCALE, CameraFilterFactory.FILTER_TYPE_GRAY_SCALE, "GrayScale")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_SHARPNESS, CameraFilterFactory.FILTER_TYPE_SHARPNESS, "Sharpness")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_SOBEL_EDGE_DETECTION, CameraFilterFactory.FILTER_TYPE_SOBEL_EDGE_DETECTION, "Sobel Edge Detection")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_THRESHOLD_EDGE_DETECTION, CameraFilterFactory.FILTER_TYPE_THRESHOLD_EDGE_DETECTION, "Threshold Edge Detection")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_THREE_X_THREE_CONVOLUTION, CameraFilterFactory.FILTER_TYPE_THREE_X_THREE_CONVOLUTION, "3x3 Convolution")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_EMBOSS, CameraFilterFactory.FILTER_TYPE_EMBOSS, "Emboss")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_POSTERIZE, CameraFilterFactory.FILTER_TYPE_POSTERIZE, "Posterize")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_FILTER_GROUP, CameraFilterFactory.FILTER_TYPE_FILTER_GROUP, "Grouped filters")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_SATURATION, CameraFilterFactory.FILTER_TYPE_SATURATION, "Saturation")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_EXPOSURE, CameraFilterFactory.FILTER_TYPE_EXPOSURE, "Exposure")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_HIGHLIGHT_SHADOW, CameraFilterFactory.FILTER_TYPE_HIGHLIGHT_SHADOW, "Highlight Shadow")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_MONOCHROME, CameraFilterFactory.FILTER_TYPE_MONOCHROME, "Monochrome")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_OPACITY, CameraFilterFactory.FILTER_TYPE_OPACITY, "Opacity")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_RGB, CameraFilterFactory.FILTER_TYPE_RGB, "RGB")
-        menu.add(0, CameraFilterFactory.FILTER_TYPE_WHITE_BALANCE, CameraFilterFactory.FILTER_TYPE_WHITE_BALANCE, "White Balance")
+        MenuInstance.getMenuList().forEach { menu.add(it.groupId, it.itemId, it.order, it.title) }
         super.onCreateOptionsMenu(menu)
         menu.setGroupCheckable(0, true, true)
         return true
