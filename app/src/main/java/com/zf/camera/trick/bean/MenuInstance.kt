@@ -27,6 +27,7 @@ object MenuInstance {
         MenuBean(0, CameraFilterFactory.FILTER_TYPE_OPACITY, CameraFilterFactory.FILTER_TYPE_OPACITY, "Opacity"),
         MenuBean(0, CameraFilterFactory.FILTER_TYPE_RGB, CameraFilterFactory.FILTER_TYPE_RGB, "RGB"),
         MenuBean(0, CameraFilterFactory.FILTER_TYPE_WHITE_BALANCE, CameraFilterFactory.FILTER_TYPE_WHITE_BALANCE, "White Balance"),
+        MenuBean(0, CameraFilterFactory.FILTER_TYPE_VIGNETTE, CameraFilterFactory.FILTER_TYPE_VIGNETTE, "Vignette"),
     )
 
     fun getMenuList(): List<MenuBean> {

@@ -4,6 +4,7 @@ package com.zf.camera.trick.filter.camera;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PointF;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLES30;
@@ -403,6 +404,17 @@ public class TFilterBase extends AFilter {
     public void setUniformLocation(int location, float value) {
         synchronized (mRunOnDraw) {
             mRunOnDraw.add(() -> GLES30.glUniform1f(location, value));
+        }
+    }
+
+    public void setUniformLocation2fv(final int location, final PointF point) {
+        synchronized (mRunOnDraw) {
+            mRunOnDraw.add(() -> {
+                float[] vec2 = new float[2];
+                vec2[0] = point.x;
+                vec2[1] = point.y;
+                GLES20.glUniform2fv(location, 1, vec2, 0);
+            });
         }
     }
 
