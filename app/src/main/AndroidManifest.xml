@@ -42,6 +42,7 @@
         <activity android:name=".CameraActivity" />
         <activity android:name=".CameraGLSurfaceViewActivity"/>
         <activity android:name=".GLTestActivity"/>
+        <activity android:name=".GameHuaRongActivity"/>
     </application>
 
 </manifest>

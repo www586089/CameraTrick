@@ -19,5 +19,9 @@ class MainActivity : BaseActivity() {
         findViewById<AppCompatTextView>(R.id.picture_tv).setOnClickListener {
             GLTestActivity.start(this)
         }
+        findViewById<AppCompatTextView>(R.id.huarong_tv).setOnClickListener {
+            GameHuaRongActivity.startActivity(this)
+        }
+
     }
 }
