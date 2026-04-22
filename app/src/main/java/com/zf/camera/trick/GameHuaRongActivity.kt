@@ -12,7 +12,6 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.compose.ui.res.stringResource
 import com.zf.camera.trick.base.BaseActivity
 
 open class GameHuaRongActivity: BaseActivity() {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -27,6 +28,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#aa67c8ff"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text="1"
                 android:textSize="50sp" />
@@ -37,6 +39,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#9967c8ff"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text="2"
                 android:textSize="50sp" />
@@ -47,6 +50,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#8867c8ff"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text="3"
                 android:textSize="50sp" />
@@ -64,6 +68,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#7767c8ff"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text="4"
                 android:textSize="50sp" />
@@ -74,6 +79,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#6667c8ff"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text="5"
                 android:textSize="50sp" />
@@ -84,6 +90,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#5567c8ff"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text="6"
                 android:textSize="50sp" />
@@ -101,6 +108,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#4467c8ff"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text="7"
                 android:textSize="50sp" />
@@ -111,6 +119,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#3367c8ff"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text="8"
                 android:textSize="50sp" />
@@ -121,6 +130,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#2267c8ff"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text=""
                 android:textSize="50sp" />
@@ -136,8 +146,10 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_centerVertical="true"
+            android:gravity="center"
             android:layout_alignParentStart="true"
-            android:textSize="34sp" />
+            android:textSize="24sp"
+            tools:text="步数：2"/>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/reset"
