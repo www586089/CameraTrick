@@ -8,8 +8,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import com.zf.camera.trick.base.BaseActivity
-import java.util.Collections
-import kotlin.random.Random
 
 open class GameHuaRongActivity: BaseActivity() {
     private val TAG = "GameHuaRongActivity"
@@ -74,15 +72,53 @@ open class GameHuaRongActivity: BaseActivity() {
         }
     }
 
+    /**
+     * 注意：3×3 无解判定还需结合空位位置！
+     * 若空位在右下角（目标位置），逆序数奇数 → 无解；
+     * 最后一个数是0才统计（代表右下角为空，此时若逆序数为奇数则无解）
+     * 判断方法如下：
+     * 1. 遍历数组，统计逆序数(剔除最后一个数0)；
+     * 2. 若逆序数是奇数，则无解。
+     */
     private fun initData() {
         numData.clear()
         dataSet.clear()
 
         val tmpArray = mutableListOf<Int>()
-        for (i in 0..8) {
+        val numberTop = 8
+        val lineCount = 3
+        for (i in 0..numberTop) {
             tmpArray.add(i)
         }
-        tmpArray.shuffle()
+
+        tmpArray.clear()
+//        tmpArray.addAll(listOf(3, 4, 2, 7, 6, 5, 1, 8, 0))//无解
+        while (true) {
+            tmpArray.shuffle()
+            Log.d(TAG, "initData: tmpArray = ${tmpArray.joinToString(",")}")
+            if (tmpArray[numberTop] == 0) {
+                //判断是否无解
+                var sum = 0
+                var firstNumber = -1
+                for (i in 0..<numberTop) {
+                    firstNumber = tmpArray[i]
+                    for (j in (i + 1)..< numberTop) {
+                        //统计逆序数
+                        if (firstNumber > tmpArray[j]) {
+                            sum++
+                        }
+                    }
+                }
+                if (sum % 2 == 1) {
+                    Log.e(TAG, "initData: 当前数据无解，重新生成数据, sum = ${sum}, tmpArray = ${tmpArray.joinToString(",")}")
+                } else {
+                    break
+                }
+            } else {
+                break
+            }
+        }
+
         tmpArray.forEachIndexed { index, itemNumber ->
             if (0 == itemNumber) {
                 emptyViewLocation = index
