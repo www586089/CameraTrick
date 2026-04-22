@@ -1,11 +1,15 @@
 package com.zf.camera.trick
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
+import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.ui.res.stringResource
@@ -33,6 +37,11 @@ open class GameHuaRongActivity: BaseActivity() {
     private lateinit var mNumView8: AppCompatTextView;
     private lateinit var resetButton: AppCompatTextView
     private lateinit var stepTextView: AppCompatTextView
+
+    private lateinit var content: View
+    private lateinit var line1: View
+    private lateinit var line2: View
+    private lateinit var line3: View
 
     private var numViewArray = listOf<AppCompatTextView>()
     private var numData = mutableListOf<Data>()
@@ -150,11 +159,35 @@ open class GameHuaRongActivity: BaseActivity() {
         }
     }
 
+    /**
+     * 获取屏幕物理宽度（px）
+     * @param context 上下文，建议使用 Activity 避免内存泄漏
+     */
+    fun getScreenPhysicalWidth(context: Context): Int {
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val displayMetrics = DisplayMetrics()
+        // 获取屏幕显示信息
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        return displayMetrics.widthPixels
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
-            viewHeight = mNumView1.measuredHeight.toFloat()
+
+            viewHeight = getScreenPhysicalWidth(this) / 3f
             viewWidth = mNumView1.measuredWidth.toFloat()
+            val LP1 = line1.layoutParams
+            LP1.height = viewHeight.toInt()
+            line1.layoutParams = LP1
+
+            val LP2 = line2.layoutParams
+            LP2.height = viewHeight.toInt()
+            line2.layoutParams = LP2
+
+            val LP3 = line3.layoutParams
+            LP3.height = viewHeight.toInt()
+            line3.layoutParams = LP3
             Log.d(TAG, "onWindowFocusChanged: viewHeight = $viewHeight, viewWidth = $viewWidth")
         }
     }
@@ -171,6 +204,11 @@ open class GameHuaRongActivity: BaseActivity() {
         mNumView6 = findViewById(R.id.number_6)
         mNumView7 = findViewById(R.id.number_7)
         mNumView8 = findViewById(R.id.number_8)
+
+        content = findViewById(R.id.content)
+        line1 = findViewById(R.id.line1)
+        line2 = findViewById(R.id.line2)
+        line3 = findViewById(R.id.line3)
 
         stepTextView = findViewById(R.id.game_step)
         resetButton = findViewById(R.id.reset)
