@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.zf.camera.trick"
-    compileSdk = 34
+    compileSdk = 35
 
     viewBinding {
         enable = true
@@ -57,16 +57,20 @@ android {
     defaultConfig {
         applicationId = "com.zf.camera.trick"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
+
+        // 默认值
+        buildConfigField("Boolean", "isRelease", "false")
+        manifestPlaceholders["isRelease"] = "false"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
         ndk {
-//            abiFilters.add("armeabi")
+            abiFilters.add("armeabi")
             abiFilters.add("arm64-v8a")
             abiFilters.add("armeabi-v7a")
 //            abiFilters.add("x86")
@@ -121,7 +125,25 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+            // 默认不是正式包
+            buildConfigField("Boolean", "isRelease", "true")
         }
+
+        debug {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+            // 默认不是正式包
+            buildConfigField("Boolean", "isRelease", "false")
+        }
+    }
+
+    // 必须开启 buildConfig（新版 Gradle 默认关闭）
+    buildFeatures {
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -182,4 +204,7 @@ dependencies {
 
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
+
+    //bugly
+    implementation("com.tencent.bugly:crashreport:4.1.9.3")
 }

@@ -2,6 +2,7 @@ package com.zf.camera.trick
 
 import android.app.Application
 import android.content.Context
+import com.tencent.bugly.crashreport.CrashReport
 import com.zf.camera.trick.utils.ImageUtils
 
 class App : Application() {
@@ -12,6 +13,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        CrashReport.initCrashReport(applicationContext, "c5f216e93e", !BuildConfig.isRelease);
         ImageUtils.init(this)
     }
 

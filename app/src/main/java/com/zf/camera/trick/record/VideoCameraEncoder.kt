@@ -164,7 +164,7 @@ class VideoCameraEncoder: IMediaRecorder, ICameraVideoRecorder {
                 TrickLog.d(TAG, "put EOS no Stream")
                 codec.queueInputBuffer(index, 0, 0, getPTU(), endOfStreamFlag)
             } else {
-                mIndexDeque.addLast(index)
+                mIndexDeque.add(index)
             }
         }
     }
@@ -216,7 +216,7 @@ class VideoCameraEncoder: IMediaRecorder, ICameraVideoRecorder {
 
         val copyData = ByteArray(data.size)
         System.arraycopy(data, 0, copyData, 0, data.size)
-        mFrameDeque.addLast(copyData)
+        mFrameDeque.add(copyData)
         checkIndexBuffer()
     }
 
