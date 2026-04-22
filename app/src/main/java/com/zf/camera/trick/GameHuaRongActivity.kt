@@ -2,11 +2,13 @@ package com.zf.camera.trick
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.compose.ui.res.stringResource
 import com.zf.camera.trick.base.BaseActivity
 
 open class GameHuaRongActivity: BaseActivity() {
@@ -67,11 +69,29 @@ open class GameHuaRongActivity: BaseActivity() {
             } else {
                 appCompatTextView.text = ""
             }
+            appCompatTextView.setBackgroundColor(Color.parseColor(data.bgColor))
 
             setListener(appCompatTextView, index)
         }
     }
 
+    /**
+     * 数字转 16 进制字符串
+     * @param uppercase 是否输出大写，默认 true
+     * @param padStart 最小长度，不足自动补 0，默认 0（不补）
+     */
+    fun Number.toHex(
+        uppercase: Boolean = true,
+        padStart: Int = 0
+    ): String {
+        val hex = when (this) {
+            is Int -> this.toString(16)
+            is Long -> this.toString(16)
+            else -> this.toLong().toString(16)
+        }.padStart(padStart, '0') // 补前导零
+
+        return if (uppercase) hex.uppercase() else hex
+    }
     /**
      * 注意：3×3 无解判定还需结合空位位置！
      * 若空位在右下角（目标位置），逆序数奇数 → 无解；
@@ -84,27 +104,28 @@ open class GameHuaRongActivity: BaseActivity() {
         numData.clear()
         dataSet.clear()
 
-        val tmpArray = mutableListOf<Int>()
+        val tmpArray = mutableListOf<Data>()
         val numberTop = 8
         val lineCount = 3
         for (i in 0..numberTop) {
-            tmpArray.add(i)
+            val hex = (i + 2).toHex()
+            tmpArray.add(Data(i, i, "$i", "#$hex${hex}67c8ff"))
         }
 
-        tmpArray.clear()
+//        tmpArray.clear()
 //        tmpArray.addAll(listOf(3, 4, 2, 7, 6, 5, 1, 8, 0))//无解
         while (true) {
             tmpArray.shuffle()
             Log.d(TAG, "initData: tmpArray = ${tmpArray.joinToString(",")}")
-            if (tmpArray[numberTop] == 0) {
+            if (tmpArray[numberTop].itemNumber == 0) {
                 //判断是否无解
                 var sum = 0
                 var firstNumber = -1
                 for (i in 0..<numberTop) {
-                    firstNumber = tmpArray[i]
+                    firstNumber = tmpArray[i].itemNumber
                     for (j in (i + 1)..< numberTop) {
                         //统计逆序数
-                        if (firstNumber > tmpArray[j]) {
+                        if (firstNumber > tmpArray[j].itemNumber) {
                             sum++
                         }
                     }
@@ -119,11 +140,13 @@ open class GameHuaRongActivity: BaseActivity() {
             }
         }
 
-        tmpArray.forEachIndexed { index, itemNumber ->
-            if (0 == itemNumber) {
+        tmpArray.forEachIndexed { index, data ->
+            if (0 == data.itemNumber) {
                 emptyViewLocation = index
+                numData.add(Data(index, data.itemNumber, data.text, "#00000000"))
+            } else {
+                numData.add(Data(index, data.itemNumber, data.text, data.bgColor))
             }
-            numData.add(Data(index, "$itemNumber"))
         }
     }
 
@@ -275,4 +298,4 @@ open class GameHuaRongActivity: BaseActivity() {
     }
 }
 
-data class Data(val position: Int, var text: String)
+data class Data(val position: Int, val itemNumber: Int, var text: String, val bgColor: String)
