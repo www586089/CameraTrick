@@ -8,6 +8,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import com.zf.camera.trick.base.BaseActivity
+import java.util.Collections
 import kotlin.random.Random
 
 open class GameHuaRongActivity: BaseActivity() {
@@ -76,24 +77,18 @@ open class GameHuaRongActivity: BaseActivity() {
     private fun initData() {
         numData.clear()
         dataSet.clear()
+
+        val tmpArray = mutableListOf<Int>()
         for (i in 0..8) {
-            val itemNumber = getRandom()
+            tmpArray.add(i)
+        }
+        tmpArray.shuffle()
+        tmpArray.forEachIndexed { index, itemNumber ->
             if (0 == itemNumber) {
-                emptyViewLocation = i
+                emptyViewLocation = index
             }
-            numData.add(Data(i, "${itemNumber}"))
+            numData.add(Data(index, "$itemNumber"))
         }
-    }
-
-    private fun getRandom(): Int {
-        val random = Random(System.currentTimeMillis())
-        val itemNumber = random.nextInt(9)
-        if (dataSet.contains(itemNumber)) {
-            return getRandom()
-        }
-        dataSet.add(itemNumber)
-
-        return itemNumber
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
