@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">CameraTrick</string>
     <string name="step_count">Step:%d</string>
+    <string name="reverse_pairs_number">Reverse Pairs Number: %d + Empty Line Number: %d = %d</string>
 </resources>

@@ -20,6 +20,7 @@ open class GameHuaRongActivity: BaseActivity() {
 
     companion object {
         const val EMPTY_LOCATION_TEXT = ""
+        const val EMPTY_LOCATION_NUMBER = 0
         fun startActivity(activity: Activity) {
             activity.startActivity(Intent(activity, GameHuaRongActivity::class.java))
         }
@@ -44,9 +45,14 @@ open class GameHuaRongActivity: BaseActivity() {
     private lateinit var line2: View
     private lateinit var line3: View
 
+    private lateinit var debugLayout: View
+    private lateinit var debugInfoTv: AppCompatTextView
+
     private var numViewArray = listOf<AppCompatTextView>()
     private var numData = mutableListOf<Data>()
     private var dataSet = mutableSetOf<Int>()
+    private var reversePairsNumber = 0
+    private var emptyLineNumber = -1
 
     private var viewHeight = 0f
     private var viewWidth = 0f
@@ -124,21 +130,16 @@ open class GameHuaRongActivity: BaseActivity() {
         while (true) {
             tmpArray.shuffle()
             Log.d(TAG, "initData: tmpArray = ${tmpArray.joinToString(",")}")
-            if (tmpArray[numberTop].itemNumber == 0) {
+            if (isEmptyItemNumber(tmpArray[numberTop].itemNumber)) {
                 //判断是否无解
-                var sum = 0
-                var firstNumber = -1
-                for (i in 0..<numberTop) {
-                    firstNumber = tmpArray[i].itemNumber
-                    for (j in (i + 1)..< numberTop) {
-                        //统计逆序数
-                        if (firstNumber > tmpArray[j].itemNumber) {
-                            sum++
-                        }
-                    }
-                }
-                if (sum % 2 == 1) {
-                    Log.e(TAG, "initData: 当前数据无解，重新生成数据, sum = ${sum}, tmpArray = ${tmpArray.joinToString(",")}")
+                val (reversePairsNumber, _) = getReversePairsNumber(lineCount, numberTop, tmpArray)
+                if (reversePairsNumber % 2 == 1) {
+                    Log.e(
+                        TAG,
+                        "initData: 当前数据无解，重新生成数据, sum = ${reversePairsNumber}, tmpArray = ${
+                            tmpArray.joinToString(",")
+                        }"
+                    )
                 } else {
                     break
                 }
@@ -146,15 +147,51 @@ open class GameHuaRongActivity: BaseActivity() {
                 break
             }
         }
+        if (!BuildConfig.isRelease) {
+            val pair = getReversePairsNumber(lineCount, numberTop, tmpArray)
+            reversePairsNumber = pair.first
+            emptyLineNumber = pair.second
+        }
 
         tmpArray.forEachIndexed { index, data ->
-            if (0 == data.itemNumber) {
+            if (EMPTY_LOCATION_NUMBER == data.itemNumber) {
                 emptyViewLocation = index
                 numData.add(data.copy(text = EMPTY_LOCATION_TEXT, bgColor = "#00000000"))
             } else {
                 numData.add(data.copy(position = index))
             }
         }
+    }
+
+    private fun isEmptyItemNumber(itemNumber: Int): Boolean {
+        return EMPTY_LOCATION_NUMBER == itemNumber
+    }
+
+    private fun getReversePairsNumber(
+        lineCount: Int,
+        numberTop: Int,
+        tmpArray: List<Data>
+    ): Pair<Int, Int> {
+        var reversePairsNumber = 0;
+        var emptyLineNumber = -1
+
+        var firstNumber = -1
+        for (i in 0..numberTop) {
+            firstNumber = tmpArray[i].itemNumber
+            for (j in (i + 1)..numberTop) {
+                val itemNumber = tmpArray[j].itemNumber
+                //统计逆序数
+                if (!isEmptyItemNumber(itemNumber) && firstNumber > itemNumber) {
+                    reversePairsNumber++
+                }
+            }
+            if (isEmptyItemNumber(firstNumber)) {
+                //从最后一行为1开始往上数
+                emptyLineNumber = lineCount - (i / lineCount)
+            }
+        }
+
+        return Pair(reversePairsNumber, emptyLineNumber)
     }
 
     /**
@@ -208,6 +245,9 @@ open class GameHuaRongActivity: BaseActivity() {
         line2 = findViewById(R.id.line2)
         line3 = findViewById(R.id.line3)
 
+        debugLayout = findViewById(R.id.debug_info_layout)
+        debugInfoTv = findViewById(R.id.debug_info_tv)
+
         stepTextView = findViewById(R.id.game_step)
         resetButton = findViewById(R.id.reset)
 
@@ -223,6 +263,18 @@ open class GameHuaRongActivity: BaseActivity() {
         setStepCountInfo(0)
 
         actionBar?.title = "华容道"
+        if (BuildConfig.isRelease) {
+            debugLayout.visibility = View.GONE
+        } else {
+            debugLayout.visibility = View.VISIBLE
+            debugInfoTv.text = String.format(
+                Locale.ENGLISH,
+                getString(R.string.reverse_pairs_number),
+                reversePairsNumber,
+                emptyLineNumber,
+                reversePairsNumber + emptyLineNumber
+            )
+        }
     }
 
     private fun setListener(numberView: AppCompatTextView, viewIndex: Int) {
