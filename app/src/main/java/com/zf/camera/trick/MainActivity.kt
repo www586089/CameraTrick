@@ -3,6 +3,7 @@ package com.zf.camera.trick
 import android.os.Bundle
 import androidx.appcompat.widget.AppCompatTextView
 import com.zf.camera.trick.base.BaseActivity
+import com.zf.camera.trick.game.hua.GameNewHuaRongActivity
 
 class MainActivity : BaseActivity() {
 
@@ -23,7 +24,7 @@ class MainActivity : BaseActivity() {
             GameHuaRongActivity.startActivity(this)
         }
         findViewById<AppCompatTextView>(R.id.huarong_4tv).setOnClickListener {
-            GameHuaRong4Activity.startActivity(this)
+            GameNewHuaRongActivity.startActivity(this)
         }
 
     }
