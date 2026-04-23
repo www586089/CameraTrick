@@ -237,6 +237,10 @@ open class GameHuaRong4Activity : BaseActivity() {
             val LP3 = line3.layoutParams
             LP3.height = viewHeight.toInt()
             line3.layoutParams = LP3
+
+            val LP4 = line3.layoutParams
+            LP4.height = viewHeight.toInt()
+            line4.layoutParams = LP4
             Log.d(TAG, "onWindowFocusChanged: viewHeight = $viewHeight, viewWidth = $viewWidth")
         }
     }
