@@ -71,6 +71,9 @@ open class GameNewHuaRongActivity : BaseActivity() {
     private var isInAnimation = false
     private var stepCount = 0;
 
+    private var clickDebugInfoCount = 0
+    private var isShowDebugInfo = !BuildConfig.isRelease
+
     override var isDarkFont: Boolean
         get() = false
         set(value) {}
@@ -98,6 +101,9 @@ open class GameNewHuaRongActivity : BaseActivity() {
         val keys = GAME_COUNT_MAP.keys
         if (keys.contains(item.itemId)) {
             lineCount = GAME_COUNT_MAP[item.itemId]!!
+            //重置部分数据
+            emptyView.background = emptyViewBg
+            stepCount = 0
             initGame()
             return true
         }
@@ -177,9 +183,7 @@ open class GameNewHuaRongActivity : BaseActivity() {
             }
         }
         if (!BuildConfig.isRelease) {
-            val pair = getReversePairsNumber(lineCount, numberTop, tmpArray)
-            reversePairsNumber = pair.first
-            emptyLineNumber = pair.second
+            getDebugInfo(numberTop, tmpArray)
         }
 
         tmpArray.forEachIndexed { index, data ->
@@ -190,6 +194,12 @@ open class GameNewHuaRongActivity : BaseActivity() {
                 numData.add(data.copy(position = index))
             }
         }
+    }
+
+    private fun getDebugInfo(numberTop: Int, tmpArray: List<Data>) {
+        val pair = getReversePairsNumber(lineCount, numberTop, tmpArray)
+        reversePairsNumber = pair.first
+        emptyLineNumber = pair.second
     }
 
     private fun isEmptyItemNumber(itemNumber: Int): Boolean {
@@ -266,6 +276,7 @@ open class GameNewHuaRongActivity : BaseActivity() {
             }
 
             id = data.position
+            setTextColor(Color.WHITE)
             background = ColorDrawable(Color.parseColor(data.bgColor))
             ellipsize = TextUtils.TruncateAt.END
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -350,9 +361,9 @@ open class GameNewHuaRongActivity : BaseActivity() {
 
         setTitle()
         if (BuildConfig.isRelease) {
-            debugLayout.visibility = View.GONE
+            debugInfoTv.visibility = View.GONE
         } else {
-            debugLayout.visibility = View.VISIBLE
+            debugInfoTv.visibility = View.VISIBLE
             debugInfoTv.text = String.format(
                 Locale.ENGLISH,
                 getString(R.string.reverse_pairs_number),
@@ -383,6 +394,40 @@ open class GameNewHuaRongActivity : BaseActivity() {
             stepCount = 0
 
             initGame()
+        }
+
+        debugLayout.setOnClickListener {
+            val clickMaxCount = 8
+            Log.d(TAG, "setListener: isRelease = ${BuildConfig.isRelease}")
+            if (BuildConfig.isRelease) {
+                clickDebugInfoCount++
+                Log.d(TAG, "setListener: clickDebugInfoCount = $clickDebugInfoCount")
+                if (clickDebugInfoCount == clickMaxCount) {
+                    isShowDebugInfo = true
+                } else if (clickDebugInfoCount > clickMaxCount) {
+                    clickDebugInfoCount = 0
+                    isShowDebugInfo = false
+                } else {
+                    isShowDebugInfo = false
+                }
+                getDebugInfo(powerTop - 1, numData)
+                updateDebugInfoLayout()
+            }
+        }
+    }
+
+    private fun updateDebugInfoLayout() {
+        if (isShowDebugInfo) {
+            debugInfoTv.visibility = View.VISIBLE
+            debugInfoTv.text = String.format(
+                Locale.ENGLISH,
+                getString(R.string.reverse_pairs_number),
+                reversePairsNumber,
+                emptyLineNumber,
+                reversePairsNumber + emptyLineNumber
+            )
+        } else {
+            debugInfoTv.visibility = View.GONE
         }
     }
 
