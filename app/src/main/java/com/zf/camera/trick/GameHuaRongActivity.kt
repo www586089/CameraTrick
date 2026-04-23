@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import com.zf.camera.trick.base.BaseActivity
 import java.util.Locale
+import kotlin.math.pow
 
 open class GameHuaRongActivity: BaseActivity() {
     private val TAG = "GameHuaRongActivity"
@@ -94,7 +95,7 @@ open class GameHuaRongActivity: BaseActivity() {
      * @param uppercase 是否输出大写，默认 true
      * @param padStart 最小长度，不足自动补 0，默认 0（不补）
      */
-    fun Number.toHex(
+    private fun Number.toHex(
         uppercase: Boolean = true,
         padStart: Int = 0
     ): String {
@@ -119,9 +120,11 @@ open class GameHuaRongActivity: BaseActivity() {
         dataSet.clear()
 
         val tmpArray = mutableListOf<Data>()
-        val numberTop = 8
-        val lineCount = 3
-        val colorStep = 256 / (lineCount * lineCount)
+        val lineCount = 4
+        val powerTop = (3f.pow(2)).toInt()
+        val numberTop: Int = powerTop - 1
+
+        val colorStep = 256 / powerTop
         for (i in 0..numberTop) {
             val opaque = (1 + ((i + 1) * colorStep)).toHex(true, 2)
             tmpArray.add(Data(i, i, "$i", "#${opaque}67C8FF"))
