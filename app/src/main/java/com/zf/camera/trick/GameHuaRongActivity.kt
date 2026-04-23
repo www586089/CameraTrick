@@ -13,11 +13,13 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import com.zf.camera.trick.base.BaseActivity
+import java.util.Locale
 
 open class GameHuaRongActivity: BaseActivity() {
     private val TAG = "GameHuaRongActivity"
 
     companion object {
+        const val EMPTY_LOCATION_TEXT = ""
         fun startActivity(activity: Activity) {
             activity.startActivity(Intent(activity, GameHuaRongActivity::class.java))
         }
@@ -72,14 +74,12 @@ open class GameHuaRongActivity: BaseActivity() {
     private fun setListener() {
         numViewArray.forEachIndexed { index, appCompatTextView ->
             val data = numData[index]
-            if (emptyViewLocation != data.position) {
-                appCompatTextView.text = numData[index].text
-            } else {
-                appCompatTextView.text = ""
-            }
-            appCompatTextView.setBackgroundColor(Color.parseColor(data.bgColor))
 
-            setListener(appCompatTextView, index)
+            appCompatTextView.apply {
+                text = numData[index].text
+                setBackgroundColor(Color.parseColor(data.bgColor))
+                setListener(this, index)
+            }
         }
     }
 
@@ -115,13 +115,12 @@ open class GameHuaRongActivity: BaseActivity() {
         val tmpArray = mutableListOf<Data>()
         val numberTop = 8
         val lineCount = 3
+        val colorStep = 256 / (lineCount * lineCount)
         for (i in 0..numberTop) {
-            val hex = (i + 2).toHex()
-            tmpArray.add(Data(i, i, "$i", "#$hex${hex}67c8ff"))
+            val opaque = (1 + ((i + 1) * colorStep)).toHex(true, 2)
+            tmpArray.add(Data(i, i, "$i", "#${opaque}67C8FF"))
         }
 
-//        tmpArray.clear()
-//        tmpArray.addAll(listOf(3, 4, 2, 7, 6, 5, 1, 8, 0))//无解
         while (true) {
             tmpArray.shuffle()
             Log.d(TAG, "initData: tmpArray = ${tmpArray.joinToString(",")}")
@@ -151,9 +150,9 @@ open class GameHuaRongActivity: BaseActivity() {
         tmpArray.forEachIndexed { index, data ->
             if (0 == data.itemNumber) {
                 emptyViewLocation = index
-                numData.add(Data(index, data.itemNumber, data.text, "#00000000"))
+                numData.add(data.copy(text = EMPTY_LOCATION_TEXT, bgColor = "#00000000"))
             } else {
-                numData.add(Data(index, data.itemNumber, data.text, data.bgColor))
+                numData.add(data.copy(position = index))
             }
         }
     }
@@ -162,7 +161,7 @@ open class GameHuaRongActivity: BaseActivity() {
      * 获取屏幕物理宽度（px）
      * @param context 上下文，建议使用 Activity 避免内存泄漏
      */
-    fun getScreenPhysicalWidth(context: Context): Int {
+    private fun getScreenPhysicalWidth(context: Context): Int {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val displayMetrics = DisplayMetrics()
         // 获取屏幕显示信息
@@ -221,7 +220,7 @@ open class GameHuaRongActivity: BaseActivity() {
 
         emptyViewBg = emptyView.background as ColorDrawable
         emptyView.setBackgroundDrawable(ColorDrawable())
-        stepTextView.text = "步数：${stepCount}"
+        setStepCountInfo(0)
 
         actionBar?.title = "华容道"
     }
@@ -282,48 +281,51 @@ open class GameHuaRongActivity: BaseActivity() {
             }
             .withEndAction {
 
-//                numViewArray[emptyViewLocation].text = numData[viewIndex]
+                /**
+                 * 交换两个位置(emptyViewLocation, viewIndex)的数据，
+                 * 但是position保持不变（因为移动位置时依赖这个position来判断，所以需要保持不变）
+                 */
+                val emptyViewData = numData[emptyViewLocation].copy(position = viewIndex)
+                val numberViewData = numData[viewIndex].copy(position = emptyViewLocation)
 
-//                emptyView.alpha = 1f
+                //保存emptyView的UI视觉效果【背景及文本】
                 val emptyBackground = emptyView.background
-                emptyView.text = numData[viewIndex].text
+                val emptyText = emptyViewData.text
+
+                //emptyView的UI视觉效果设置为numberView的UI视觉效果
+                emptyView.text = numberViewData.text
                 emptyView.setBackgroundDrawable(numberView.background)
 
-                numberView.text = ""
+                //numberView的UI视觉效果设置为emptyView的UI视觉效果
+                numberView.text = emptyText
                 numberView.background = emptyBackground
+                //numberView坐标归位
                 numberView.translationX -= tsX
                 numberView.translationY -= tsY
 
+                //【先交换数据再交换记录emptyViewLocation，不能反过来】
+                numData[emptyViewLocation] = numberViewData
+                numData[viewIndex] = emptyViewData
 
                 emptyView = numberView
-
-                val tmp = numData[emptyViewLocation]
-                numData[emptyViewLocation].text = numData[viewIndex].text
-                numData[viewIndex].text = ""
-
-                var sb = "\n"
-                numData.forEachIndexed { index, i ->
-                    sb = sb.plus("$i ")
-                    if ((index + 1) % 3 == 0) {
-                        sb = sb.plus("\n")
-                    }
-                }
-
-                Log.d(TAG, "animateView: ${sb}")
-
                 emptyViewLocation = viewIndex
-                isInAnimation = false
 
-                stepTextView.text = "步数：${++stepCount}"
+                setStepCountInfo(++stepCount)
                 checkSuccess()
-        }.start()
+
+                isInAnimation = false
+            }.start()
+    }
+
+    private fun setStepCountInfo(stepCount: Int) {
+        stepTextView.text = String.format(Locale.ENGLISH, getString(R.string.step_count), stepCount)
     }
 
     private fun checkSuccess() {
         var targetIndex = -1
         for (index in 0 until numData.size) {
             val data = numData[index]
-            if ("${index + 1}" != data.text) {
+            if ((index + 1) != data.itemNumber) {
                 break;
             }
             targetIndex = index
@@ -335,4 +337,6 @@ open class GameHuaRongActivity: BaseActivity() {
     }
 }
 
-data class Data(val position: Int, val itemNumber: Int, var text: String, val bgColor: String)
+data class Data(val position: Int, val itemNumber: Int, var text: String, val bgColor: String) {
+
+}

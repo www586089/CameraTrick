@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">CameraTrick</string>
-    <string name="step_count">Step:%d</string>
+    <string name="step_count">步数：%d</string>
 </resources>
