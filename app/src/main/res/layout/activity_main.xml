@@ -42,6 +42,7 @@
             android:paddingHorizontal="4dp"
             android:paddingVertical="6dp"
             android:text="图片显示" />
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/huarong_tv"
             android:layout_width="wrap_content"
@@ -50,7 +51,17 @@
             android:background="#67c8ff"
             android:paddingHorizontal="4dp"
             android:paddingVertical="6dp"
-            android:text="华容道" />
+            android:text="华容道3x3" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/huarong_4tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="#67c8ff"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="6dp"
+            android:text="华容道4x4" />
 
         <LinearLayout
             android:id="@+id/content"

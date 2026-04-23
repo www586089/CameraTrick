@@ -22,6 +22,9 @@ class MainActivity : BaseActivity() {
         findViewById<AppCompatTextView>(R.id.huarong_tv).setOnClickListener {
             GameHuaRongActivity.startActivity(this)
         }
+        findViewById<AppCompatTextView>(R.id.huarong_4tv).setOnClickListener {
+            GameHuaRong4Activity.startActivity(this)
+        }
 
     }
 }
