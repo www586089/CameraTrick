@@ -3,6 +3,7 @@ package com.zf.camera.trick.game.hua
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
@@ -23,14 +24,16 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import com.zf.camera.trick.BuildConfig
 import com.zf.camera.trick.R
 import com.zf.camera.trick.base.BaseActivity
+import com.zf.camera.trick.game.hua.settings.SettingsActivity
 import java.util.Locale
 import kotlin.math.pow
 
-open class GameNewHuaRongActivity : BaseActivity() {
+class GameNewHuaRongActivity : BaseActivity() {
     private val TAG = "GameNewHuaRongActivity"
 
     companion object {
@@ -80,6 +83,10 @@ open class GameNewHuaRongActivity : BaseActivity() {
 
     private lateinit var vibrator: Vibrator
 
+    private lateinit var sp: SharedPreferences
+    private var isVibrateEnable = true
+    private var isAnimEnable = true
+
     override var isDarkFont: Boolean
         get() = false
         set(value) {}
@@ -88,12 +95,23 @@ open class GameNewHuaRongActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_new_huarong_layout)
 
+        sp = getSharedPreferences("app_config", MODE_PRIVATE)
         initVibrator()
         initGame()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menu?.apply {
+            // 主按钮：右上角常驻图标
+            val settingsItem = menu.add(Menu.NONE, 100, 100, "")
+            // 关键：常驻显示
+            settingsItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+            // 原生齿轮设置图标
+            // ✅ 修复图标类型错误（关键代码）
+            ContextCompat.getDrawable(baseContext, android.R.drawable.ic_menu_preferences)?.let {
+                settingsItem.icon = it
+            }
+
             GAME_COUNT_MAP.forEach { (key, value) ->
                 add(0, key, key, "${value}阶华容道")
             }
@@ -103,10 +121,19 @@ open class GameNewHuaRongActivity : BaseActivity() {
         return true
     }
 
+
+    override fun onResume() {
+        super.onResume()
+        isVibrateEnable = SettingsActivity.isVibrateEnable(sp)
+        isAnimEnable = SettingsActivity.isAnimEnable(sp)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d(TAG, "onOptionsItemSelected: ${item.itemId}")
         val keys = GAME_COUNT_MAP.keys
-        if (keys.contains(item.itemId)) {
+        if (item.itemId == 100) {
+            SettingsActivity.startActivity(this)
+        } else if (keys.contains(item.itemId)) {
             lineCount = GAME_COUNT_MAP[item.itemId]!!
             //重置部分数据
             emptyView.background = emptyViewBg
@@ -402,18 +429,21 @@ open class GameNewHuaRongActivity : BaseActivity() {
             if (0f == pair.first && 0f == pair.second) {
                 return@setOnClickListener
             }
-            if (vibrator.hasVibrator()) {
-                val vibrateTime = 20L
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val effect = VibrationEffect.createOneShot(
-                        vibrateTime,
-                        VibrationEffect.DEFAULT_AMPLITUDE
-                    )
-                    vibrator.vibrate(effect)
-                } else {
-                    vibrator.vibrate(vibrateTime)
+            if (isVibrateEnable) {
+                if (vibrator.hasVibrator()) {
+                    val vibrateTime = 20L
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val effect = VibrationEffect.createOneShot(
+                            vibrateTime,
+                            VibrationEffect.DEFAULT_AMPLITUDE
+                        )
+                        vibrator.vibrate(effect)
+                    } else {
+                        vibrator.vibrate(vibrateTime)
+                    }
                 }
             }
+
             animateView(numberView, pair.first, pair.second, viewIndex)
         }
 
@@ -505,7 +535,7 @@ open class GameNewHuaRongActivity : BaseActivity() {
             return
         }
         numberView.animate().translationX(tsX).translationY(tsY)
-            .rotation(360f)
+            .rotation(if (isAnimEnable) 360f else 0f)
             .setDuration(300)
             .setInterpolator(AccelerateDecelerateInterpolator())
             .withStartAction {

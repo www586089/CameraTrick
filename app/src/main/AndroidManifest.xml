@@ -53,6 +53,7 @@
         <activity android:name=".GameHuaRongActivity"/>
         <activity android:name=".game.hua.GameNewHuaRongActivity" />
         <activity android:name=".GameHuaRong4Activity" />
+        <activity android:name=".game.hua.settings.SettingsActivity" />
     </application>
 
 </manifest>
