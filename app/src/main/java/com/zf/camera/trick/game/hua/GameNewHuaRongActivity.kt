@@ -443,19 +443,25 @@ open class GameNewHuaRongActivity : BaseActivity() {
                 return Pair(0f, 0f)
             }
 
-            viewIndex - lineCount -> {
+            viewIndex - lineCount -> {//上移
                 return Pair(0f, -viewHeight)
             }
 
-            viewIndex + lineCount -> {
+            viewIndex + lineCount -> {//下移
                 return Pair(0f, viewHeight)
             }
 
-            viewIndex - 1 -> {
+            viewIndex - 1 -> {//左移
+                if ((viewIndex / lineCount) != emptyViewLocation / lineCount) {
+                    return Pair(0f, 0f)
+                }
                 return Pair(-viewWidth, 0f)
             }
 
-            viewIndex + 1 -> {
+            viewIndex + 1 -> {//右移
+                if ((viewIndex / lineCount) != emptyViewLocation / lineCount) {
+                    return Pair(0f, 0f)
+                }
                 return Pair(viewWidth, 0f)
             }
 
