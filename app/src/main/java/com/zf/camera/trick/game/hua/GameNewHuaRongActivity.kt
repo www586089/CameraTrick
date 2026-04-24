@@ -7,6 +7,9 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.util.Log
@@ -75,6 +78,8 @@ open class GameNewHuaRongActivity : BaseActivity() {
     private var clickDebugInfoCount = 0
     private var isShowDebugInfo = !BuildConfig.isRelease
 
+    private lateinit var vibrator: Vibrator
+
     override var isDarkFont: Boolean
         get() = false
         set(value) {}
@@ -83,6 +88,7 @@ open class GameNewHuaRongActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_new_huarong_layout)
 
+        initVibrator()
         initGame()
     }
 
@@ -310,6 +316,15 @@ open class GameNewHuaRongActivity : BaseActivity() {
         }
     }
 
+    private fun initVibrator() {
+        vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val manager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            manager.defaultVibrator
+        } else {
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+    }
+
     private fun initView() {
         viewHeight = (getScreenPhysicalWidth(this) / lineCount.toFloat())
         viewWidth = viewHeight
@@ -386,6 +401,18 @@ open class GameNewHuaRongActivity : BaseActivity() {
             val pair = getTranslation(data.position)
             if (0f == pair.first && 0f == pair.second) {
                 return@setOnClickListener
+            }
+            if (vibrator.hasVibrator()) {
+                val vibrateTime = 20L
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val effect = VibrationEffect.createOneShot(
+                        vibrateTime,
+                        VibrationEffect.DEFAULT_AMPLITUDE
+                    )
+                    vibrator.vibrate(effect)
+                } else {
+                    vibrator.vibrate(vibrateTime)
+                }
             }
             animateView(numberView, pair.first, pair.second, viewIndex)
         }
