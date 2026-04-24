@@ -16,6 +16,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
@@ -476,7 +477,10 @@ open class GameNewHuaRongActivity : BaseActivity() {
         if (isInAnimation) {
             return
         }
-        numberView.animate().translationX(tsX).translationY(tsY).setDuration(300)
+        numberView.animate().translationX(tsX).translationY(tsY)
+            .rotation(360f)
+            .setDuration(300)
+            .setInterpolator(AccelerateDecelerateInterpolator())
             .withStartAction {
                 isInAnimation = true
             }
@@ -503,6 +507,7 @@ open class GameNewHuaRongActivity : BaseActivity() {
                 //numberView坐标归位
                 numberView.translationX -= tsX
                 numberView.translationY -= tsY
+                numberView.rotation = 0f
 
                 //【先交换数据再交换记录emptyViewLocation，不能反过来】
                 numData[emptyViewLocation] = numberViewData
