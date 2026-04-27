@@ -29,6 +29,7 @@ import androidx.core.widget.TextViewCompat
 import com.zf.camera.trick.BuildConfig
 import com.zf.camera.trick.R
 import com.zf.camera.trick.base.BaseActivity
+import com.zf.camera.trick.databinding.ActivityGameNewHuarongLayoutBinding
 import com.zf.camera.trick.game.hua.settings.SettingsActivity
 import java.util.Locale
 import kotlin.math.pow
@@ -55,15 +56,6 @@ class GameNewHuaRongActivity : BaseActivity() {
             activity.startActivity(Intent(activity, GameNewHuaRongActivity::class.java))
         }
     }
-
-
-    private lateinit var gameLayoutContent: LinearLayout
-    private lateinit var resetButton: AppCompatTextView
-    private lateinit var stepTextView: AppCompatTextView
-
-    //调试信息
-    private lateinit var debugLayout: View
-    private lateinit var debugInfoTv: AppCompatTextView
 
     private var numLayoutArray = mutableListOf<LinearLayout>()
     private var numViewArray = mutableListOf<AppCompatTextView>()
@@ -106,9 +98,12 @@ class GameNewHuaRongActivity : BaseActivity() {
         get() = false
         set(value) {}
 
+    private val binding: ActivityGameNewHuarongLayoutBinding
+            by lazy { ActivityGameNewHuarongLayoutBinding.inflate(layoutInflater) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_game_new_huarong_layout)
+        setContentView(binding.root)
 
         sp = getSharedPreferences("app_config", MODE_PRIVATE)
         initVibrator()
@@ -460,22 +455,13 @@ class GameNewHuaRongActivity : BaseActivity() {
     private fun initView() {
         viewHeight = (getScreenPhysicalWidth(this) / lineCount.toFloat())
         viewWidth = viewHeight
-
-        gameLayoutContent = findViewById(R.id.game_layout)
-        gameLayoutContent.removeAllViews()
+        binding.gameLayout.removeAllViews()
 
         numLayoutArray.clear()
 
         for (i in 0..(lineCount - 1)) {
             numLayoutArray.add(getLinearLayout(viewHeight.toInt()))
         }
-
-        //初始化调试区域
-        debugLayout = findViewById(R.id.debug_info_layout)
-        debugInfoTv = findViewById(R.id.debug_info_tv)
-
-        stepTextView = findViewById(R.id.game_step)
-        resetButton = findViewById(R.id.reset)
 
         numViewArray.clear()
         //创建具体子View
@@ -486,14 +472,14 @@ class GameNewHuaRongActivity : BaseActivity() {
         var index = 0
         for (layout in numLayoutArray) {
             //先构建每一行的父布局
-            gameLayoutContent.addView(layout)
+            binding.gameLayout.addView(layout)
             //在构建当前行的子View
             for (i in 0..(lineCount - 1)) {
                 layout.addView(numViewArray[index++])
             }
         }
 
-        gameLayoutContent.post {
+        binding.gameLayout.post {
             for (layout in numLayoutArray) {
                 val LP = layout.layoutParams
                 LP.height = viewHeight.toInt()
@@ -509,10 +495,10 @@ class GameNewHuaRongActivity : BaseActivity() {
 
         setTitle()
         if (BuildConfig.isRelease) {
-            debugInfoTv.visibility = View.GONE
+            binding.debugInfoTv.visibility = View.GONE
         } else {
-            debugInfoTv.visibility = View.VISIBLE
-            debugInfoTv.text = String.format(
+            binding.debugInfoTv.visibility = View.VISIBLE
+            binding.debugInfoTv.text = String.format(
                 Locale.ENGLISH,
                 getString(R.string.reverse_pairs_number),
                 reversePairsNumber,
@@ -552,11 +538,11 @@ class GameNewHuaRongActivity : BaseActivity() {
             animateView(numberView, pair.first, pair.second, viewIndex)
         }
 
-        resetButton.setOnClickListener {
+        binding.reset.setOnClickListener {
             initGame()
         }
 
-        debugLayout.setOnClickListener {
+        binding.debugInfoLayout.setOnClickListener {
             val clickMaxCount = 8
             Log.d(TAG, "setListener: isRelease = ${BuildConfig.isRelease}")
             if (BuildConfig.isRelease) {
@@ -578,8 +564,8 @@ class GameNewHuaRongActivity : BaseActivity() {
 
     private fun updateDebugInfoLayout() {
         if (isShowDebugInfo) {
-            debugInfoTv.visibility = View.VISIBLE
-            debugInfoTv.text = String.format(
+            binding.debugInfoTv.visibility = View.VISIBLE
+            binding.debugInfoTv.text = String.format(
                 Locale.ENGLISH,
                 getString(R.string.reverse_pairs_number),
                 reversePairsNumber,
@@ -587,7 +573,7 @@ class GameNewHuaRongActivity : BaseActivity() {
                 reversePairsNumber + emptyLineNumber
             )
         } else {
-            debugInfoTv.visibility = View.GONE
+            binding.debugInfoTv.visibility = View.GONE
         }
     }
 
@@ -716,7 +702,8 @@ class GameNewHuaRongActivity : BaseActivity() {
     }
 
     private fun setStepCountInfo(stepCount: Int) {
-        stepTextView.text = String.format(Locale.ENGLISH, getString(R.string.step_count), stepCount)
+        binding.gameStep.text =
+            String.format(Locale.ENGLISH, getString(R.string.step_count), stepCount)
     }
 
     private fun checkSuccess() {
