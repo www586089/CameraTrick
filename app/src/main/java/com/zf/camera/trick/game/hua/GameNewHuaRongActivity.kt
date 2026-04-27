@@ -71,8 +71,8 @@ class GameNewHuaRongActivity : BaseActivity() {
     private val cmdRedoList = mutableListOf<Command>()
     private var isRedo = false
 
-    private var reversePairsNumber = 0
-    private var emptyLineNumber = -1
+    private var reversePairsNumber = 0    //逆序对数
+    private var emptyLineNumberDiff = -1  //初始空格所在行与目标空格所在行差值
     private var lineCount = 3
     private var powerTop = -1
 
@@ -83,6 +83,7 @@ class GameNewHuaRongActivity : BaseActivity() {
     private lateinit var emptyView: AppCompatTextView
     private lateinit var emptyViewBg: ColorDrawable
     private var isInAnimation = false
+    private var isInAction = false //是否正在执行菜单动作
     private var stepCount = 0;
 
     private var clickDebugInfoCount = 0
@@ -208,27 +209,37 @@ class GameNewHuaRongActivity : BaseActivity() {
         val keys = GAME_COUNT_MAP.keys
         if (item.itemId == MENU_ITEM_UNDO) {
             if (cmdUndoList.isNotEmpty()) {
-                val cmd = cmdUndoList.removeLastOrNull()
-                if (cmd != null) {
-                    //撤销的动作需要加入redo队列
-                    isRedo = true
-                    numViewArray[cmd.position].performClick()
-                    if (cmdUndoList.isEmpty()) {
-                        invalidateMenuItem()
+                if (!isInAction) {
+                    isInAction = true
+                    val cmd = cmdUndoList.removeLastOrNull()
+                    if (cmd != null) {
+                        //撤销的动作需要加入redo队列
+                        isRedo = true
+                        numViewArray[cmd.position].performClick()
+                        if (cmdUndoList.isEmpty()) {
+                            invalidateMenuItem()
+                        }
                     }
+                } else {
+                    Log.d(TAG, "onOptionsItemSelected(undo): fast click!!!")
                 }
             } else {
                 Toast.makeText(this, "没有可撤销的命令", Toast.LENGTH_SHORT).show()
             }
         } else if (item.itemId == MENU_ITEM_REDO) {
             if (cmdRedoList.isNotEmpty()) {
-                val cmd = cmdRedoList.removeLastOrNull()
-                if (cmd != null) {
-                    //重做的动作默认在undo队列
-                    numViewArray[cmd.position].performClick()
-                    if (cmdRedoList.isEmpty()) {
-                        invalidateMenuItem()
+                if (!isInAction) {
+                    isInAction = true
+                    val cmd = cmdRedoList.removeLastOrNull()
+                    if (cmd != null) {
+                        //重做的动作默认在undo队列
+                        numViewArray[cmd.position].performClick()
+                        if (cmdRedoList.isEmpty()) {
+                            invalidateMenuItem()
+                        }
                     }
+                } else {
+                    Log.d(TAG, "onOptionsItemSelected(redo): fast click!!!")
                 }
             } else {
                 Toast.makeText(this, "没有可重做的命令", Toast.LENGTH_SHORT).show()
@@ -274,12 +285,17 @@ class GameNewHuaRongActivity : BaseActivity() {
     }
 
     /**
-     * 注意：3×3 无解判定还需结合空位位置！
-     * 若空位在右下角（目标位置），逆序数奇数 → 无解；
-     * 最后一个数是0才统计（代表右下角为空，此时若逆序数为奇数则无解）
-     * 判断方法如下：
-     * 1. 遍历数组，统计逆序数(剔除最后一个数0)；
-     * 2. 若逆序数是奇数，则无解。
+     * 若数字华容道，必然有解，只存在于如下3个细分情形：
+     * 1)若格子列数为奇数，则逆序数必须为偶数；
+     * 2)若格子列数为偶数，且逆序数为偶数，则当前空格所在行数与初始空格所在行数的差为偶数；
+     * 3)若格子列数为偶数，且逆序数为奇数，则当前空格所在行数与初始空格所在行数的差为奇数。
+     *
+     * 原因如下：
+     * 1 格子列数为奇数，怎么移动，都不会改变原始的逆序数。因为奇数加减偶数还是奇数，偶数加减偶数还是偶数。所以，只要保证逆序数是偶数即可，不必关心空格的位置。
+     * 2 格子列数为偶数，那么进行奇数次上下移动，会改变其逆序数的奇偶性。所以，如果当前逆序数是偶数，要想有解，就要保证实际上下移动会进行偶数次，也就是说空格
+     * 所在行与初始空格所在行的差为偶数。同理，若当前逆序数是奇数，要想有解，要进行奇数次的移动，才能保证最终逆序数是偶数。
+     *
+     * 链接：https://www.jianshu.com/p/1c1849d876b2
      */
     private fun initData() {
         stepCount = 0;
@@ -305,21 +321,37 @@ class GameNewHuaRongActivity : BaseActivity() {
         while (true) {
             tmpArray.shuffle()
             Log.d(TAG, "initData: tmpArray = ${tmpArray.joinToString(",")}")
-            if (isEmptyItemNumber(tmpArray[numberTop].itemNumber)) {
-                //判断是否无解
-                val (reversePairsNumber, _) = getReversePairsNumber(lineCount, numberTop, tmpArray)
-                if (reversePairsNumber % 2 == 1) {
-                    Log.e(
-                        TAG,
-                        "initData: 当前数据无解，重新生成数据, sum = ${reversePairsNumber}, tmpArray = ${
-                            tmpArray.joinToString(",")
-                        }"
-                    )
-                } else {
+            //判断是否无解
+            val (reversePairsNumber, emptyLineNumber) = getReversePairsNumber(
+                lineCount,
+                numberTop,
+                tmpArray
+            )
+            val isLineCountOddNumber = 1 == lineCount % 2
+            val isReversePairsOddNumber = 1 == (reversePairsNumber % 2)
+            if (isLineCountOddNumber) {
+                if (!isReversePairsOddNumber) {//奇数阶时，逆序数需要为偶数才有解
                     break
+                } else {
+                    continue
                 }
             } else {
-                break
+                val targetEmptyLineNumber = 1
+                val isEmptyLineNumberDiffOddNumber =
+                    1 == ((emptyLineNumber - targetEmptyLineNumber) % 2)
+                if (!isReversePairsOddNumber) {
+                    if (!isEmptyLineNumberDiffOddNumber) {//逆序数为偶数&&空格行数差为偶数，则有解
+                        break
+                    } else {
+                        continue
+                    }
+                } else {
+                    if (isEmptyLineNumberDiffOddNumber) {//逆序数为奇数&&空格行数差为奇数，则有解
+                        break
+                    } else {
+                        continue
+                    }
+                }
             }
         }
         if (!BuildConfig.isRelease) {
@@ -338,8 +370,9 @@ class GameNewHuaRongActivity : BaseActivity() {
 
     private fun getDebugInfo(numberTop: Int, tmpArray: List<Data>) {
         val pair = getReversePairsNumber(lineCount, numberTop, tmpArray)
+        val targetEmptyLineNumber = 1
         reversePairsNumber = pair.first
-        emptyLineNumber = pair.second
+        emptyLineNumberDiff = pair.second - targetEmptyLineNumber
     }
 
     private fun isEmptyItemNumber(itemNumber: Int): Boolean {
@@ -508,8 +541,8 @@ class GameNewHuaRongActivity : BaseActivity() {
                 Locale.ENGLISH,
                 getString(R.string.reverse_pairs_number),
                 reversePairsNumber,
-                emptyLineNumber,
-                reversePairsNumber + emptyLineNumber
+                emptyLineNumberDiff,
+                reversePairsNumber + emptyLineNumberDiff
             )
         }
     }
@@ -575,8 +608,8 @@ class GameNewHuaRongActivity : BaseActivity() {
                 Locale.ENGLISH,
                 getString(R.string.reverse_pairs_number),
                 reversePairsNumber,
-                emptyLineNumber,
-                reversePairsNumber + emptyLineNumber
+                emptyLineNumberDiff,
+                reversePairsNumber + emptyLineNumberDiff
             )
         } else {
             binding.debugInfoTv.visibility = View.GONE
@@ -680,6 +713,7 @@ class GameNewHuaRongActivity : BaseActivity() {
                 checkSuccess()
 
                 isInAnimation = false
+                isInAction = false
             }.start()
     }
 
