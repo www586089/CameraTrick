@@ -40,6 +40,11 @@ class GameNewHuaRongActivity : BaseActivity() {
         const val EMPTY_LOCATION_TEXT = ""
         const val EMPTY_LOCATION_NUMBER = 0
 
+        const val MENU_GROUP_ACTION = 100
+        const val MENU_ITEM_UNDO = 101      //撤销
+        const val MENU_ITEM_REDO = 102      //重做
+        const val MENU_ITEM_SETTINGS = 103  //设置
+
         var key = 0
         val GAME_COUNT_MAP = mutableMapOf(
             Pair(key++, 2), Pair(key++, 3), Pair(key++, 4), Pair(key++, 5), Pair(key++, 6),
@@ -64,7 +69,16 @@ class GameNewHuaRongActivity : BaseActivity() {
     private var numViewArray = mutableListOf<AppCompatTextView>()
     private var numData = mutableListOf<Data>()
     private var dataSet = mutableSetOf<Int>()
-    private val cmdList = mutableListOf<Command>()
+
+    private val unDoRedoSize = 25
+
+    //命令撤销队列
+    private val cmdUndoList = mutableListOf<Command>()
+
+    //命令重做队列
+    private val cmdRedoList = mutableListOf<Command>()
+    private var isRedo = false
+
     private var reversePairsNumber = 0
     private var emptyLineNumber = -1
     private var lineCount = 3
@@ -101,17 +115,46 @@ class GameNewHuaRongActivity : BaseActivity() {
         initGame()
     }
 
+    private fun addOnGoingMenu(
+        menu: Menu,
+        group: Int,
+        menuId: Int,
+        menuIconId: Int,
+        title: String
+    ) {
+        // 主按钮：右上角常驻图标
+        val undoMenuItem = menu.add(group, menuId, menuId, title)
+        // 关键：常驻显示
+        undoMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        // 原生齿轮设置图标
+        // ✅ 修复图标类型错误（关键代码）
+        ContextCompat.getDrawable(baseContext, menuIconId)?.let {
+            undoMenuItem.icon = it
+        }
+    }
+
+    /**
+     * invalidateOptionsMenu()
+     *         ↓
+     * onCreateOptionsMenu()  →  重建菜单（加载布局）
+     *         ↓
+     * onPrepareOptionsMenu() → 准备菜单（做动态修改）
+     *         ↓
+     * onOptionsItemSelected() → 处理菜单点击事件
+     */
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menu?.apply {
-            // 主按钮：右上角常驻图标
-            val settingsItem = menu.add(Menu.NONE, 100, 100, "")
-            // 关键：常驻显示
-            settingsItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-            // 原生齿轮设置图标
-            // ✅ 修复图标类型错误（关键代码）
-            ContextCompat.getDrawable(baseContext, R.drawable.ic_settings)?.let {
-                settingsItem.icon = it
-            }
+
+
+            addOnGoingMenu(this, MENU_GROUP_ACTION, MENU_ITEM_UNDO, R.drawable.ic_undo, "撤销")
+            addOnGoingMenu(this, MENU_GROUP_ACTION, MENU_ITEM_REDO, R.drawable.ic_redo, "重做")
+            addOnGoingMenu(
+                this,
+                MENU_GROUP_ACTION,
+                MENU_ITEM_SETTINGS,
+                R.drawable.ic_settings,
+                "设置"
+            )
 
             GAME_COUNT_MAP.forEach { (key, value) ->
                 add(0, key, key, "${value}阶华容道")
@@ -122,6 +165,37 @@ class GameNewHuaRongActivity : BaseActivity() {
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.apply {
+            Log.d(TAG, "onPrepareOptionsMenu: ")
+            //刷新撤销按钮图标
+            val undoEnable = cmdUndoList.isNotEmpty()
+            val undoDrawableId = if (undoEnable) R.drawable.ic_undo else R.drawable.ic_undo_disable
+            updateMenuItem(this, MENU_ITEM_UNDO, undoEnable, undoDrawableId)
+
+            //刷新重做按钮图标
+            val redoEnable = cmdRedoList.isNotEmpty()
+            val redoDrawableId = if (redoEnable) R.drawable.ic_redo else R.drawable.ic_redo_disable
+            updateMenuItem(this, MENU_ITEM_REDO, redoEnable, redoDrawableId)
+        }
+
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    private fun updateMenuItem(
+        menu: Menu,
+        menuItemId: Int,
+        isMenuItemEnable: Boolean,
+        drawableId: Int
+    ) {
+        menu.findItem(menuItemId).apply {
+            isEnabled = isMenuItemEnable
+            ContextCompat.getDrawable(baseContext, drawableId)?.let {
+                icon = it
+            }
+        }
+    }
+
 
     override fun onResume() {
         super.onResume()
@@ -129,10 +203,42 @@ class GameNewHuaRongActivity : BaseActivity() {
         isAnimEnable = SettingsActivity.isAnimEnable(sp)
     }
 
+    private fun invalidateMenuItem() {
+        invalidateOptionsMenu()
+        Log.d(TAG, "invalidateMenuItem")
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d(TAG, "onOptionsItemSelected: ${item.itemId}")
         val keys = GAME_COUNT_MAP.keys
-        if (item.itemId == 100) {
+        if (item.itemId == MENU_ITEM_UNDO) {
+            if (cmdUndoList.isNotEmpty()) {
+                val cmd = cmdUndoList.removeLastOrNull()
+                if (cmd != null) {
+                    //撤销的动作需要加入redo队列
+                    isRedo = true
+                    numViewArray[cmd.position].performClick()
+                    if (cmdUndoList.isEmpty()) {
+                        invalidateMenuItem()
+                    }
+                }
+            } else {
+                Toast.makeText(this, "没有可撤销的命令", Toast.LENGTH_SHORT).show()
+            }
+        } else if (item.itemId == MENU_ITEM_REDO) {
+            if (cmdRedoList.isNotEmpty()) {
+                val cmd = cmdRedoList.removeLastOrNull()
+                if (cmd != null) {
+                    //重做的动作默认在undo队列
+                    numViewArray[cmd.position].performClick()
+                    if (cmdRedoList.isEmpty()) {
+                        invalidateMenuItem()
+                    }
+                }
+            } else {
+                Toast.makeText(this, "没有可重做的命令", Toast.LENGTH_SHORT).show()
+            }
+        } else if (item.itemId == MENU_ITEM_SETTINGS) {
             SettingsActivity.startActivity(this)
         } else if (keys.contains(item.itemId)) {
             lineCount = GAME_COUNT_MAP[item.itemId]!!
@@ -565,6 +671,15 @@ class GameNewHuaRongActivity : BaseActivity() {
                 //【先交换数据再交换记录emptyViewLocation，不能反过来】
                 numData[emptyViewLocation] = numberViewData
                 numData[viewIndex] = emptyViewData
+                if (isRedo) {
+                    //撤销的动作需要加入重做队列【redo】
+                    queueRedo(emptyViewLocation, numberViewData)
+                    isRedo = false
+                } else {
+                    //重做或者新的命令动作需要加入撤销队列【undo】
+                    queueUndo(emptyViewLocation, numberViewData)
+                }
+
 
                 emptyView = numberView
                 emptyViewLocation = viewIndex
@@ -574,6 +689,30 @@ class GameNewHuaRongActivity : BaseActivity() {
 
                 isInAnimation = false
             }.start()
+    }
+
+    private fun queueRedo(emptyViewLocation: Int, emptyViewData: Data) {
+        val invalidateMenu = cmdRedoList.isEmpty()
+        if (cmdRedoList.size >= unDoRedoSize) {
+            cmdRedoList.removeAt(0)
+        }
+        cmdRedoList.add(Command(emptyViewLocation, emptyViewData))
+
+        if (invalidateMenu) {
+            invalidateMenuItem()
+        }
+    }
+
+    private fun queueUndo(viewIndex: Int, data: Data) {
+        val invalidateMenu = cmdUndoList.isEmpty()
+        if (cmdUndoList.size >= unDoRedoSize) {
+            cmdUndoList.removeAt(0)
+        }
+        cmdUndoList.add(Command(viewIndex, data))
+
+        if (invalidateMenu) {
+            invalidateMenuItem()
+        }
     }
 
     private fun setStepCountInfo(stepCount: Int) {
@@ -600,4 +739,4 @@ data class Data(val position: Int, val itemNumber: Int, var text: String, val bg
 
 }
 
-data class Command(val position: Int, val itemNumber: Int, val text: String, val bgColor: String)
+data class Command(val position: Int, val data: Data)
