@@ -285,6 +285,12 @@ class GameNewHuaRongActivity : BaseActivity() {
         stepCount = 0;
         numData.clear()
         dataSet.clear()
+        if (cmdUndoList.isNotEmpty() || cmdRedoList.isNotEmpty()) {
+            cmdUndoList.clear()
+            cmdRedoList.clear()
+            invalidateMenuItem()
+        }
+
 
         val tmpArray = mutableListOf<Data>()
         powerTop = (lineCount.toFloat().pow(2)).toInt()
