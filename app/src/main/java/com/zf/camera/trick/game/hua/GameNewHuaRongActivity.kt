@@ -64,6 +64,7 @@ class GameNewHuaRongActivity : BaseActivity() {
     private var numViewArray = mutableListOf<AppCompatTextView>()
     private var numData = mutableListOf<Data>()
     private var dataSet = mutableSetOf<Int>()
+    private val cmdList = mutableListOf<Command>()
     private var reversePairsNumber = 0
     private var emptyLineNumber = -1
     private var lineCount = 3
@@ -108,7 +109,7 @@ class GameNewHuaRongActivity : BaseActivity() {
             settingsItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
             // 原生齿轮设置图标
             // ✅ 修复图标类型错误（关键代码）
-            ContextCompat.getDrawable(baseContext, android.R.drawable.ic_menu_preferences)?.let {
+            ContextCompat.getDrawable(baseContext, R.drawable.ic_settings)?.let {
                 settingsItem.icon = it
             }
 
@@ -135,9 +136,6 @@ class GameNewHuaRongActivity : BaseActivity() {
             SettingsActivity.startActivity(this)
         } else if (keys.contains(item.itemId)) {
             lineCount = GAME_COUNT_MAP[item.itemId]!!
-            //重置部分数据
-            emptyView.background = emptyViewBg
-            stepCount = 0
             initGame()
             return true
         }
@@ -183,6 +181,7 @@ class GameNewHuaRongActivity : BaseActivity() {
      * 2. 若逆序数是奇数，则无解。
      */
     private fun initData() {
+        stepCount = 0;
         numData.clear()
         dataSet.clear()
 
@@ -448,9 +447,6 @@ class GameNewHuaRongActivity : BaseActivity() {
         }
 
         resetButton.setOnClickListener {
-            emptyView.background = emptyViewBg
-            stepCount = 0
-
             initGame()
         }
 
@@ -603,3 +599,5 @@ class GameNewHuaRongActivity : BaseActivity() {
 data class Data(val position: Int, val itemNumber: Int, var text: String, val bgColor: String) {
 
 }
+
+data class Command(val position: Int, val itemNumber: Int, val text: String, val bgColor: String)
