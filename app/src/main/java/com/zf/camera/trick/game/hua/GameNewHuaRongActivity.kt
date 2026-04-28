@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -95,6 +96,22 @@ class GameNewHuaRongActivity : BaseActivity() {
     private var isVibrateEnable = true
     private var isAnimEnable = true
 
+    private var totalTimeMs = 0L
+
+    private var isTimerStated = false
+
+    // 极大时长，间隔1秒
+    private val timer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
+        override fun onTick(millisUntilFinished: Long) {
+            // 每次+1秒
+            totalTimeMs += 1000L
+            updateDurationText(totalTimeMs)
+        }
+
+        override fun onFinish() {}
+    }
+
+
     override var isDarkFont: Boolean
         get() = false
         set(value) {}
@@ -109,6 +126,25 @@ class GameNewHuaRongActivity : BaseActivity() {
         sp = getSharedPreferences("app_config", MODE_PRIVATE)
         initVibrator()
         initGame()
+    }
+
+
+    private fun updateDurationText(timeMS: Long) {
+        // 格式化
+        val timeStr = formatMsToHMS(timeMS)
+        binding.gameTime.text =
+            String.format(Locale.ENGLISH, getString(R.string.game_duration), timeStr)
+    }
+
+    /**
+     * 毫秒 转 时分秒 00:00:00
+     */
+    private fun formatMsToHMS(ms: Long): String {
+        val totalSec = ms / 1000
+        val h = totalSec / 3600
+        val m = totalSec % 3600 / 60
+        val s = totalSec % 60
+        return String.format("%02d:%02d:%02d", h, m, s)
     }
 
     private fun addOnGoingMenu(
@@ -284,6 +320,19 @@ class GameNewHuaRongActivity : BaseActivity() {
         return if (uppercase) hex.uppercase() else hex
     }
 
+    private fun startTimer() {
+        if (isTimerStated) {
+            return
+        }
+        timer.start()
+        isTimerStated = true
+    }
+
+    private fun cancelTimer() {
+        timer.cancel()
+        isTimerStated = false
+    }
+
     /**
      * 若数字华容道，必然有解，只存在于如下3个细分情形：
      * 1)若格子列数为奇数，则逆序数必须为偶数；
@@ -305,6 +354,10 @@ class GameNewHuaRongActivity : BaseActivity() {
             cmdUndoList.clear()
             cmdRedoList.clear()
             invalidateMenuItem()
+        }
+        totalTimeMs = 0
+        if (isTimerStated) {
+            cancelTimer()
         }
 
 
@@ -533,6 +586,7 @@ class GameNewHuaRongActivity : BaseActivity() {
         setStepCountInfo(0)
 
         setTitle()
+        updateDurationText(totalTimeMs)
         if (BuildConfig.isRelease) {
             binding.debugInfoTv.visibility = View.GONE
         } else {
@@ -558,6 +612,9 @@ class GameNewHuaRongActivity : BaseActivity() {
             val pair = getTranslation(data.position)
             if (0f == pair.first && 0f == pair.second) {
                 return@setOnClickListener
+            }
+            if (!isTimerStated) {
+                startTimer()
             }
             if (isVibrateEnable) {
                 if (vibrator.hasVibrator()) {
@@ -757,6 +814,7 @@ class GameNewHuaRongActivity : BaseActivity() {
         }
 
         if ((targetIndex + 2) == numData.size) {
+            cancelTimer()
             Toast.makeText(this, "你成功了", Toast.LENGTH_LONG).show()
         }
     }

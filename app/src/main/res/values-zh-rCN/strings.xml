@@ -2,4 +2,5 @@
     <string name="app_name">CameraTrick</string>
     <string name="step_count">步数：%d</string>
     <string name="reverse_pairs_number">逆序数对：%d + 空白行序数：%d = %d</string>
+    <string name="game_duration">时长：%s</string>
 </resources>
