@@ -3,11 +3,13 @@ package com.zf.camera.trick.game.hua.settings
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Switch
-import androidx.appcompat.widget.SwitchCompat
 import com.zf.camera.trick.R
 import com.zf.camera.trick.base.BaseActivity
+import com.zf.camera.trick.databinding.ActivitySettingsBinding
+import com.zf.camera.trick.game.hua.dialog.ColorPickerBottomDialog
 
 class SettingsActivity : BaseActivity() {
 
@@ -19,15 +21,17 @@ class SettingsActivity : BaseActivity() {
     private val KEY_VIBRATE = "key_vibrate"
     private val KEY_ANIM = "key_anim"
 
+    val binding: ActivitySettingsBinding by lazy { ActivitySettingsBinding.inflate(layoutInflater) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        setContentView(binding.root)
         actionBar?.title = "设置"
 
         sp = getSharedPreferences("app_config", MODE_PRIVATE)
         initView()
         initSwitchState()
-        initSwitchListener()
+        initListener()
     }
 
     private fun initView() {
@@ -42,13 +46,24 @@ class SettingsActivity : BaseActivity() {
     }
 
     // 开关监听 + 保存配置
-    private fun initSwitchListener() {
+    private fun initListener() {
         switchVibrate.setOnCheckedChangeListener { _, isChecked ->
             sp.edit().putBoolean(KEY_VIBRATE, isChecked).apply()
         }
 
         switchAnim.setOnCheckedChangeListener { _, isChecked ->
             sp.edit().putBoolean(KEY_ANIM, isChecked).apply()
+        }
+        binding.selectAppBg.setOnClickListener {
+            ColorPickerBottomDialog.show(
+                context = this,
+                defaultColor = 0xFF2196F3.toInt(),
+                enableAlpha = true,
+                outsideCancel = true
+            ) { color, hex ->
+                sp.edit().putInt("key_appColor", color).apply()
+                binding.root.setBackgroundColor(color)
+            }
         }
     }
 
@@ -65,6 +80,10 @@ class SettingsActivity : BaseActivity() {
 
         fun isAnimEnable(sp: SharedPreferences): Boolean {
             return sp.getBoolean("key_anim", true)
+        }
+
+        fun getAppColor(sp: SharedPreferences): Int {
+            return sp.getInt("key_appColor", -1)
         }
     }
 }

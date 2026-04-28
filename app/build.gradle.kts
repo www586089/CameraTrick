@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -149,8 +150,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+    // 把下面这段替换你原来的 kotlinOptions
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
+        }
     }
     buildFeatures {
 //        compose = true
@@ -189,11 +193,13 @@ dependencies {
     implementation("pub.devrel:easypermissions:3.0.0")
 
     //状态啦库
-    implementation ("com.geyifeng.immersionbar:immersionbar:3.2.2")
-    implementation ("com.geyifeng.immersionbar:immersionbar-components:3.2.2")
+    implementation("com.geyifeng.immersionbar:immersionbar:3.2.2")
+    implementation("com.geyifeng.immersionbar:immersionbar-components:3.2.2")
 
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
+    //颜色选择
+    implementation("com.github.skydoves:colorpickerview:2.4.0")
 
     //bugly
     implementation("com.tencent.bugly:crashreport:4.1.9.3")
