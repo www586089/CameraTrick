@@ -6,6 +6,8 @@ import android.view.View
 import android.widget.TextView
 import com.skydoves.colorpickerview.ColorPickerView
 import com.skydoves.colorpickerview.listeners.ColorListener
+import com.skydoves.colorpickerview.sliders.AlphaSlideBar
+import com.skydoves.colorpickerview.sliders.BrightnessSlideBar
 import com.zf.camera.trick.R
 
 object ColorPickerBottomDialog {
@@ -27,16 +29,21 @@ object ColorPickerBottomDialog {
             .setOutsideCancel(outsideCancel)
             .setBackCancel(backCancel)
 
-        val root = dialog.getRootView() ?: return
+        val root = dialog.getRootView()
         val colorPicker = root.findViewById<ColorPickerView>(R.id.colorPickerView)
+        val alphaSlideBar = root.findViewById<AlphaSlideBar>(R.id.alphaSlideBar)
+        val brightnessSlideBar = root.findViewById<BrightnessSlideBar>(R.id.brightnessSlideBar)
         val preView = root.findViewById<View>(R.id.view_preview)
         val tvHex = root.findViewById<TextView>(R.id.tv_hex_code)
         val tvCancel = root.findViewById<TextView>(R.id.tv_cancel)
         val tvConfirm = root.findViewById<TextView>(R.id.tv_confirm)
 
         var currentColor = defaultColor
-        colorPicker.setInitialColor(defaultColor)
-        colorPicker.alphaSlideBar?.visibility = if (enableAlpha) View.VISIBLE else View.GONE
+        colorPicker.apply {
+            setInitialColor(defaultColor)
+            attachAlphaSlider(alphaSlideBar)
+            attachBrightnessSlider(brightnessSlideBar)
+        }
 
 
         // ====================== 修复完毕 ======================

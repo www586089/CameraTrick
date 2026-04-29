@@ -233,11 +233,7 @@ class GameNewHuaRongActivity : BaseActivity() {
         super.onResume()
         isVibrateEnable = SettingsActivity.isVibrateEnable(sp)
         isAnimEnable = SettingsActivity.isAnimEnable(sp)
-        val bgColor = SettingsActivity.getAppColor(sp)
-        if (-1 != bgColor) {
-            binding.root.setBackgroundColor(bgColor)
-        }
-
+        binding.root.setBackgroundColor(SettingsActivity.getAppColor(sp))
     }
 
     private fun invalidateMenuItem() {

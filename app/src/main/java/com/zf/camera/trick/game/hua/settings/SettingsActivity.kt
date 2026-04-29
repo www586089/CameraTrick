@@ -14,14 +14,13 @@ import com.zf.camera.trick.game.hua.dialog.ColorPickerBottomDialog
 class SettingsActivity : BaseActivity() {
 
     private lateinit var sp: SharedPreferences
-    private lateinit var switchVibrate: Switch
-    private lateinit var switchAnim: Switch
 
     // 配置Key
     private val KEY_VIBRATE = "key_vibrate"
     private val KEY_ANIM = "key_anim"
 
     val binding: ActivitySettingsBinding by lazy { ActivitySettingsBinding.inflate(layoutInflater) }
+    var bgColor = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,29 +34,29 @@ class SettingsActivity : BaseActivity() {
     }
 
     private fun initView() {
-        switchVibrate = findViewById(R.id.switch_vibrate)
-        switchAnim = findViewById(R.id.switch_anim)
+        bgColor = getAppColor(sp)
+        binding.root.setBackgroundColor(bgColor)
     }
 
     // 读取本地配置，回显开关
     private fun initSwitchState() {
-        switchVibrate.isChecked = sp.getBoolean(KEY_VIBRATE, true)
-        switchAnim.isChecked = sp.getBoolean(KEY_ANIM, true)
+        binding.switchVibrate.isChecked = sp.getBoolean(KEY_VIBRATE, true)
+        binding.switchAnim.isChecked = sp.getBoolean(KEY_ANIM, true)
     }
 
     // 开关监听 + 保存配置
     private fun initListener() {
-        switchVibrate.setOnCheckedChangeListener { _, isChecked ->
+        binding.switchVibrate.setOnCheckedChangeListener { _, isChecked ->
             sp.edit().putBoolean(KEY_VIBRATE, isChecked).apply()
         }
 
-        switchAnim.setOnCheckedChangeListener { _, isChecked ->
+        binding.switchAnim.setOnCheckedChangeListener { _, isChecked ->
             sp.edit().putBoolean(KEY_ANIM, isChecked).apply()
         }
         binding.selectAppBg.setOnClickListener {
             ColorPickerBottomDialog.show(
                 context = this,
-                defaultColor = 0xFF2196F3.toInt(),
+                defaultColor = bgColor,
                 enableAlpha = true,
                 outsideCancel = true
             ) { color, hex ->
@@ -83,7 +82,7 @@ class SettingsActivity : BaseActivity() {
         }
 
         fun getAppColor(sp: SharedPreferences): Int {
-            return sp.getInt("key_appColor", -1)
+            return sp.getInt("key_appColor", Color.parseColor("#2196F3"));
         }
     }
 }
